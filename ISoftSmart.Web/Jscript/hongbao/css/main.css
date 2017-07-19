@@ -1,0 +1,114 @@
+/*caozhuzi 2017-07-12*/
+h2,a{padding:0;margin: 0;}
+ul,li{list-style: none;}
+
+.cf{color: #fff;}
+.c0{color: #000;}
+.c2{color: #222;}
+.c3{color: #333;}
+.c8{color: #888;}
+.c9{color: #999;}
+.cb{color: #A6AEBB;}
+
+.f12{font-size: 12px;}
+.f14{font-size: 14px;}
+.f16{font-size: 16px;}
+.f18{font-size: 18px;}
+.f20{font-size: 20px;}
+
+b{font-weight: 700;}
+.n{font-weight: 100;}
+
+.pr{position: relative;}
+.pa{position: absolute;}
+.tc{text-align: center;}
+
+.oz{overflow: hidden;zoom: 1;}
+.left{float: left;}
+.right{float: right;}
+.cont_left{float:left;}
+.cont_right{float:right;}
+.none{display: none;}
+
+body{background: #fff;}
+/*入群页面*/
+.top{height: 60px;line-height: 60px;background: #2D2D2D;}
+.top .go-back{left: 15px;font-size: 22px;}
+.top h2{font-size: 26px;}
+.top .renyuan{right: 15px;}
+
+.picMarquee-top{width: 100%; overflow:hidden; position:relative;margin: 12px 0;height: 100%; }
+.picMarquee-top .bd{ padding:0 15px;   }
+.picMarquee-top .bd  li p{width: 62px;height: 27px;line-height: 27px;background:rgba(0,0,0,0.5);border-radius: 4px;margin: 25px auto 13px ;}
+.picMarquee-top .bd  li{ text-align:center; zoom:1; }
+.picMarquee-top .bd  li .right img{ width: 80px;height: 80px;border: 2px solid #ddd;border-radius: 8px;  }
+.picMarquee-top .bd  li .cont_right {width:167px;height: 95px;background: url(../images/jindangundongbeijingtupian.png) no-repeat;margin-right: 6px; }
+.picMarquee-top .bd  li .cont_right a{padding:18px 0 0 70px;display: block;width: 150px;font-size: 10px;}
+.picMarquee-top .bd  li .cont_right a div{height: 40px;overflow: hidden;}
+
+.shurukuang{height: 73px;background: #E6E6E6;border-bottom: 2px solid #DBDBDB;padding: 0 5px;position:fixed;z-index: 3;left: 0;bottom: 0;width:100%;}
+.yuyin {line-height: 71px;width: 11%;}
+.shuru-wenben{width: 75%;margin: 0 2%;}
+.shuru-wenben input{height: 53px;border: 1px solid #E1E1E1;line-height: 13px;padding:  19px 0 19px 10px;background: #fff;width: 100%;margin-top: 11px;border-radius: 4px;}
+.biaoqing{line-height: 71px;width: 11%;}
+.yingyong{line-height: 71px;width: 11%;margin-left: 2%;}
+
+.cont-index{background: #ECECEC;position: fixed;width:100%;}
+
+.admin-content-list{padding:20px 10px 0 10px;margin-bottom:0;width: 100%;}
+.admin-content-list li a{display: block;width: 100%;}
+.admin-content-list li a img{width: 60px;height: 60px;}
+.admin-content-list li a p{line-height: 35px;font-size: 14px;color: #8A8A8A;margin: 0;padding-bottom: 20px;}
+
+
+/*发金蛋*/
+.hongbao-top{line-height: 60px;font-size: 26px;}
+.hongbao-top .shut-fa{left: 15px;font-size: 22px;}
+
+.form-style{padding: 0;margin: 0;}
+.form-style input{line-height: 20px;padding: 29px 0 29px 10px;width: 100%;height: 82px;border: 2px solid #F0F0F0;background: #fff;font-size: 22px;color: #111;border-radius: 10px;}
+
+.yuan{right: 20px;font-size: 22px;top: 24px;}
+.ge{right: 20px;font-size: 22px;top: 24px;}
+
+.form-style p{line-height: 30px;padding-bottom: 20px;margin: 0;}
+
+.liuyan{padding: 10px;line-height: 30px;background: #fff;border-radius: 10px;width: 100%;border: 2px solid #F0F0F0;font-size: 22px;}
+
+.shijijine{line-height: 105px;display: block;margin-bottom: 25px;font-size: 20px;}
+.shijijine strong{font-size: 52px;}
+
+.saiqian{line-height: 62px;width:80%;height: 66px;background: #E75F39;border: 1px solid #DCBEB4;color: #fff;font-size: 24px;margin: 0 auto;border-radius: 9px;display: block;}
+.saiqian:hover,.saiqian:active,.saiqian:focus{color: #fff;}
+
+.lingqujinetishi{left: 0;bottom: 35px;line-height: 28px;width: 100%;margin: 0;}
+
+.zhezhaoceng{position:fixed;width: 100%;height: 100%;left: 0;top: 0;right: 0;bottom: 0;background: rgba(0,0,0,0.5);z-index: 99;}
+.querenxinxi{width: 230px;position: fixed;top: 50%;margin-top:-135px;left:50%;margin-left: -115px;border-radius: 8px;background: #fff;z-index: 100;height: 270px;}
+.shut{position: absolute;left: 5%;top: 16px;cursor: pointer;}
+.querenxinxi h2{line-height: 60px;border-bottom: 1px solid #C0CCC0;}
+.querenxinxi p{line-height: 70px;font-size: 40px;}
+.querenxinxi a{border: 1px solid #ddd;width: 120px;height: 50px;line-height: 50px;font-size: 24px;display: block;;margin: 0 auto 40px;border-radius: 5px;}
+
+/*6发出金蛋后的反馈信息*/
+.renwutouxiang{margin: 55px auto 12px;border: 2px solid #ddd;border-radius: 10px;display: block;}  
+
+.personal-information{line-height: 38px;}
+.personal-information p{margin: 0;}
+
+.waiting-dan{line-height: 52px;padding: 90px 0 0 20px;border-bottom: 1px solid #ddd;}
+.waiting-dan p{margin: 0;}
+
+.chakan{line-height: 36px;padding: 200px 0 10px;}
+
+/*金蛋信息列表*/
+.zongshu span{line-height: 65px;}
+.zongshu p{margin: 0;line-height: 100px;font-size: 52px;}
+
+.list-info{padding: 0 22px;margin: 0;}
+.list-info li{border-bottom: 1px solid #ddd;padding: 12px 0;}
+.list-info li a{display: block;width: 100%;line-height: 36px;font-size: 22px;}
+.list-info li p{margin: 0;}
+
+
+

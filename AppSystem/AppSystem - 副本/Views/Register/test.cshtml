@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>pc和手机端的图片上传处理</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <style type="text/css">
+        img {
+            broder: 2px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <p>选择:</p>
+    <p><input type="file" accept="image/*" capture="camera" id="upload" name="upload"></p>
+    <p>图片预览：</p>
+    <p id="preview"></p>
+    <script src="~/Scripts/upload/mbUploadImg.js"></script>
+    <script type="text/javascript">
+
+		var upload = document.getElementById('upload'),
+			preview = document.getElementById('preview');
+
+		upload.addEventListener('change',mbUploadImg.handleFile,false);
+
+
+		mbUploadImg.init({
+			changeSize:true,
+			maxWidth : 800,
+			maxHeight : 600,
+			imgHandle:function(src){
+				preview.innerHTML = '<img src="'+ src +'" />';
+			}
+		})
+
+
+    </script>
+</body>
+</html>

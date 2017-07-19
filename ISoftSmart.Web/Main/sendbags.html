@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>发红包</title>
+    <link href="../Jscript/hongbao/css/amazeui.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/swiper-3.4.2.min.css" />
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/main.css" />
+</head>
+<body class="pr" style="padding-bottom: 150px;background: url(../Jscript/hongbao/images/jinetishi.jpg) no-repeat bottom #F1F1F1;background-size: 100%;">
+    <div class="hongbao-top pr am-text-center c2">
+        <a id="close" class="pa shut-fa c3" href="">关闭</a>发金豆
+    </div>
+    <div class="am-padding">
+        <ul class="form-style">
+            <li class="pr">
+                <span class="yuan pa c9">元</span>
+                <input class="zongjine" id="bagAmount" placeholder="总金豆" type="text" value="" />
+                <p class="f18"><span class="c0">当前为拼手气金豆</span></p>
+            </li>
+            <li class="pr">
+                <span class="ge pa c9">个</span>
+                <input class="hongbaogeshu" id="bagNum" placeholder="金豆个数" type="text" value="" />
+                <p class="qunrenshu f18 c8">本群共<span>123</span>人</p>
+            </li>
+        </ul>
+        <textarea id="remark" class="f20 liuyan c9" placeholder="恭喜发财，大吉大利"></textarea>
+        <span class="shijijine am-text-center c0"><sup>Y</sup><stong><label id="num">0.00</label></stong></span>
+        <button class="saiqian am-text-center" id="sendBeans" type="button">塞钱进红包</button>
+    </div>
+    <p class="c9 pa lingqujinetishi am-text-center f14">
+        对方可领取的金额为<span>0.01~200</span>元
+    </p>
+    <script src="../Script/jquery-2.1.4.min.js"></script>
+    <script src="../Script/jquery.signalR-2.2.2.min.js"></script>
+    <script src="../signalr/hubs"></script>
+    <script src="../Jscript/groupinfo/sendbag.js"></script>
+</body>
+</html>
+

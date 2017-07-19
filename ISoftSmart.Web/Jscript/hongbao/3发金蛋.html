@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    	<title>发金蛋</title>
+		<link rel="stylesheet" type="text/css" href="css/amazeui.css"/>
+		<link rel="stylesheet" type="text/css" href="css/swiper-3.4.2.min.css"/>
+		<link rel="stylesheet" type="text/css" href="css/main.css"/>
+	</head>
+	<body class="pr" style="padding-bottom: 150px;background: url(images/jinetishi.jpg) no-repeat bottom #F1F1F1;background-size: 100%;">
+		<div class="hongbao-top pr am-text-center c2">
+			<a class="pa shut-fa c3" href="">关闭</a>发金蛋
+		</div>
+		<div class="am-padding">
+			<form class="form-style" action="" method="post">
+				<ul>
+					<li class="pr">
+						<span class="ge pa c9">个</span>
+						<input class="hongbaogeshu" placeholder="金蛋个数" type="text" value=""/>
+						<p class="qunrenshu f18 c8">本群共<span>123</span>人</p>
+					</li>
+				</ul>
+				<textarea class="f20 liuyan c9">恭喜发财，大吉大利</textarea>
+				<span class="shijijine am-text-center c8"><strong class="n c0">36</strong>个</span>
+				<a class="saiqian saiqian-a am-text-center" href="javascript:;">塞金蛋</a>
+			</form>
+		</div>
+		<p class="c9 pa lingqujinetishi am-text-center f14">
+			对方可领取的金蛋为<span>200</span>个
+		</p>
+		
+		<!--发出金蛋后的确认信息弹出框-->
+		<div class="zhezhaoceng none"></div>
+		<div class="querenxinxi none">
+			<span class="c8 f18 shut b">X</span><h2 class="c0 am-text-center">发出的金蛋数量</h2>
+			<p class="c0 am-text-center">36 <span class="c8 f16">个</span></p>
+			<a class="c3 am-text-center" href="">确&ensp;定</a>
+		</div>
+		<script src="js/jquery.11.min.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			$(".saiqian-a").click(function(){
+				$(".zhezhaoceng,.querenxinxi").show();
+			})
+			$(".shut,.querenxinxi a").click(function(){
+				$(".zhezhaoceng,.querenxinxi").hide();
+			})
+		</script>
+	</body>
+</html>
