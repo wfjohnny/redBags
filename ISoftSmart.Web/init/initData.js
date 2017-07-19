@@ -14,7 +14,7 @@ var Signalr = "http://localhost:1494/";
             type: type,
             data: json,
             async: false,
-            xhrFields: {
+            xhrFields: { 
                 withCredentials: true
             },
             crossDomain: true,//新增cookie跨域配置
