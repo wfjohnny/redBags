@@ -183,8 +183,7 @@ namespace ISoftSmart.API.Controllers
             {
                 lock (_locker)
                 {
-                    var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
-                    bagcache.Add(bag);
+                    var bagcache = StackExchangeRedisExtensions.Get<RBCreateBag>(db, CacheKey.BagKey);
                     StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache, 240);
                     var res = rt.InsertBag(bag);
                     if (res > 0)

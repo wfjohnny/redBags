@@ -1,6 +1,12 @@
 ﻿var chat = $.connection.chatHub;
 var customerCode;
-var customerNick = "Customer" + Math.random().toString().substring(2, 5);//测试数据
+var bag = {
+    rID: "",
+    userId: "",
+    bagAmount: "",
+    bagNum: 0,
+    bagStatus: 0
+};
 function newGuid() {//测试数据
     var guid = "{";
     for (var i = 1; i <= 32; i++) {
@@ -14,6 +20,20 @@ function newGuid() {//测试数据
 // 这里是注册集线器调用的方法,和1.0不同的是需要chat.client后注册,1.0则不需要
 chat.client.broadcastMessage = function (guid,count, Num, remark) {
     LoadBag(guid, count, Num, remark);
+    bag.rID = guid;
+    bag.userId = customerCode;
+    bag.bagAmount = count;
+    bag.bagNum = Num;
+    var dataJson = JSON.stringify(bag);
+    debugger
+    var res = callBackFuncJson("api/test/insertbag", dataJson, "");
+    if (res.code == "SCCESS") {
+        console.log("1111");
+    }
+    else {
+
+    }
+
 };
 //// 获取用户名称。
 //$('#username').html(prompt('请输入您的名称:', ''));

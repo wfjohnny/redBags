@@ -18,7 +18,6 @@ $(function () {
         bag.bagAmount = $("#bagAmount").val();
         bag.bagNum = $("#bagNum").val();
         parent.chat.server.sendBean(bag.rID, bag.bagAmount, bag.bagNum, remark).done(function () {
-            //var res = callBackFuncJson("api/test", JSON.stringify(bag));
             parent.layer.closeAll("iframe");
         });
     });

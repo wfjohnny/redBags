@@ -50,3 +50,5 @@ var Signalr = "http://localhost:1494/";
         });
         return resdata;
     }
+    var AppId = "wx7148296902760247";
+    var AppSecret = "6400c962d8c115c2fac6b06e0710ef23";
