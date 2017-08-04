@@ -22,10 +22,11 @@ namespace ISoftSmart.Web.signalr
         /// 群发
         /// </summary>
         /// <param name="message"></param>
-        public void SendMessage(string message)
+        public void SendMessage(string message,string customeCode)
         {
             //调用所有客户注册的本地的JS方法(broadcastMessage)
-            Clients.All.broadcastMessage(message + DateTime.Now.ToString());
+            //Clients.All.broadcastMessage(message + DateTime.Now.ToString());
+            Clients.All.loadMessage(message,customeCode, DateTime.Now.ToString());
         }
         /// <summary>
         /// 登录连线
@@ -94,10 +95,10 @@ namespace ISoftSmart.Web.signalr
         /// 群发金豆
         /// </summary>
         /// <param name="message"></param>
-        public void SendBean(string guid,string count,string Num,string remark)
+        public void SendBean(string guid, string count, string Num, string remark)
         {
-           // Guid guid = Guid.NewGuid();
-            Clients.All.broadcastMessage(guid,count, Num,remark);
+            // Guid guid = Guid.NewGuid();
+            Clients.All.broadcastMessage(guid, count, Num, remark);
         }
     }
 }

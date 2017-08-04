@@ -8,6 +8,9 @@ using ISoftSmart.Model.RB;
 using ISoftSmart.Dapper.Helper;
 using System.Data;
 using System.Data.SqlClient;
+using ISoftSmart.Model.UserInfo;
+using ISoftSmart.Model.BS.My;
+using ISoftSmart.Model.WX;
 
 namespace ISoftSmart.Inteface.Implements
 {
@@ -27,16 +30,90 @@ namespace ISoftSmart.Inteface.Implements
             return result;
         }
 
-        public RBCreateBag GetBag(RBCreateBag bag)
+        public List<RBCreateBag> GetBag(RBCreateBag bag)
         {
             SqlParameter[] sp = new SqlParameter[]
             {
-                new SqlParameter("@BagStatus",bag.BagStatus)
+                new SqlParameter("@BagStatus",bag.BagStatus),
+                new SqlParameter("@RID",bag.RID),
             };
-            var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where BagStatus=@BagStatus", sp, CommandType.Text);
+            var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where BagStatus=@BagStatus and RID=@RID", sp, CommandType.Text);
             if (result == "")
                 return null;
-            return result.JsonDeserialize<RBCreateBag>();
+            return result.JsonDeserialize<List<RBCreateBag>>();
+        }
+        public List<RBCreateBag> GetSendBag(RBCreateBag bag)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+            {
+                new SqlParameter("@RID",bag.RID),
+            };
+            var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where  RID=@RID", sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<RBCreateBag>>();
+        }
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public List<WXUserInfo> GetUserInfo(WXUserInfo user)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+            {
+                new SqlParameter("@OpenId",user.openid)
+            };
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[UserInfo] b where b.OpenId=@OpenId ", sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<WXUserInfo>>();
+        }
+        public int InsertUserInfo(WXUserInfo user)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+              {
+                 new SqlParameter("@UserId",Guid.NewGuid()),
+                 new SqlParameter("@OpenId",user.openid),
+                 new SqlParameter("@NickName",user.nickname),
+                 new SqlParameter("@HeadImgUrl",user.headimgurl),
+                 new SqlParameter("@Country",user.country),
+                 new SqlParameter("@Province",user.province),
+                 new SqlParameter("@City",user.city),
+                 new SqlParameter("@Sex",user.sex),
+              };
+            var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[UserInfo]
+           ([UserId]
+           ,[OpenId]
+           ,[NickName]
+           ,[HeadImgUrl]
+           ,[Country]
+           ,[Province]
+           ,[City]
+           ,[Sex])
+     VALUES
+           (@UserId
+           ,@OpenId
+           ,@NickName
+           ,@HeadImgUrl
+           ,@Country
+           ,@Province
+           ,@City
+           ,@Sex)", sp, CommandType.Text);
+            return result;
+        }
+        public List<MyBagSerial> GetUserSerialList(MyBagSerial my)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+            {
+                new SqlParameter("@RID",my.RID)
+            };
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[BagSerial] b left join [dbo].[UserInfo] u
+                on b.UserId = u.UserId
+                where b.RID =@RID ", sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<MyBagSerial>>();
         }
 
         public int InsertBag(RBCreateBag bag)
@@ -50,9 +127,10 @@ namespace ISoftSmart.Inteface.Implements
                  new SqlParameter("@CreateTime",bag.CreateTime),
                  new SqlParameter("@BagStatus",bag.BagStatus),
                  new SqlParameter("@Winner",bag.Winner),
-                 new SqlParameter("@WinnerAmount",bag.WinnerAmount)
+                 new SqlParameter("@WinnerAmount",bag.WinnerAmount),
+                 new SqlParameter("@Remark",bag.Remark),
              };
-            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"INSERT INTO CreateBag
+            var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO CreateBag
                    ([RID]
                    ,[UserId]
                    ,[BagAmount]
@@ -60,7 +138,8 @@ namespace ISoftSmart.Inteface.Implements
                    ,[CreateTime]
                    ,[BagStatus]
                    ,[Winner]
-                   ,[WinnerAmount])
+                   ,[WinnerAmount]
+                   ,[Remark])
              VALUES
                    (@RID
                    ,@UserId
@@ -69,10 +148,151 @@ namespace ISoftSmart.Inteface.Implements
                    ,@CreateTime
                    ,@BagStatus
                    ,@Winner
-                   ,@WinnerAmount)", sp, CommandType.Text);
+                   ,@WinnerAmount,@Remark)", sp, CommandType.Text);
+            return result;
+        }
+
+        public int InsertSerial(MyBagSerial my)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+                {
+                    new SqlParameter("@SerialId",Guid.NewGuid()),
+                    new SqlParameter("@UserId",my.UserId),
+                    new SqlParameter("@BagAmount",my.BagAmount),
+                    new SqlParameter("@CreateTime",my.CreateTime),
+                    new SqlParameter("@RID",my.RID)
+                };
+            var result = @"INSERT INTO [dbo].[BagSerial]
+               ([SerialId]
+               ,[RID]
+               ,[UserId]
+               ,[BagAmount]
+               ,[CreateTime])
+         VALUES
+               (@SerialId
+               ,@RID
+               ,@UserId
+               ,@BagAmount
+               ,@CreateTime)";
+            var r = Dapper.Helper.SQLHelper.Execute(result, sp, CommandType.Text);
+            return r;
+        }
+
+        public int InsertSerialList(List<MyBagSerial> my)
+        {
+            int ret = 0;
+            foreach (var item in my)
+            {
+                SqlParameter[] sp = new SqlParameter[]
+                {
+                    new SqlParameter("@SerialId",item.RID),
+                    new SqlParameter("@UserId",item.RID),
+                    new SqlParameter("@BagAmount",item.RID),
+                    new SqlParameter("@CreateTime",item.RID),
+                    new SqlParameter("@RID",item.RID)
+                };
+                var result = @"INSERT INTO [dbo].[BagSerial]
+               ([SerialId]
+               ,[RID]
+               ,[UserId]
+               ,[BagAmount]
+               ,[CreateTime])
+         VALUES
+               (@SerialId
+               ,@RID
+               ,@UserId
+               ,@BagAmount
+               ,@CreateTime)";
+                var r = Dapper.Helper.SQLHelper.Execute(result, sp, CommandType.Text);
+                ret += r;
+            }
+            return ret;
+        }
+
+
+
+        public int SetUserBean(WXUserInfo bag)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@OpenId",bag.openid),
+                 new SqlParameter("@BeanNum",bag.beannum),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            UPDATE [dbo].[UserInfo]
+               SET [BeanNum] = [BeanNum]+@BeanNum
+             WHERE OpenId=@OpenId", sp, CommandType.Text);
+            return result;
+        }
+        public int InsertMessageRecordByText(MessageRecord record)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@MID",Guid.NewGuid()),
+                 new SqlParameter("@UserID",record.UserID),
+                 new SqlParameter("@MContent",record.MContent),
+                 new SqlParameter("@MType",record.MType),
+                 new SqlParameter("@CreateTime",record.CreateTime),
+                 new SqlParameter("@HeadImgUrl",record.HeadImgUrl),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
+           ([MID]
+           ,[UserID]
+           ,[MContent]
+           ,[HeadImgUrl]
+           ,[MType]
+           ,[CreateTime])
+     VALUES
+           (@MID
+           ,@UserID
+           ,@MContent
+           ,@HeadImgUrl
+           ,@MType
+           ,@CreateTime)", sp, CommandType.Text);
+            return result;
+        }
+        public int InsertMessageRecordByBag(MessageRecord record)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@MID",Guid.NewGuid()),
+                 new SqlParameter("@MType",record.MType),
+                 new SqlParameter("@BagID",record.BagID),
+                 new SqlParameter("@BagUserID",record.BagUserID),
+                 new SqlParameter("@BagRemark",record.BagRemark),
+                 new SqlParameter("@HeadImgUrl",record.HeadImgUrl),
+                 new SqlParameter("@CreateTime",record.CreateTime),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
+                   ([MID]
+                   ,[HeadImgUrl]
+                   ,[MType]
+                   ,[BagID]
+                   ,[BagUserID]
+                   ,[BagRemark]
+                   ,[CreateTime])
+             VALUES
+                   (@MID
+                   ,@HeadImgUrl
+                   ,@MType
+                   ,@BagID
+                   ,@BagUserID
+                   ,@BagRemark
+                   ,@CreateTime)", sp, CommandType.Text);
+            return result;
+        }
+        public List<MessageRecord> GetMsgList(DateTime startTime, DateTime endTime)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+            {
+                new SqlParameter("@startTime",startTime),
+                new SqlParameter("@endTime",endTime)
+            };
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT *
+          FROM [dbo].[MessageRecord] where CreateTime between @startTime and @endTime", sp, CommandType.Text);
             if (result == "")
-                return 0;
-            return 1;
+                return null;
+            return result.JsonDeserialize<List<MessageRecord>>();
         }
     }
 }

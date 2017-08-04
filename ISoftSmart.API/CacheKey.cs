@@ -9,5 +9,9 @@ namespace ISoftSmart.API
     {
         public const string BagKey = "BagKey";
         public const string OpenBagKey = "OpenBagKey";
+        public const string SerialKey = "SerialKey";
+        public const string WxAccessToken = "WxAccessToken";
+        public const string WxUserList = "WxUserList";
+        public const string MsgRecord = "MsgRecord";
     }
 }

@@ -48,6 +48,8 @@
     <Compile Include="AD\My\MyAdUser.cs" />
     <Compile Include="APIResponse.cs" />
     <Compile Include="BaseModel.cs" />
+    <Compile Include="BS\BagSerial.cs" />
+    <Compile Include="BS\My\MyBagSerial.cs" />
     <Compile Include="DataTablesData.cs" />
     <Compile Include="JObjectParse.cs" />
     <Compile Include="ModelMaster.cs" />
@@ -58,11 +60,18 @@
     <Compile Include="RB\RBCreateBag.cs" />
     <Compile Include="ServicesException.cs" />
     <Compile Include="UserDetail.cs" />
+    <Compile Include="UserInfo\UserInfo.cs" />
+    <Compile Include="WX\AccessTokenOpenId.cs" />
+    <Compile Include="WX\MessageRecord.cs" />
+    <Compile Include="WX\UserOpenIdInfo.cs" />
+    <Compile Include="WX\WXUserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UserInfo\My\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

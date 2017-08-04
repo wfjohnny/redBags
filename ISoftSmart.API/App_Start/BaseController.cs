@@ -1,5 +1,6 @@
 ﻿using ISoftSmart.Model;
 using ISoftSmart.Model.AD.My;
+using ISoftSmart.Model.WX;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -65,6 +66,21 @@ namespace ISoftSmart.API.App_Start
                     return null;
                 }
                 return Session["adUser"] as MyAdUser;
+            }
+        }
+        public WXUserInfo wxCurrentUser
+        {
+            get
+            {
+                if (!Session.Keys.Contains("wxUser"))
+                {
+                    return null;
+                }
+                return Session["wxUser"] as WXUserInfo;
+            }
+            set
+            {
+                Session["wxUser"] = value;
             }
         }
         #endregion

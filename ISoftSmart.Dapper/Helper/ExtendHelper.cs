@@ -25,9 +25,14 @@ namespace ISoftSmart.Dapper.Helper
             //}
             StringBuilder sb = new StringBuilder();
             //sb.Append("{\"ok\":true,");
+            if (ds.Tables[0].Rows.Count == 0)
+            {
+                return string.Empty;
+            }
             foreach (DataTable dt in ds.Tables)
             {
                 //sb.Append(string.Format("\"{0}\":[", dt.TableName));
+                sb.Append(string.Format("["));
 
                 foreach (DataRow dr in dt.Rows)
                 {
@@ -42,8 +47,9 @@ namespace ISoftSmart.Dapper.Helper
                 if(dt.Rows.Count>0)
                 {
                     sb.Remove(sb.ToString().LastIndexOf(','), 1);
+                    sb.Append("]");
                 }
-                //sb.Append("],");
+             
             }
             //sb.Remove(sb.ToString().LastIndexOf(','), 1);
             //sb.Append("}");

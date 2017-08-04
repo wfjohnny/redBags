@@ -1,19 +1,30 @@
 ﻿using ISoftSmart.API.App_Start;
+using ISoftSmart.Common.Log;
 using ISoftSmart.Core.IoC;
+using ISoftSmart.Core.Logger;
 using ISoftSmart.Core.RedisClient;
+using ISoftSmart.Core.WebApi;
+using ISoftSmart.Core.WebApi.APIServer.Request;
 using ISoftSmart.Inteface.Implements;
 using ISoftSmart.Inteface.Inteface;
 using ISoftSmart.Model;
-using ISoftSmart.Model.AD;
-using ISoftSmart.Model.AD.My;
+using ISoftSmart.Model.BS;
+using ISoftSmart.Model.BS.My;
 using ISoftSmart.Model.RB;
+using ISoftSmart.Model.UserInfo;
+using ISoftSmart.Model.WX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.SessionState;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace ISoftSmart.API.Controllers
 {
@@ -21,9 +32,16 @@ namespace ISoftSmart.API.Controllers
     public class HomeController : BaseController, IRequiresSessionState
     {
         private static object _locker = new object();
+        string AppId = System.Configuration.ConfigurationManager.AppSettings["AppId"].ToString();
+        string AppSecret = System.Configuration.ConfigurationManager.AppSettings["AppSecret"].ToString();
+        string RetUrl = System.Configuration.ConfigurationManager.AppSettings["RetUrl"].ToString();
+        string GetUser = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={0}&openid={1}";
+        string GetOpenID = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
+        int pageSize = 100;
+        IDatabase db = RedisManager.Instance.GetDatabase();
         [Route("t")]
         [HttpGet]
-        public IHttpActionResult Index()
+        public IHttpActionResult Index(string bagId)
         {
             #region IOC
             // ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.RegisterType(typeof(ITestUsers), typeof(UserExtents));//注册接口
@@ -66,29 +84,44 @@ namespace ISoftSmart.API.Controllers
             //var bag = IoCFactory.Instance.CurrentContainer.Resolve<RBCreateBag>();//注册对象
             //bag = rt.GetBag(bag);
 
-
-            var db = RedisManager.Instance.GetDatabase();
+            Guid rId = Guid.Parse(bagId.Split('_')[0]);
             if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
             {
-                var bagcaches = StackExchangeRedisExtensions.Get<RBCreateBag>(db, CacheKey.BagKey);
-                return Ok(new APIResponse<RBCreateBag>
+                var bagcaches = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                var bagList = bagcaches.Where(x => x.RID == rId).FirstOrDefault();
+                if (bagList != null)
                 {
-                    Code = "SUCCESS",
-                    ResponseMessage = "获取列表成功！",
-                    Result = bagcaches
-                });
+                    return Ok(new APIResponse<RBCreateBag>
+                    {
+                        Code = "SUCCESS",
+                        ResponseMessage = "获取列表成功！",
+                        Result = bagList
+                    });
+                }
+                else
+                {
+                    return Ok(new APIResponse<RBCreateBag>
+                    {
+                        Code = "ERROR",
+                        ResponseMessage = "获取列表失败！",
+                        Result = bagList
+                    });
+                }
             }
             else
             {
                 var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//注册对象
                 var bag = IoCFactory.Instance.CurrentContainer.Resolve<RBCreateBag>();//注册对象
+                List<RBCreateBag> bagList = new List<RBCreateBag>();
                 bag.BagStatus = 0;
-                bag = rt.GetBag(bag);
-                if (bag != null)
+                bag.RID = Guid.Parse(bagId.Split('_')[0]);
+                bagList = rt.GetBag(bag);
+                if (bagList != null)
                 {
-                    StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bag);
-                    var bagcaches = StackExchangeRedisExtensions.Get<RBCreateBag>(db, CacheKey.BagKey);
-                    return Ok(new APIResponse<RBCreateBag>
+                    bagList.Add(bag);
+                    StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagList);
+                    var bagcaches = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                    return Ok(new APIResponse<List<RBCreateBag>>
                     {
                         Code = "SUCCESS",
                         ResponseMessage = "获取列表成功！",
@@ -106,6 +139,34 @@ namespace ISoftSmart.API.Controllers
             }
 
         }
+
+        [Route("getWxUser")]
+        [HttpGet]
+        public IHttpActionResult GetUserInfoByWX(string bagId)
+        {
+
+            try
+            {
+                var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                var userinfoList = rt.GetUserInfo(new WXUserInfo() { openid = bagId }).FirstOrDefault();
+                return Ok(new APIResponse<WXUserInfo>
+                {
+                    Code = "SCCESS",
+                    ResponseMessage = "获取用户信息成功",
+                    Result = userinfoList
+                });
+            }
+            catch (Exception ex )
+            {
+                StackExchangeRedisExtensions.Set(db, "1111", ex.Message);
+                return Ok(new APIResponse<WXUserInfo>
+                {
+                    Code = "SCCESS",
+                    ResponseMessage = "获取用户信息失败",
+                    Result = null
+                });
+            }
+        }
         [Route("openbag")]
         [HttpPost]
         public IHttpActionResult OpenBag(RBCreateBag bag)
@@ -119,41 +180,117 @@ namespace ISoftSmart.API.Controllers
             //Task.Run(() =>
             //{
             bag.CreateTime = DateTime.Now;
-            var db = RedisManager.Instance.GetDatabase();
-            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
+            var outbag = IoCFactory.Instance.CurrentContainer.Resolve<RBCreateBag>();//注册对象
+            try
             {
-                lock (_locker)
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
                 {
-                    var bagcache = StackExchangeRedisExtensions.Get<RBCreateBag>(db, CacheKey.BagKey);
-                    if (bagcache.BagNum > 0)
+                    lock (_locker)
                     {
-                        decimal curAmount = 0;
-                        var openResult = GenerateBag(bagcache, out curAmount);
-                        Code = "SUCCESS";
-                        ResponseMessage = "抢到" + curAmount + "元！";
-                        Result = openResult;
-                        RedisQueueManager.Push<RBCreateBag>(CacheKey.OpenBagKey, bagcache);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
-                    }
-                    else
-                    {
-                        Code = "ERROR";
-                        ResponseMessage = "红包抢完了！";
-                        bag.BagStatus = 1;
-                        //RedisQueueManager.DoQueue<int>((s) =>
-                        //{
-                        //    rt.ChangeBagStatus(bag);
-                        //}, CacheKey.OpenBagKey);
-                        rt.ChangeBagStatus(bag);
-                        StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
+                        var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                        var tr = bagcache.Where(x => x.RID == bag.RID).FirstOrDefault();
+                        if (tr != null && tr.BagNum > 0)
+                        {
+                            decimal curAmount = 0;
+                            var openResult = GenerateBag(tr, out outbag, out curAmount);
+                            bagcache.Remove(bagcache.Where(x => x.RID == outbag.RID).FirstOrDefault());
+                            bagcache.Add(outbag);
+                            Code = "SUCCESS";
+                            ResponseMessage = "抢到" + curAmount + "个金豆！";
+                            Result = openResult;
+                            StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
+                            var userInfo = IoCFactory.Instance.CurrentContainer.Resolve<WXUserInfo>();//注册对象
+                            userInfo.beannum = curAmount;
+                            userInfo.openid = bag.UserId;
+                            rt.SetUserBean(userInfo);
+
+                            MyBagSerial bsent = new MyBagSerial();//增加到流水表
+                            bsent.SerialId = Guid.NewGuid();
+                            bsent.UserId = bag.UserId;
+                            bsent.BagAmount = curAmount;
+                            bsent.CreateTime = DateTime.Now;
+                            bsent.RID = bag.RID;
+                            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+                            {
+                                var bagkey = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey);
+                                bagkey.Add(bsent);
+                                StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bagkey);
+                            }
+                            else
+                            {
+                                List<MyBagSerial> bsList = new List<MyBagSerial>();
+                                bsList.Add(bsent);
+                                StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bsList);
+                            }
+                            StackExchangeRedisExtensions.Set(db, "bsent", bsent);
+                            rt.InsertSerial(bsent);
+                        }
+                        else
+                        {
+                            Code = "ERROR";
+                            ResponseMessage = "金豆抢完了！";
+                            bag.BagStatus = 1;
+                            rt.ChangeBagStatus(bag);
+                            var setcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                            setcache.Remove(bagcache.Where(x => x.RID == outbag.RID).FirstOrDefault());
+                            if (setcache.Count > 0)
+                            {
+                                setcache.Add(outbag);
+                            }
+                            StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, setcache);
+                            //List<MyBagSerial> list = new List<MyBagSerial>();
+                            //var serialCache = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey);
+                            //foreach (var item in serialCache)
+                            //{
+                            //    MyBagSerial bsent = new MyBagSerial();//增加到流水表
+                            //    bsent.SerialId = Guid.NewGuid();
+                            //    bsent.UserId = bag.UserId;
+                            //    bsent.BagAmount = item.BagAmount;
+                            //    bsent.CreateTime = DateTime.Now;
+                            //    list.Add(bsent);
+
+                            //}
+                            //rt.InsertSerialList(list);
+                        }
                     }
                 }
+                else
+                {
+                    StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bag);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bag);
+
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message);
             }
+
             return Ok(new APIResponse<RBCreateBag>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = Result
+            });
+            //});
+            //return Ok(new APIResponse<RBCreateBag>
+            //{
+            //    Code = Code,
+            //    ResponseMessage = ResponseMessage,
+            //    Result = Result
+            //});
+        }
+        [Route("seruserbean")]
+        [HttpPost]
+        public IHttpActionResult SetUserBean(WXUserInfo info)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            WXUserInfo Result = null;
+            rt.SetUserBean(info);
+            return Ok(new APIResponse<WXUserInfo>
             {
                 Code = Code,
                 ResponseMessage = ResponseMessage,
@@ -176,42 +313,44 @@ namespace ISoftSmart.API.Controllers
             var Code = string.Empty;
             var ResponseMessage = string.Empty;
             RBCreateBag Result = null;
-
-            bag.CreateTime = DateTime.Now;
-            var db = RedisManager.Instance.GetDatabase();
             if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
             {
                 lock (_locker)
                 {
-                    var bagcache = StackExchangeRedisExtensions.Get<RBCreateBag>(db, CacheKey.BagKey);
+                    var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                    bagcache.Add(bag);
+                    //var tr = bagcache.Where(x => x.RID == bag.RID).FirstOrDefault();
                     StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache, 240);
                     var res = rt.InsertBag(bag);
-                    if (res > 0)
-                    {
-                        Code = "SCCESS";
-                        ResponseMessage = "金豆发放成功！";
-                    }
-                    else
-                    {
-                        Code = "ERROR";
-                        ResponseMessage = "金豆发放失败！";
-                    }
+                    //if (res > 0)
+                    //{
+                    Code = "SCCESS";
+                    ResponseMessage = "金豆发放成功！";
+                    //}
+                    //else
+                    //{
+                    //    Code = "ERROR";
+                    //    ResponseMessage = "金豆发放失败！";
+                    //}
                 }
             }
             else
             {
-                StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bag);
+                List<RBCreateBag> crbag = new List<RBCreateBag>();
+                crbag.Add(bag);
+                StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, crbag);
+                //var res = rt.InsertBag(bag);
+                //if (res > 0)
+                //{
+                Code = "SCCESS";
+                ResponseMessage = "金豆发放成功！";
                 var res = rt.InsertBag(bag);
-                if (res > 0)
-                {
-                    Code = "SCCESS";
-                    ResponseMessage = "金豆发放成功！";
-                }
-                else
-                {
-                    Code = "ERROR";
-                    ResponseMessage = "金豆发放失败！";
-                }
+                //}
+                //else
+                //{
+                //    Code = "ERROR";
+                //    ResponseMessage = "金豆发放失败！";
+                //}
             }
             return Ok(new APIResponse<RBCreateBag>
             {
@@ -220,7 +359,232 @@ namespace ISoftSmart.API.Controllers
                 Result = Result
             });
         }
-        RBCreateBag GenerateBag(RBCreateBag bag, out decimal curAmount)
+        [Route("inserttext")]
+        [HttpPost]
+        public IHttpActionResult InsertText(MessageRecord record)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            MessageRecord Result = null;
+            WXUserInfo user = new WXUserInfo();
+            try
+            {
+                var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                record.CreateTime = DateTime.Now;
+
+               var wxUser= rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+                record.HeadImgUrl = wxUser.headimgurl;
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                {
+                    var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
+                    if (record.MType == 1)
+                    {
+                        record.BagID = record.BagID.ToString();
+                        rt.InsertMessageRecordByBag(record);
+                        bagcache.Add(record);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                        Code = "SCCESS";
+                        ResponseMessage = "保存聊天记录成功！";
+                    }
+                    else
+                    {
+                        bagcache.Add(record);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                        var res = rt.InsertMessageRecordByText(record);
+                        Code = "SCCESS";
+                        ResponseMessage = "保存聊天记录成功！";
+                    }
+
+                }
+                else
+                {
+                    if (record.MType == 1)
+                    {
+                        List<MessageRecord> rec = new List<MessageRecord>();
+                        record.BagID = record.BagID.ToString();
+                        rec.Add(record);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                        var res = rt.InsertMessageRecordByBag(record);
+                        Code = "SCCESS";
+                        ResponseMessage = "保存聊天记录成功！";
+                    }
+                    else
+                    {
+                        List<MessageRecord> rec = new List<MessageRecord>();
+                        record.BagID = record.BagID.ToString();
+                        rec.Add(record);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                        var res = rt.InsertMessageRecordByText(record);
+                        Code = "SCCESS";
+                        ResponseMessage = "保存聊天记录成功！";
+                    }
+
+                }
+                user = rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message, 240);
+            }
+
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = user
+            });
+        }
+        [Route("getmsglist")]
+        [HttpGet]
+        public IHttpActionResult GetMsgList(string time, int pageIndex = 1)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            var curTime = time == null ? DateTime.Now.ToString() : Convert.ToDateTime(time).AddHours(-2).ToString();
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            List<MessageRecord> Result = null;
+            try
+            {
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                {
+                    DateTime dt = Convert.ToDateTime(curTime);
+                    var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
+                    Code = "SCCESS";
+                    ResponseMessage = "获取聊天记录成功！";
+                    Result = bagcache;
+                }
+                else
+                {
+                    DateTime startdt = Convert.ToDateTime(DateTime.Now.ToShortDateString() + " 0:00:00");
+                    DateTime enddt = Convert.ToDateTime(DateTime.Now.ToShortDateString() + " 23:59:59");
+                    var msgList = rt.GetMsgList(startdt, enddt);
+                    if (msgList != null)
+                    {
+                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, msgList);
+                        Result = msgList.Skip(pageSize * (pageIndex - 1)).OrderByDescending(x => x.CreateTime).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
+                    }
+                    Code = "SCCESS";
+                    ResponseMessage = "获取聊天记录成功！";
+                }
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message, 120);
+            }
+
+            return Ok(new APIResponse<List<MessageRecord>>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = Result
+            });
+        }
+        [Route("getbaglist")]
+        [HttpGet]
+        public IHttpActionResult GetBagList(string bagId)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            List<MyBagSerial> result = new List<MyBagSerial>();
+            Guid gRID = Guid.Parse(bagId);
+            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+            {
+                var bagcache = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == gRID).ToList();
+                result = bagcache;
+                if (bagcache.Count > 0)
+                {
+                    Code = "SCCESS";
+                    ResponseMessage = "获取已抢金豆列表成功！";
+                }
+                else
+                {
+                    Code = "ERROR";
+                    ResponseMessage = "获取已抢金豆列表失败！";
+                }
+            }
+            else
+            {
+                rt.GetUserSerialList(new MyBagSerial() { RID = gRID });
+            }
+            return Ok(new APIResponse<List<MyBagSerial>>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = result
+            });
+        }
+
+        [Route("getbagcount")]
+        [HttpGet]
+        public IHttpActionResult GetRedBagCount(string bagId)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            RBCreateBag result = new RBCreateBag();
+            Guid gRID = Guid.Parse(bagId);
+            var ret = rt.GetSendBag(new RBCreateBag() { RID = Guid.Parse(bagId) }).FirstOrDefault();
+            Code = "SCCESS";
+            ResponseMessage = "获取已抢金豆列表成功！";
+            return Ok(new APIResponse<RBCreateBag>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = ret
+            });
+        }
+        [Route("getHasBag")]
+        [HttpGet]
+        public IHttpActionResult GetHasBag(string bagId, string userId)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            RBCreateBag result = new RBCreateBag();
+            Guid gRID = Guid.Parse(bagId);
+
+            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+            {
+                var ret = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == gRID).ToList();
+                var userList = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).ToList();
+                foreach (var item in ret)
+                {
+                    item.nickname = userList.ToList().Where(x => x.openid == item.UserId).FirstOrDefault().nickname;
+                }
+                var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
+                userBag.SerialList = new List<RBBagSerial>();
+                userBag.SerialList = ret;
+
+                if (ret.Count != 0)
+                {
+                    result = userBag;
+                    Code = "ERROR";
+                    ResponseMessage = "用户已抢到该红包！";
+                }
+                else
+                {
+                    Code = "SCCESS";
+                    ResponseMessage = "用户尚未抢到该红包！";
+                    result = userBag;
+                }
+            }
+            else
+            {
+                Code = "SCCESS";
+                ResponseMessage = "用户尚未抢到该红包！";
+            }
+            return Ok(new APIResponse<RBCreateBag>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = result
+            });
+        }
+        RBCreateBag GenerateBag(RBCreateBag bag, out RBCreateBag outbag, out decimal curAmount)
         {
             bag.BagNum -= 1;
             curAmount = 0;
@@ -238,14 +602,170 @@ namespace ISoftSmart.API.Controllers
                 curAmount = bag.BagAmount;
                 bag.BagAmount = 0;
             }
-            return bag;
+            outbag = bag;
+            return outbag;
         }
-        [Serializable]
-        public class UserInfo
+
+
+
+        [Route("wxGetUserInfo")]
+        [HttpGet]
+        public IHttpActionResult wxGetUserInfo(string url, string code)
         {
-            public string ID { get; set; }
-            public string Name { get; set; }
-            public int Age { get; set; }
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            getAccessTokenUrl = url;
+            Code = "SCCESS";
+            string accessToken = string.Empty;
+            string openid = string.Empty;
+            WXUserInfo UserInfo = new WXUserInfo();
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            try
+            {
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxAccessToken))
+                {
+                    var wxToken = StackExchangeRedisExtensions.Get<string>(db, CacheKey.WxAccessToken);
+                    var urls = string.Format(GetOpenID, AppId, AppSecret, code);
+                    var msg = CallBackUrl(urls);//获取用户OpenId
+                                                //获取用户信息
+                    var dep = JsonConvert.DeserializeObject<AccessTokenOpenId>(msg);
+                    //if (dep.refresh_token != "")
+                    //{
+                    //    StackExchangeRedisExtensions.Set(db, CacheKey.WxAccessToken, dep.refresh_token);
+                    //}
+                    var token = StackExchangeRedisExtensions.Get(db, CacheKey.WxAccessToken);
+                    var UserInfoMsg = CallBackUrl(string.Format(GetUser, token, dep.openid));
+                    UserInfo = JsonConvert.DeserializeObject<WXUserInfo>(UserInfoMsg);
+                    if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                    {
+                        var wxUserList = new List<WXUserInfo>();
+
+                        wxUserList.Add(UserInfo);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserList);
+                        if (rt.GetUserInfo(UserInfo) == null)
+                        {
+                            rt.InsertUserInfo(UserInfo);
+                        }
+                    }
+                    else
+                    {
+                        var wxUserLists = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
+                        var wxUserExists = wxUserLists.Where(x => x.openid == UserInfo.openid).FirstOrDefault();
+                        if (wxUserExists == null)
+                        {
+                            wxUserLists.Add(UserInfo);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserLists);
+                            if (rt.GetUserInfo(UserInfo) == null)
+                            {
+                                rt.InsertUserInfo(UserInfo);
+                            }
+                        }
+                    }
+                    wxCurrentUser = UserInfo;
+                    StackExchangeRedisExtensions.Set(db, "wxCurrentUser", wxCurrentUser);
+                }
+                else
+                {
+                    GetAccessToken("", out accessToken, out openid);
+                    StackExchangeRedisExtensions.Set(db, CacheKey.WxAccessToken, accessToken, 120);
+                    var urls = string.Format(GetOpenID, AppId, AppSecret, code);
+                    var openIdmsg = CallBackUrl(urls);//获取用户OpenId
+                                                      //获取用户信息
+                    var dep = JsonConvert.DeserializeObject<WXUserInfo>(openIdmsg);
+                    var UserInfoMsg = CallBackUrl(string.Format(GetUser, accessToken, dep.openid));
+                    UserInfo = JsonConvert.DeserializeObject<WXUserInfo>(UserInfoMsg);
+                    if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                    {
+                        var wxUserList = new List<WXUserInfo>();
+                        wxUserList.Add(UserInfo);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserList);
+                        if (rt.GetUserInfo(UserInfo) == null)
+                        {
+                            var r = rt.InsertUserInfo(UserInfo);
+                        }
+                    }
+                    else
+                    {
+                        var wxUserLists = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
+                        var wxUserExists = wxUserLists.Where(x => x.openid == UserInfo.openid).FirstOrDefault();
+                        if (wxUserExists == null)
+                        {
+                            wxUserLists.Add(UserInfo);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserLists);
+                            if (rt.GetUserInfo(UserInfo) == null)
+                            {
+                                var r = rt.InsertUserInfo(UserInfo);
+                            }
+                        }
+                    }
+                    wxCurrentUser = UserInfo;
+                    StackExchangeRedisExtensions.Set(db, "wxCurrentUser", wxCurrentUser);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                StackExchangeRedisExtensions.Set(db, "02", ex.Message);
+            }
+
+            ResponseMessage = "用户已抢到该红包！";
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = UserInfo
+            });
         }
+
+        //获取微信凭证access_token的接口
+        public static string getAccessTokenUrl = string.Empty;
+
+        #region 获取微信凭证
+        public void GetAccessToken(string wechat_id, out string accessToken, out string openid)
+        {
+
+            string respText = "";
+            string url = getAccessTokenUrl;
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            using (Stream resStream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(resStream, Encoding.UTF8);
+                respText = reader.ReadToEnd();
+                resStream.Close();
+            }
+            var dep = JsonConvert.DeserializeObject<AccessTokenOpenId>(respText);
+
+            // Dictionary<string, object> respDic = (Dictionary<string, object>)Jss.DeserializeObject(respText);
+            accessToken = dep.access_token;
+            openid = dep.openid;
+        }
+        string CallBackUrl(string url)
+        {
+            try
+            {
+                string respText = "";
+                getAccessTokenUrl = url;
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getAccessTokenUrl);
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                using (Stream resStream = response.GetResponseStream())
+                {
+                    StreamReader reader = new StreamReader(resStream, Encoding.UTF8);
+                    respText = reader.ReadToEnd();
+                    resStream.Close();
+                }
+                return respText;
+            }
+            catch (Exception ex)
+            {
+                //l.WriteLogFile(ex.Message);
+                //l.WriteLogFile(ex.StackTrace);
+                return null;
+            }
+
+        }
+
+        #endregion 获取微信凭证
+
     }
 }

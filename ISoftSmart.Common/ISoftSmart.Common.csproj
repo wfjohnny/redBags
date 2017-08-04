@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="CacheHelper.cs" />
     <Compile Include="HttpHelper.cs" />
+    <Compile Include="Log\Log.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

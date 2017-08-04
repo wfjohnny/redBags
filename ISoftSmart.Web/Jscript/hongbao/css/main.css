@@ -48,10 +48,13 @@ body{background: #fff;}
 
 .shurukuang{height: 73px;background: #E6E6E6;border-bottom: 2px solid #DBDBDB;padding: 0 5px;position:fixed;z-index: 3;left: 0;bottom: 0;width:100%;}
 .yuyin {line-height: 71px;width: 11%;}
-.shuru-wenben{width: 75%;margin: 0 2%;}
+.shuru-wenben{width: 63%;margin-left: 2%;}
 .shuru-wenben input{height: 53px;border: 1px solid #E1E1E1;line-height: 13px;padding:  19px 0 19px 10px;background: #fff;width: 100%;margin-top: 11px;border-radius: 4px;}
 .biaoqing{line-height: 71px;width: 11%;}
-.yingyong{line-height: 71px;width: 11%;margin-left: 2%;}
+.yingyong{line-height: 71px;width: 10%;margin-left: 2%;}
+.yingyong img{width: 30px;height: 30px;}
+.fasong{height:71px;line-height: 71px;width: 18%;margin-left: 2%;}
+.fasong a{border: 1px solid #ccc;width:100%;height: 30px;line-height:30px;display: block;margin-top: 24px;border-radius:4px;}
 
 .cont-index{background: #ECECEC;position: fixed;width:100%;}
 
