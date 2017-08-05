@@ -14,16 +14,11 @@
         <!--<a  class="go-back pa cf" href="javascript:void(0);">
             关闭
         </a>-->
-        <a class="renyuan pa cf" href=""><img src="../Jscript/hongbao/images/renyuan.jpg" /></a>
+        <a class="renyuan pa cf"  href="javascript:void(0);"><img id="menus" src="../Jscript/hongbao/images/renyuan.jpg" /></a>
         <h2 class="tc">红包一群</h2>
     </div>
     <div class="banner">
-        <div class="picMarquee-top">
-            <!--
-                                作者：m13326363119@163.com
-                                时间：2015-04-23
-                                描述：js里如果opp:false(默认),就会向上滚动。上左往下右是true
-                            -->
+        <div class="picMarquee-top" id="contentArea" style="height:465px;overflow:auto">
             <div class="bd">
                 <ul class="" id="msg">
                     <!--<li>
@@ -156,7 +151,7 @@
             </div>
         </div>
     </div>
-    <div class="shurukuang oz">
+    <div class="shurukuang oz" id="ctlMenu">
         <!--<div class="yuyin left tc">
             <img src="../Jscript/hongbao/images/yuyin.jpg" />
         </div>-->
@@ -179,10 +174,17 @@
                 <div class="swiper-wrapper">
                     <div class="swiper-slide">
                         <ul class="admin-content-list ">
-                        	<li class="am-text-center">
+                        	<li class="am-text-center" style="width:30%;float:left;margin-left:20%;">
                                 <a id="sendBag" href="javascript:void(0);" class="">
-                                    <img src="../Jscript/hongbao/images/hongbao.png" />
+                                    <img src="../Jscript/hongbao/images/hongbao.png">
                                     <p>红包</p>
+                                </a>
+                            </li>
+                                
+                            <li class="am-text-center" style="width:30%;float:left;">
+                                <a href="javascript:void(0);" id="getAmt" class="">
+                                    <img src="../Jscript/hongbao/images/qunshoukuan.png" />
+                                    <p>收款</p>
                                 </a>
                             </li>
                             <!--<li class="am-text-center">
@@ -229,8 +231,6 @@
                             </li>-->
                         </ul>
                     </div>
-                    <!--<div class="swiper-slide"></div>-->
-                    <!--<div class="swiper-slide"></div>-->
                 </div>
                 <div class="swiper-pagination"></div>
             </div>
@@ -247,7 +247,7 @@
     <script src="../Jscript/hongbao/js/jquery.SuperSlide.2.1.1.js" type="text/javascript" charset="utf-8"></script>
     <script src="../Jscript/groupinfo/group.js"></script>
     <script type="text/javascript">
-        $(".picMarquee-top").slide({ mainCell: ".bd ul", autoPlay: true, effect: "topMarquee", vis:4, opp: true, interTime: 50 });
+        //$(".picMarquee-top").slide({ mainCell: ".bd ul", autoPlay: true, effect: "topMarquee", vis:4, opp: true, interTime: 50 });
     </script>
     <script src="../Jscript/hongbao/js/swiper-3.4.2.jquery.min.js" type="text/javascript" charset="utf-8"></script>
     <script>
@@ -261,10 +261,14 @@
 		$(".yingyong").click(function(){
 			if ($(".cont-index").hasClass("none")) {
 				$(".cont-index").removeClass("none").css("bottom",0);
-				$(".shurukuang").css("bottom","133px");
+				$(".shurukuang").css("bottom", "133px");
+				$("#contentArea").css("height", "343px");
+				$('#contentArea').scrollTop($('.bd').height());
 			}else{
 				$(".cont-index").addClass("none");
-				$(".shurukuang").css("bottom",0);
+				$(".shurukuang").css("bottom", 0);
+				$("#contentArea").css("height", "465px");
+				$('#contentArea').scrollTop($('.bd').height());
 			}
 		});
     </script>

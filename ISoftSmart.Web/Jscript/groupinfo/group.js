@@ -14,17 +14,17 @@ var UserInfo = {
     privilege: "",
     province: "",
     sex: "",
-    unionid:""
+    unionid: ""
 };
 var MessageRecord = {
-    mID:"",
+    mID: "",
     userID: "",
     mContent: "",
     mType: "",
     headImgUrl: "",
     bagID: "",
     bagUserID: "",
-    bagRemark:"",
+    bagRemark: "",
 };
 var openid;
 if (getUrlParam("openid") == null) {
@@ -33,20 +33,21 @@ if (getUrlParam("openid") == null) {
 else {
     openid = getUrlParam("openid");
 }
-var wxUserres = callBackDataFunc("api/test/getWxUser",openid, "");
-if (wxUserres.code == "SCCESS")
-{
-    UserInfo.city = wxUserres.result.city;
-    UserInfo.country = wxUserres.result.country;
-    UserInfo.headimgurl = wxUserres.result.headimgurl;
-    UserInfo.nickname = wxUserres.result.nickname;
-    UserInfo.openid = wxUserres.result.openid;
-    UserInfo.privilege = wxUserres.result.privilege;
-    UserInfo.province = wxUserres.result.province;
-    UserInfo.sex = wxUserres.result.sex;
-    UserInfo.unionid = wxUserres.result.unionid;
+var wxUserres = callBackDataFunc("api/test/getWxUser", openid, "");
+if (wxUserres.code == "SCCESS") {
+    if (wxUserres.result != null) {
+        UserInfo.city = wxUserres.result.city;
+        UserInfo.country = wxUserres.result.country;
+        UserInfo.headimgurl = wxUserres.result.headimgurl;
+        UserInfo.nickname = wxUserres.result.nickname;
+        UserInfo.openid = wxUserres.result.openid;
+        UserInfo.privilege = wxUserres.result.privilege;
+        UserInfo.province = wxUserres.result.province;
+        UserInfo.sex = wxUserres.result.sex;
+        UserInfo.unionid = wxUserres.result.unionid;
+    }
 }
-console.log(wxUserres);
+//console.log(wxUserres);
 var bag = {
     rID: "",
     userId: "",
@@ -73,7 +74,21 @@ chat.client.broadcastMessage = function (guid, count, Num, remark) {
     bag.bagNum = Num;
 
 };
-chat.client.loadMessage = function (message,curUser, time) {
+chat.client.loadAmtMessage = function (openid, imgurl) {
+    var html = "";//http://localhost/bagAPI/QRFile/olDlVsy5vYjAhbWIDMYaj5PSVp04.jpg
+    var myDate = new Date();
+    var h = myDate.getHours();
+    var m = myDate.getMinutes();
+    html += "<li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
+    html += "  <div class=\"oz\"><div class=\"right\">";
+    html += "                    <img src=\"" + imgurl + "\" /></div>";
+    html += "   <div style=\"float:right;margin-right:10px\">";
+    html += "      <img src=\"" +Apiurl+"QRFile/"+ openid + ".jpg\" style=\"width:180px;\" /> ";
+    html += "   </div></li>";
+    $("#msg").append(html);
+    $('#contentArea').scrollTop($('.bd').height());
+};
+chat.client.loadMessage = function (message, curUser, time) {
     var html = "";
     MessageRecord.mID = newGuid();
     MessageRecord.mContent = message;
@@ -109,20 +124,19 @@ chat.client.loadMessage = function (message,curUser, time) {
         html += "</div>";
         html += "</div> </li>";
     }
-    console.log(res);
-   // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
+    // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
     //if (curUser == customerCode) {
-        //html += "<li><p class=\"am-text-center cf f12\">" + time + "</p>";
-        //html +=" <div class=\"right\">";
-        //html += "                     <a href=\"\"><img src=\"" + UserInfo.headimgurl + "\" /></a>";
-        //html += "                  </div>";
-        //html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-        //html += "        <span class=\"bubble rightBubble\">";
-        //html += "            "+message+"";
-        //html += "            <span class=\"bottomLevel\"></span>";
-        //html += "           <span class=\"topLevel\"></span>";
-        //html += "        </span>";
-        //html += "   </div></li>";
+    //html += "<li><p class=\"am-text-center cf f12\">" + time + "</p>";
+    //html +=" <div class=\"right\">";
+    //html += "                     <a href=\"\"><img src=\"" + UserInfo.headimgurl + "\" /></a>";
+    //html += "                  </div>";
+    //html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+    //html += "        <span class=\"bubble rightBubble\">";
+    //html += "            "+message+"";
+    //html += "            <span class=\"bottomLevel\"></span>";
+    //html += "           <span class=\"topLevel\"></span>";
+    //html += "        </span>";
+    //html += "   </div></li>";
     //}
     //else {
     //    html += "<li><p class=\"am-text-center cf f12\">" + time + "</p>";
@@ -140,6 +154,7 @@ chat.client.loadMessage = function (message,curUser, time) {
     //}
     $("#msg").append(html);
     $("#textmsg").val("");
+    $('#contentArea').scrollTop($('.bd').height());
 };
 
 // 启动连接,这里和1.0也有区别
@@ -148,7 +163,7 @@ $.connection.hub.start().done(function () {
     $.ajax({
         url: Apiurl + "api/test/getmsglist", // url  action是方法的名称
         type: "Get",
-        data: { time: "", pageIndex:1},
+        data: { time: "", pageIndex: 1 },
         async: false,
         xhrFields: {
             withCredentials: true
@@ -158,11 +173,10 @@ $.connection.hub.start().done(function () {
         contentType: "application/json",
         success: function (data) {
             var html = "";
-            console.log(data.result);
             $(data.result).each(function (a, item) {
                 var time = item.createTime.split(" ")[1].split(":");
                 if (item.mType == 0) {
-                
+
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"right\">";
                     html += "                     <a href=\"\"><img src=\"" + item.headImgUrl + "\" /></a>";
@@ -190,24 +204,61 @@ $.connection.hub.start().done(function () {
                 }
             });
             $("#msg").append(html);
-
-            console.log(data.result);
+            $('#contentArea').scrollTop($('.bd').height());
         }
     });
     $('#sendMsg').click(function () {
-        //  var message = $('#username').html() + ":" + $('#message').val()
-        // 这里是调用服务器的方法,同样,首字母小写
-        
+
         var message = $("#textmsg").val();
-        if (message == "")
-        {
+        if (message == "") {
             layer.msg("不能发送空消息！");
             return;
         }
         chat.server.sendMessage(message, UserInfo.openid);
+    });
+    $('#getAmt').click(function () {
+        //alert("11");
+        // var dataJson = JSON.stringify(MessageRecord);
+        if (UserInfo.openid == null)
+        {
+            UserInfo.openid = openid;
+        }
+        var r = callBackDataFunc("api/test/getAmtCode", UserInfo.openid, "");
+        if (r.code == "SCCESS")
+        {
+            if (r.result.hasImg == 0)
+            {
+                layer.msg("还没有上传收款码，请先上传收款码！");
+                return;
+            }
+        }
+        var headUrl = UserInfo.headimgurl;
+        var userID = UserInfo.openid;
+        //$.ajax({
+        //    url: Apiurl + "api/test/getAmtCode", // url  action是方法的名称
+        //    type: "Get",
+        //    data: { bagId: UserInfo.openid },
+        //    async: false,
+        //    xhrFields: {
+        //        withCredentials: true
+        //    },
+        //    crossDomain: true,//新增cookie跨域配置
+        //    dataType: "json",
+        //    contentType: "application/json",
+        //    success: function (data) {
+        //        if (data.code == "SCCESS") {
+        //            if (data.result.hasImg == null) {
+        //                layer.msg("还没有上传收款码，请先上传收款码！");
+        //                return;
+        //            }
+        //        }
+        //    }
+        //});
+        chat.server.sendAmtMessage(userID, headUrl);
         // 清空输入框的文字并给焦点.
         // $('#message').val('').focus();
     });
+
 });
 $.connection.hub.stateChanged(function (state) {
     if (state.newState == $.signalR.connectionState.reconnecting) {
@@ -246,11 +297,11 @@ $(function () {
             maxmin: false,
             closeBtn: 0,
             title: "",
-            cancel: function(index, layero){ 
-                if(confirm('确定要关闭么')){ //只有当点击confirm框的确定时，该层才会关闭
+            cancel: function (index, layero) {
+                if (confirm('确定要关闭么')) { //只有当点击confirm框的确定时，该层才会关闭
                     layer.close(index)
                 }
-                return false; 
+                return false;
             }
         });
         layer.full(index);
@@ -258,7 +309,24 @@ $(function () {
     $("#close").click(function () {
         layer.close(index);
     });
-   
+
+    $("#menus").click(function () {
+        index = layer.open({
+            type: 2,
+            content: '../Main/menu.html',
+            area: ['320px', '195px'],
+            maxmin: false,
+            closeBtn: 0,
+            title: "",
+            cancel: function (index, layero) {
+                if (confirm('确定要关闭么')) { //只有当点击confirm框的确定时，该层才会关闭
+                    layer.close(index)
+                }
+                return false;
+            }
+        });
+        layer.full(index);
+    });
 });
 function OpenBag(guid, customerCode) {
     var ret = callBackTwoDataFunc("api/test/getHasBag", guid, customerCode, "");
@@ -300,7 +368,7 @@ function LoadBag(guid, count, Num, remark) {
     var myDate = new Date();
     var h = myDate.getHours();
     var m = myDate.getMinutes();
-    var bag = " <li><p class=\"am-text-center cf f12\">"+h+":"+m+"</p>";
+    var bag = " <li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
     bag += " <div class=\"oz\">";
     bag += " <div class=\"right\">";
     bag += "<a href=\"javascript:void(0);\" ><img src=\"" + UserInfo.headimgurl + "\" /></a>";
@@ -308,10 +376,11 @@ function LoadBag(guid, count, Num, remark) {
     bag += "<div class=\"cont_right\">";
     bag += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + guid + "','" + UserInfo.openid + "');\">";
     bag += "<div>" + remark + " </div>";
-   // bag += "领取金蛋";
+    // bag += "领取金蛋";
     bag += "</a>";
     bag += "</div>";
     bag += "</div> </li>";
     $("#msg").append(bag);
+    $('#contentArea').scrollTop($('.bd').height());
 }
 

@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>图3</title>
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/amazeui.css" />
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/swiper-3.4.2.min.css" />
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/main.css" />
+    <script src="../Script/jquery-2.1.4.min.js"></script>
+    <script src="../Jscript/upload/backuploadImg.js"></script>
+    <script src="../Jscript/upload/camera.js"></script>
+    <script src="../Jscript/upload/mbUploadImg.js"></script>
+    <script src="../init/initData.js"></script>
+    <script src="../Jscript/layer/layer.js"></script>
+</head>
+
+
+<body>
+    <div class="hongbao-top pr am-text-center c2" style="height:60px">
+        <a class="pa shut-fa c3" href="javascript:void(0);" id="close">关闭</a>
+    </div>
+    <div class="floats" style="text-align:center;border: none;width: 100%;">
+        <p id="facepreview" style="height:240px;width: 100%;display: block;"></p>
+        <a href="#" style="width: 45%;margin: 130px auto;position: relative;text-decoration: none;display: block;">
+        	<div style="width: 100%;height: 40px;line-height:40px;border: 1px solid #ddd;border-radius: 5px;background: #19AC18;color: #fff;font-size: 16px;text-align: center;">
+				选择收款码
+			</div>
+            <input type="file" class="ui-btn-submit" accept="image/*" id="faceupload"  style="border: 1px solid #ddd;height: 40px;width: 100%;position: absolute;left: 0px;top: 0px;opacity: 0;width:100%;">
+        </a>
+    </div>
+    
+
+    <!--<div style="width: 65%;margin: 30px auto;position: relative;">
+        <input style="border: 1px solid #ddd;height: 40px;width: 100%;position: absolute;left: 0px;top: 0px;opacity: 0;width:100%;" type="file" />
+        <div style="width: 100%;height: 40px;line-height:40px;border: 1px solid #ddd;border-radius: 5px;background: #19AC18;color: #fff;font-size: 16px;text-align: center;">
+            上传图片
+        </div>
+    </div>-->
+</body>
+<script>
+    $(function () {
+        $("#close").click(function () {
+            parent.layer.closeAll("iframe");
+        })
+    });
+    var ImageModel = {
+        id: "",
+        ImgFile: "",
+    };
+    var picString;
+    var faceupload = document.getElementById('faceupload'),
+     facepreview = document.getElementById('facepreview');
+    faceupload.addEventListener('change', mbUploadImg.handleFile, false);
+    mbUploadImg.init({
+        changeSize: true,
+        maxWidth: 360,
+        maxHeight:360,
+        imgHandle: function (src) {
+            facepreview.innerHTML = '<img id="faceimg" src="' + src + '" />';
+            picString = src;
+            UploadFile(src, 0);
+        }
+    })
+
+    var arrayImg = ",";//图片base64值
+    function SetValue() {
+        arrayImg = ",";
+        arrayImg = arrayImg + picString + ",";
+    } var array = new Array();
+    var facecardimg = "";
+    var backcardimg = "";
+    function UploadFile(src, type) {
+        SetValue();
+        var reg = new RegExp("data:image/jpeg;base64,", "g");//创建正则RegExp对象
+        var imgStr = arrayImg;
+        var imgStr = imgStr.replace(reg, "");//替换多余的头文信息
+        array = new Array();
+        //去掉第一个逗号
+        if (imgStr.substr(0, 1) == ',') imgStr = imgStr.substr(1);
+        //去掉最后一个逗号
+        var reg = /,$/gi;
+        imgStr = imgStr.replace(reg, "");
+        array = imgStr.split(",");
+        var imgCount = array.length;
+        for (var i = 0; i < imgCount; i++) {
+            ImageModel.id = "file";
+            ImageModel.ImgFile = array[i];
+            var res1 = JSON.stringify(ImageModel);
+            var res = callBackJsonFunc("api/test/uploadimg", res1, "Post");
+            if (res.code == "SCCESS") {
+                layer.msg("上传成功！");
+            }
+            else {
+                layer.msg("上传失败，请重新上传！");
+            }
+        }
+    }
+</script>
+</html>

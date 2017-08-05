@@ -29,6 +29,16 @@ namespace ISoftSmart.Web.signalr
             Clients.All.loadMessage(message,customeCode, DateTime.Now.ToString());
         }
         /// <summary>
+        /// 收款码
+        /// </summary>
+        /// <param name="message"></param>
+        public void SendAmtMessage(string message, string customeCode)
+        {
+            //调用所有客户注册的本地的JS方法(broadcastMessage)
+            //Clients.All.broadcastMessage(message + DateTime.Now.ToString());
+            Clients.All.loadAmtMessage(message, customeCode);
+        }
+        /// <summary>
         /// 登录连线
         /// </summary>
         /// <param name="userID">用户ID</param>

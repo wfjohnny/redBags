@@ -18,5 +18,6 @@ namespace ISoftSmart.Model.WX
         public string privilege { get; set; }
         public string unionid { get; set; }
         public decimal beannum { get; set; }
+        public int hasImg { get; set; }
     }
 }

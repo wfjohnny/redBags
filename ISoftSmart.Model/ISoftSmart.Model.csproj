@@ -51,6 +51,7 @@
     <Compile Include="BS\BagSerial.cs" />
     <Compile Include="BS\My\MyBagSerial.cs" />
     <Compile Include="DataTablesData.cs" />
+    <Compile Include="ImageModel.cs" />
     <Compile Include="JObjectParse.cs" />
     <Compile Include="ModelMaster.cs" />
     <Compile Include="PageData.cs" />

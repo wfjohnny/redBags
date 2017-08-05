@@ -25,5 +25,6 @@ namespace ISoftSmart.Inteface.Inteface
         int InsertMessageRecordByText(MessageRecord message);
         int InsertMessageRecordByBag(MessageRecord msg);
         List<MessageRecord> GetMsgList(DateTime startTime, DateTime endTime);
+        int SetUserImage(WXUserInfo info);
     }
 }

@@ -141,6 +141,7 @@
     <Content Include="Jscript\groupinfo\auth.js" />
     <Content Include="Jscript\groupinfo\baglist.js" />
     <Content Include="Jscript\groupinfo\group.js" />
+    <Content Include="Jscript\groupinfo\menu.js" />
     <Content Include="Jscript\groupinfo\sendbag.js" />
     <Content Include="Jscript\groupinfo\waitlist.js" />
     <Content Include="Jscript\hongbao\1enter.html" />
@@ -175,6 +176,8 @@
     <Content Include="Jscript\hongbao\js\jquery.11.min.js" />
     <Content Include="Jscript\hongbao\js\jquery.SuperSlide.2.1.1.js" />
     <Content Include="Jscript\hongbao\js\swiper-3.4.2.jquery.min.js" />
+    <Content Include="Jscript\hongbao\图2.html" />
+    <Content Include="Jscript\hongbao\图3.html" />
     <Content Include="Jscript\img\red-w.png" />
     <Content Include="Jscript\img\red-y.png" />
     <Content Include="Jscript\layer\layer.js" />
@@ -186,8 +189,13 @@
     <Content Include="Jscript\layer\skin\default\loading-0.gif" />
     <Content Include="Jscript\layer\skin\default\loading-1.gif" />
     <Content Include="Jscript\layer\skin\default\loading-2.gif" />
+    <Content Include="Jscript\upload\backuploadImg.js" />
+    <Content Include="Jscript\upload\camera.js" />
+    <Content Include="Jscript\upload\mbUploadImg.js" />
     <Content Include="Main\baglist.html" />
+    <Content Include="Main\menu.html" />
     <Content Include="Main\sendbags.html" />
+    <Content Include="Main\uploadfile.html" />
     <Content Include="Main\waitList.html" />
     <Content Include="Script\jquery.signalR-2.2.2.js" />
     <Content Include="Script\jquery.signalR-2.2.2.min.js" />

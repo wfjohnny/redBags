@@ -81,6 +81,7 @@ namespace ISoftSmart.Inteface.Implements
                  new SqlParameter("@Province",user.province),
                  new SqlParameter("@City",user.city),
                  new SqlParameter("@Sex",user.sex),
+                 new SqlParameter("@HasImg",user.hasImg),
               };
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[UserInfo]
            ([UserId]
@@ -90,7 +91,8 @@ namespace ISoftSmart.Inteface.Implements
            ,[Country]
            ,[Province]
            ,[City]
-           ,[Sex])
+           ,[Sex]
+           ,[HasImg])
      VALUES
            (@UserId
            ,@OpenId
@@ -99,7 +101,8 @@ namespace ISoftSmart.Inteface.Implements
            ,@Country
            ,@Province
            ,@City
-           ,@Sex)", sp, CommandType.Text);
+           ,@Sex
+           ,@HasImg)", sp, CommandType.Text);
             return result;
         }
         public List<MyBagSerial> GetUserSerialList(MyBagSerial my)
@@ -221,6 +224,19 @@ namespace ISoftSmart.Inteface.Implements
             var result = Dapper.Helper.SQLHelper.Execute(@"
             UPDATE [dbo].[UserInfo]
                SET [BeanNum] = [BeanNum]+@BeanNum
+             WHERE OpenId=@OpenId", sp, CommandType.Text);
+            return result;
+        }
+        public int SetUserImage(WXUserInfo bag)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@OpenId",bag.openid),
+                 new SqlParameter("@HasImg",bag.hasImg),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            UPDATE [dbo].[UserInfo]
+               SET [HasImg] = @HasImg
              WHERE OpenId=@OpenId", sp, CommandType.Text);
             return result;
         }

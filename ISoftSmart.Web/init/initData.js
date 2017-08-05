@@ -35,6 +35,7 @@ var Signalr = "http://localhost/";
         });
         return resdata;
     }
+
     //调用后台链接，json字符串，请求类型：post，get
     function callBackFunc(url, type) {
         if (type == "")

@@ -25,12 +25,18 @@ using System.Web.Http;
 using System.Web.SessionState;
 using Newtonsoft.Json;
 using StackExchange.Redis;
+using ISoftSmart.Common.UploadHelper;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace ISoftSmart.API.Controllers
 {
     [RoutePrefix("api/test")]
     public class HomeController : BaseController, IRequiresSessionState
     {
+        private string IMG_BASE64;
         private static object _locker = new object();
         string AppId = System.Configuration.ConfigurationManager.AppSettings["AppId"].ToString();
         string AppSecret = System.Configuration.ConfigurationManager.AppSettings["AppSecret"].ToString();
@@ -156,7 +162,7 @@ namespace ISoftSmart.API.Controllers
                     Result = userinfoList
                 });
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 StackExchangeRedisExtensions.Set(db, "1111", ex.Message);
                 return Ok(new APIResponse<WXUserInfo>
@@ -372,7 +378,7 @@ namespace ISoftSmart.API.Controllers
                 var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
                 record.CreateTime = DateTime.Now;
 
-               var wxUser= rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+                var wxUser = rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
                 record.HeadImgUrl = wxUser.headimgurl;
                 if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
                 {
@@ -639,12 +645,18 @@ namespace ISoftSmart.API.Controllers
                     if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
                     {
                         var wxUserList = new List<WXUserInfo>();
-
+                       
                         wxUserList.Add(UserInfo);
                         StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserList);
-                        if (rt.GetUserInfo(UserInfo) == null)
+                        var userMsg = rt.GetUserInfo(UserInfo);
+                        if (userMsg == null)
                         {
+                            UserInfo.hasImg = 0;
                             rt.InsertUserInfo(UserInfo);
+                        }
+                        else
+                        {
+                            UserInfo.hasImg = 1;
                         }
                     }
                     else
@@ -653,11 +665,18 @@ namespace ISoftSmart.API.Controllers
                         var wxUserExists = wxUserLists.Where(x => x.openid == UserInfo.openid).FirstOrDefault();
                         if (wxUserExists == null)
                         {
+                            UserInfo.hasImg = 0;
                             wxUserLists.Add(UserInfo);
                             StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserLists);
-                            if (rt.GetUserInfo(UserInfo) == null)
+                            var userMsg = rt.GetUserInfo(UserInfo);
+                            if (userMsg == null)
                             {
+                                UserInfo.hasImg = 0;
                                 rt.InsertUserInfo(UserInfo);
+                            }
+                            else
+                            {
+                                UserInfo.hasImg = 1;
                             }
                         }
                     }
@@ -679,9 +698,15 @@ namespace ISoftSmart.API.Controllers
                         var wxUserList = new List<WXUserInfo>();
                         wxUserList.Add(UserInfo);
                         StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserList);
-                        if (rt.GetUserInfo(UserInfo) == null)
+                        var userMsg = rt.GetUserInfo(UserInfo);
+                        if (userMsg == null)
                         {
-                            var r = rt.InsertUserInfo(UserInfo);
+                            UserInfo.hasImg = 0;
+                            rt.InsertUserInfo(UserInfo);
+                        }
+                        else
+                        {
+                            UserInfo.hasImg = 1;
                         }
                     }
                     else
@@ -692,9 +717,15 @@ namespace ISoftSmart.API.Controllers
                         {
                             wxUserLists.Add(UserInfo);
                             StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, wxUserLists);
-                            if (rt.GetUserInfo(UserInfo) == null)
+                            var userMsg = rt.GetUserInfo(UserInfo);
+                            if (userMsg == null)
                             {
-                                var r = rt.InsertUserInfo(UserInfo);
+                                UserInfo.hasImg = 0;
+                                rt.InsertUserInfo(UserInfo);
+                            }
+                            else
+                            {
+                                UserInfo.hasImg = 1;
                             }
                         }
                     }
@@ -716,7 +747,112 @@ namespace ISoftSmart.API.Controllers
                 Result = UserInfo
             });
         }
+        [Route("getAmtCode")]
+        [HttpGet]
+        public IHttpActionResult GetAmtCode(string bagId)
+        {
+            string code = string.Empty;
+            string responseMessage = string.Empty;
+            var info = new WXUserInfo();
+            try
+            {
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                {
+                    var res = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == bagId).FirstOrDefault();
+                    if (res != null)
+                    {
+                        info = res;
+                        code = "SCCESS";
+                        responseMessage = "获取用户信息成功";
+                    }
+                }
+                else
+                {
+                    var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                    var userinfoList = rt.GetUserInfo(new WXUserInfo() { openid = bagId }).FirstOrDefault();
+                    info = userinfoList;
+                    code = "SCCESS";
+                    responseMessage = "获取用户信息成功";
+                }
+                return Ok(new APIResponse<WXUserInfo>
+                {
+                    Code = code,
+                    ResponseMessage = responseMessage,
+                    Result = info
+                });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new APIResponse<WXUserInfo>
+                {
+                    Code = "SCCESS",
+                    ResponseMessage = "获取用户信息失败",
+                    Result = null
+                });
+            }
+        }
+        [Route("uploadimg")]
+        [HttpPost]
+        public IHttpActionResult UploadFile(ImageModel img)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            IMG_BASE64 = img.ImgFile;
+            UploadImage imgs = new UploadImage();
+            byte[] byteArray = System.Text.Encoding.Default.GetBytes(IMG_BASE64);
+            var imgFile = BytToImg(IMG_BASE64);
+            WXUserInfo user = new WXUserInfo() {
+                hasImg = 1,
+                openid = wxCurrentUser==null? "olDlVsy5vYjAhbWIDMYaj5PSVp04" : wxCurrentUser.openid
+            };
+            var res = rt.SetUserImage(user);
+            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+            {
+                var openid = wxCurrentUser == null ? "olDlVsy5vYjAhbWIDMYaj5PSVp04" : wxCurrentUser.openid;
+                var userList = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
+                if (userList.Count > 0)
+                {
+                    var userInfo = userList.Where(x => x.openid == openid).FirstOrDefault();
+                    if (userInfo != null)
+                    {
+                        userList.Remove(userInfo);
+                        userInfo.hasImg = 1;
+                        userList.Add(userInfo);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, userList);
+                    }
+                }
+            }
+            //获取文件储存路径
+            return Ok(new APIResponse<string>
+            {
+                Code = "SCCESS",
+                ResponseMessage = "上传成功"
+            });
+        }
+        public System.Drawing.Image BytToImg(string byt)
+        {
+            byte[] arr = Convert.FromBase64CharArray(byt.ToCharArray(), 0, byt.Length);
+            MemoryStream ms = new MemoryStream(arr);
+            try
+            {
+                var bmp = Image.FromStream(ms);
+                var bmpfileName = wxCurrentUser == null ? "olDlVsy5vYjAhbWIDMYaj5PSVp04.jpg" : wxCurrentUser.openid + ".jpg";
+                string root = HttpContext.Current.Server.MapPath("~/QRFile/");
+                if (!Directory.Exists(HttpContext.Current.Server.MapPath("~/QRFile/")))
+                {
+                    Directory.CreateDirectory(HttpContext.Current.Server.MapPath("~/QRFile/"));
+                }
+                var path = root + bmpfileName;
+                bmp.Save(path, ImageFormat.Png);
 
+                ms.Close();
+                return bmp;
+            }
+            catch (Exception ex)
+            {
+                ms.Close();
+                return null;
+            }
+        }
         //获取微信凭证access_token的接口
         public static string getAccessTokenUrl = string.Empty;
 
