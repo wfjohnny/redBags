@@ -40,17 +40,46 @@ $(function () {
         bag.bagNum = $("#bagNum").val();
         bag.remark = remark;
         var dataJson = JSON.stringify(bag);
-        var res = callBackFuncJson("api/test/insertbag", dataJson, "");
+        $.ajax({
+            url: Apiurl + "api/test/insertbag", // url  action是方法的名称
+            type: "Post",
+            data: dataJson,
+            //async: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true,//新增cookie跨域配置
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                parent.MessageRecord.mID = parent.newGuid();
+                parent.MessageRecord.bagID = bag.rID;
+                parent.MessageRecord.mType = 1;
+                parent.MessageRecord.bagUserID = parent.UserInfo.openid;
+                parent.MessageRecord.bagRemark = remark;
+                parent.MessageRecord.headImgUrl = parent.UserInfo.headimgurl;
+                console.log(parent.MessageRecord);
+                var dataJson1 = JSON.stringify(parent.MessageRecord);
+                $.ajax({
+                    url: Apiurl + "api/test/inserttext", // url  action是方法的名称
+                    type: "Post",
+                    data: dataJson1,
+                    //async: false,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    crossDomain: true,//新增cookie跨域配置
+                    dataType: "json",
+                    contentType: "application/json",
+                    success: function (data) {
+                        resdata = data;
+                        console.log(data);
+                    }
+                });
+            }
+        });
         //if (res.code == "SCCESS") {
-            parent.MessageRecord.mID =parent.newGuid();
-            parent.MessageRecord.bagID = bag.rID;
-            parent.MessageRecord.mType = 1;
-            parent.MessageRecord.bagUserID = parent.UserInfo.openid;
-            parent.MessageRecord.bagRemark = remark;
-            parent.MessageRecord.headImgUrl = parent.UserInfo.headimgurl;
-            console.log(parent.MessageRecord);
-            var dataJson1 = JSON.stringify(parent.MessageRecord);
-            var res = callBackFuncJson("api/test/inserttext", dataJson1, "");
+           
         //}
         //else {
 

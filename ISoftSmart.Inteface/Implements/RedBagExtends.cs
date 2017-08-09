@@ -297,6 +297,30 @@ namespace ISoftSmart.Inteface.Implements
                    ,@CreateTime)", sp, CommandType.Text);
             return result;
         }
+        public int InsertMessageRecordByImg(MessageRecord record)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@MID",Guid.NewGuid()),
+                 new SqlParameter("@MType",record.MType),
+                 new SqlParameter("@AmtUserID",record.AmtUserID),
+                 new SqlParameter("@AmtUserImg",record.AmtUserImg),
+                 new SqlParameter("@CreateTime",record.CreateTime),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
+                   ([MID]
+                   ,[MType]
+                   ,[AmtUserID]
+                   ,[AmtUserImg]
+                   ,[CreateTime])
+             VALUES
+                   (@MID
+                   ,@MType
+                   ,@AmtUserID
+                   ,@AmtUserImg
+                   ,@CreateTime)", sp, CommandType.Text);
+            return result;
+        }
         public List<MessageRecord> GetMsgList(DateTime startTime, DateTime endTime)
         {
             SqlParameter[] sp = new SqlParameter[]

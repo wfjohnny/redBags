@@ -21,7 +21,7 @@ var Signalr = "http://localhost/";
             url: Apiurl + url, // url  action是方法的名称
             type: type,
             data: json,
-            async: false,
+            //async: false,
             xhrFields: { 
                 withCredentials: true
             },
@@ -35,7 +35,6 @@ var Signalr = "http://localhost/";
         });
         return resdata;
     }
-
     //调用后台链接，json字符串，请求类型：post，get
     function callBackFunc(url, type) {
         if (type == "")

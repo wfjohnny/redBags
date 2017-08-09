@@ -14,7 +14,7 @@ var UserInfo = {
     privilege: "",
     province: "",
     sex: "",
-    unionid: ""
+    unionid: "",
 };
 var MessageRecord = {
     mID: "",
@@ -25,6 +25,8 @@ var MessageRecord = {
     bagID: "",
     bagUserID: "",
     bagRemark: "",
+    amtUserID: "",
+    amtUserImg: ""
 };
 var openid;
 if (getUrlParam("openid") == null) {
@@ -33,21 +35,36 @@ if (getUrlParam("openid") == null) {
 else {
     openid = getUrlParam("openid");
 }
-var wxUserres = callBackDataFunc("api/test/getWxUser", openid, "");
-if (wxUserres.code == "SCCESS") {
-    if (wxUserres.result != null) {
-        UserInfo.city = wxUserres.result.city;
-        UserInfo.country = wxUserres.result.country;
-        UserInfo.headimgurl = wxUserres.result.headimgurl;
-        UserInfo.nickname = wxUserres.result.nickname;
-        UserInfo.openid = wxUserres.result.openid;
-        UserInfo.privilege = wxUserres.result.privilege;
-        UserInfo.province = wxUserres.result.province;
-        UserInfo.sex = wxUserres.result.sex;
-        UserInfo.unionid = wxUserres.result.unionid;
+var wxUserres;
+$.ajax({
+    url: Apiurl + "api/test/getWxUser", // url  action是方法的名称
+    type: "Get",
+    data: { bagId: openid },
+    //async: false,
+    xhrFields: {
+        withCredentials: true
+    },
+    crossDomain: true,//新增cookie跨域配置
+    dataType: "json",
+    contentType: "application/json",
+    success: function (data) {
+        if (data.code)
+        {
+            if (data.result != null) {
+                UserInfo.city = data.result.city;
+                UserInfo.country = data.result.country;
+                UserInfo.headimgurl = data.result.headimgurl;
+                UserInfo.nickname = data.result.nickname;
+                UserInfo.openid = data.result.openid;
+                UserInfo.privilege = data.result.privilege;
+                UserInfo.province = data.result.province;
+                UserInfo.sex = data.result.sex;
+                UserInfo.unionid = data.result.unionid;
+            }
+        }
     }
-}
-//console.log(wxUserres);
+});
+
 var bag = {
     rID: "",
     userId: "",
@@ -75,7 +92,7 @@ chat.client.broadcastMessage = function (guid, count, Num, remark) {
 
 };
 chat.client.loadAmtMessage = function (openid, imgurl) {
-    var html = "";//http://localhost/bagAPI/QRFile/olDlVsy5vYjAhbWIDMYaj5PSVp04.jpg
+    var html = "";
     var myDate = new Date();
     var h = myDate.getHours();
     var m = myDate.getMinutes();
@@ -87,43 +104,83 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
+    MessageRecord.mID = newGuid();
+    MessageRecord.mType =2;//收款图片
+    MessageRecord.amtUserID = openid;
+    MessageRecord.userID = openid;
+    MessageRecord.amtUserImg = UserInfo.headimgurl;
+    var dataJson = JSON.stringify(MessageRecord);
+    $.ajax({
+        url: Apiurl + "api/test/inserttext", // url  action是方法的名称
+        type: "Post",
+        data: dataJson,
+        //async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            //resdata = data;
+        }
+    });
+    //var res = callBackFuncJson("api/test/inserttext", dataJson, "");
 };
-chat.client.loadMessage = function (message, curUser, time) {
+chat.client.loadMessage = function (message,userImg, curUser, time) {
     var html = "";
     MessageRecord.mID = newGuid();
     MessageRecord.mContent = message;
     MessageRecord.mType = 0;
     MessageRecord.userID = curUser;
-    MessageRecord.headImgUrl = UserInfo.headimgurl;
+    MessageRecord.headImgUrl = userImg;
     var dataJson = JSON.stringify(MessageRecord);
-    var res = callBackFuncJson("api/test/inserttext", dataJson, "");
-    time = time.split(" ")[1].split(":");
-    if (res.code == "SCCESS") {
-        html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-        html += " <div class=\"right\">";
-        html += "                     <a href=\"\"><img src=\"" + res.result.headimgurl + "\" /></a>";
-        html += "                  </div>";
-        html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-        html += "        <span class=\"bubble rightBubble\">";
-        html += "            " + message + "";
-        html += "            <span class=\"bottomLevel\"></span>";
-        html += "           <span class=\"topLevel\"></span>";
-        html += "        </span>";
-        html += "   </div></li>";
-    }
-    else {
-        html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-        html += " <div class=\"oz\">";
-        html += " <div class=\"right\">";
-        html += "<a href=\"javascript:void(0);\" ><img src=\"" + item.headImgUrl + "\" /></a>";
-        html += "</div>";
-        html += "<div class=\"cont_right\">";
-        html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + item.bagID + "','" + item.bagUserID + "');\">";
-        html += "<div>" + item.bagRemark + " </div>";
-        html += "</a>";
-        html += "</div>";
-        html += "</div> </li>";
-    }
+    $.ajax({
+        url: Apiurl + "api/test/inserttext", // url  action是方法的名称
+        type: "Post",
+        data: dataJson,
+        //async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            time = time.split(" ")[1].split(":");
+            if (data.code == "SCCESS") {
+                html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                html += " <div class=\"right\">";
+                html += "                     <a href=\"\"><img src=\"" + data.result.headimgurl + "\" /></a>";
+                html += "                  </div>";
+                html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+                html += "        <span class=\"bubble rightBubble\">";
+                html += "            " + message + "";
+                html += "            <span class=\"bottomLevel\"></span>";
+                html += "           <span class=\"topLevel\"></span>";
+                html += "        </span>";
+                html += "   </div></li>";
+            }
+            else {
+                html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                html += " <div class=\"oz\">";
+                html += " <div class=\"right\">";
+                html += "<a href=\"javascript:void(0);\" ><img src=\"" + data.headImgUrl + "\" /></a>";
+                html += "</div>";
+                html += "<div class=\"cont_right\">";
+                html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + data.bagID + "','" + data.bagUserID + "');\">";
+                html += "<div>" + data.bagRemark + " </div>";
+                html += "</a>";
+                html += "</div>";
+                html += "</div> </li>";
+            }
+            $("#msg").append(html);
+            $("#textmsg").val("");
+            $('#contentArea').scrollTop($('.bd').height());
+        }
+    });
+    //var res = callBackFuncJson("api/test/inserttext", dataJson, "");
+   
     // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
     //if (curUser == customerCode) {
     //html += "<li><p class=\"am-text-center cf f12\">" + time + "</p>";
@@ -152,19 +209,16 @@ chat.client.loadMessage = function (message, curUser, time) {
     //    html += "       </span>";
     //    html += "    </div></li>";
     //}
-    $("#msg").append(html);
-    $("#textmsg").val("");
-    $('#contentArea').scrollTop($('.bd').height());
+   
 };
 
 // 启动连接,这里和1.0也有区别
 $.connection.hub.start().done(function () {
-
     $.ajax({
         url: Apiurl + "api/test/getmsglist", // url  action是方法的名称
         type: "Get",
         data: { time: "", pageIndex: 1 },
-        async: false,
+        //async: false,
         xhrFields: {
             withCredentials: true
         },
@@ -189,7 +243,7 @@ $.connection.hub.start().done(function () {
                     html += "        </span>";
                     html += "   </div></li>";
                 }
-                else {
+                else if (item.mType == 1) {
                     html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"oz\">";
                     html += " <div class=\"right\">";
@@ -202,61 +256,57 @@ $.connection.hub.start().done(function () {
                     html += "</div>";
                     html += "</div> </li>";
                 }
+                else {
+                    html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                    html += "  <div class=\"oz\"><div class=\"right\">";
+                    html += "                    <img src=\"" + item.amtUserImg + "\" /></div>";
+                    html += "   <div style=\"float:right;margin-right:10px\">";
+                    html += "      <img src=\"" + Apiurl + "QRFile/" + item.amtUserID + ".jpg\" style=\"width:180px;\" /> ";
+                    html += "   </div></li>";
+                   
+                }
             });
             $("#msg").append(html);
             $('#contentArea').scrollTop($('.bd').height());
         }
     });
     $('#sendMsg').click(function () {
-
+        
         var message = $("#textmsg").val();
         if (message == "") {
             layer.msg("不能发送空消息！");
             return;
         }
-        chat.server.sendMessage(message, UserInfo.openid);
+        chat.server.sendMessage(message,UserInfo.headimgurl, UserInfo.openid);
     });
     $('#getAmt').click(function () {
-        //alert("11");
-        // var dataJson = JSON.stringify(MessageRecord);
         if (UserInfo.openid == null)
         {
             UserInfo.openid = openid;
         }
-        var r = callBackDataFunc("api/test/getAmtCode", UserInfo.openid, "");
-        if (r.code == "SCCESS")
-        {
-            if (r.result.hasImg == 0)
-            {
-                layer.msg("还没有上传收款码，请先上传收款码！");
-                return;
+        $.ajax({
+            url: Apiurl + "api/test/getAmtCode", // url  action是方法的名称
+            type: "Get",
+            data: { bagId: UserInfo.openid },
+            async: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true,//新增cookie跨域配置
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                if (data.code == "SCCESS") {
+                    if (data.result.hasImg == 0) {
+                        layer.msg("还没有上传收款码，请先上传收款码！");
+                        return;
+                    }
+                }
+                var headUrl = UserInfo.headimgurl;
+                var userID = UserInfo.openid;
+                chat.server.sendAmtMessage(userID, headUrl);
             }
-        }
-        var headUrl = UserInfo.headimgurl;
-        var userID = UserInfo.openid;
-        //$.ajax({
-        //    url: Apiurl + "api/test/getAmtCode", // url  action是方法的名称
-        //    type: "Get",
-        //    data: { bagId: UserInfo.openid },
-        //    async: false,
-        //    xhrFields: {
-        //        withCredentials: true
-        //    },
-        //    crossDomain: true,//新增cookie跨域配置
-        //    dataType: "json",
-        //    contentType: "application/json",
-        //    success: function (data) {
-        //        if (data.code == "SCCESS") {
-        //            if (data.result.hasImg == null) {
-        //                layer.msg("还没有上传收款码，请先上传收款码！");
-        //                return;
-        //            }
-        //        }
-        //    }
-        //});
-        chat.server.sendAmtMessage(userID, headUrl);
-        // 清空输入框的文字并给焦点.
-        // $('#message').val('').focus();
+        });
     });
 
 });
@@ -329,40 +379,55 @@ $(function () {
     });
 });
 function OpenBag(guid, customerCode) {
-    var ret = callBackTwoDataFunc("api/test/getHasBag", guid, customerCode, "");
-    CurUserBag = ret.result;
-    var index;
-    if (ret.code == "SCCESS") {
-        index = layer.open({
-            type: 2,
-            content: '../redenvelope.html',
-            area: ['320px', '195px'],
-            maxmin: false,
-            closeBtn: 0,
-            title: "",
-            success: function (layero, index) {
-                var body = layer.getChildFrame('body', index);
-                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
-                body.find(':input[type=hidden]').val(guid + "_" + customerCode);
+    $.ajax({
+        url: Apiurl + "api/test/getHasBag", // url  action是方法的名称
+        type: "Get",
+        data: { bagId: guid, userId: customerCode },
+       // async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            CurUserBag = data.result;
+            var index;
+            if (data.code == "SCCESS") {
+                index = layer.open({
+                    type: 2,
+                    content: '../redenvelope.html',
+                    area: ['320px', '195px'],
+                    maxmin: false,
+                    closeBtn: 0,
+                    title: "",
+                    success: function (layero, index) {
+                        var body = layer.getChildFrame('body', index);
+                        var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                        body.find(':input[type=hidden]').val(guid + "_" + customerCode);
+                    }
+                });
             }
-        });
-    }
-    else {
-        index = layer.open({
-            type: 2,
-            content: '../Main/waitList.html',
-            area: ['320px', '195px'],
-            maxmin: false,
-            closeBtn: 0,
-            title: "",
-            success: function (layero, index) {
-                var body = layer.getChildFrame('body', index);
-                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
-                body.find(':input[type=hidden]').val(guid + "_" + customerCode);
+            else {
+                index = layer.open({
+                    type: 2,
+                    content: '../Main/waitList.html',
+                    area: ['320px', '195px'],
+                    maxmin: false,
+                    closeBtn: 0,
+                    title: "",
+                    success: function (layero, index) {
+                        var body = layer.getChildFrame('body', index);
+                        var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                        body.find(':input[type=hidden]').val(guid + "_" + customerCode);
+                    }
+                });
             }
-        });
-    }
-    layer.full(index);
+            layer.full(index);
+        }
+    });
+    //var ret = callBackTwoDataFunc("api/test/getHasBag", guid, customerCode, "");
+   
 }
 function LoadBag(guid, count, Num, remark) {
     var myDate = new Date();

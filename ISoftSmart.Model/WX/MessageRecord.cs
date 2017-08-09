@@ -17,6 +17,8 @@ namespace ISoftSmart.Model.WX
         public string BagRemark { get; set; }
         public DateTime CreateTime { get; set; }
         public string HeadImgUrl { get; set; }
+        public string AmtUserImg { get; set; }
+        public string AmtUserID { get; set; }
 
     }
 }

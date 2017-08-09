@@ -22,11 +22,11 @@ namespace ISoftSmart.Web.signalr
         /// 群发
         /// </summary>
         /// <param name="message"></param>
-        public void SendMessage(string message,string customeCode)
+        public void SendMessage(string message,string userHeadImg,string customeCode)
         {
             //调用所有客户注册的本地的JS方法(broadcastMessage)
             //Clients.All.broadcastMessage(message + DateTime.Now.ToString());
-            Clients.All.loadMessage(message,customeCode, DateTime.Now.ToString());
+            Clients.All.loadMessage(message, userHeadImg,customeCode, DateTime.Now.ToString());
         }
         /// <summary>
         /// 收款码
