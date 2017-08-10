@@ -105,10 +105,10 @@ namespace ISoftSmart.Web.signalr
         /// 群发金豆
         /// </summary>
         /// <param name="message"></param>
-        public void SendBean(string guid, string count, string Num, string remark)
+        public void SendBean(string guid, string count, string Num, string remark,string headimgurl)
         {
             // Guid guid = Guid.NewGuid();
-            Clients.All.broadcastMessage(guid, count, Num, remark);
+            Clients.All.broadcastMessage(guid, count, Num, remark, headimgurl);
         }
     }
 }

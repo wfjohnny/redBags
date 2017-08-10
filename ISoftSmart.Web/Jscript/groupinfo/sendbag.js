@@ -34,7 +34,7 @@ $(function () {
         if (remark == "") {
             remark = "恭喜发财，大吉大利";
         }
-        bag.rID = parent.newGuid();
+        bag.rID = parent.newGuid().toUpperCase();
         bag.userId = parent.UserInfo.openid;
         bag.bagAmount = $("#bagAmount").val();
         bag.bagNum = $("#bagNum").val();
@@ -52,7 +52,7 @@ $(function () {
             dataType: "json",
             contentType: "application/json",
             success: function (data) {
-                parent.MessageRecord.mID = parent.newGuid();
+                parent.MessageRecord.mID = parent.newGuid().toUpperCase();
                 parent.MessageRecord.bagID = bag.rID;
                 parent.MessageRecord.mType = 1;
                 parent.MessageRecord.bagUserID = parent.UserInfo.openid;
@@ -84,7 +84,7 @@ $(function () {
         //else {
 
         //}
-        parent.chat.server.sendBean(bag.rID, bag.bagAmount, bag.bagNum, remark).done(function () {
+        parent.chat.server.sendBean(bag.rID, bag.bagAmount, bag.bagNum, remark, parent.UserInfo.headimgurl).done(function () {
             parent.layer.closeAll("iframe");
         });
     });

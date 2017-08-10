@@ -70,7 +70,8 @@ var bag = {
     userId: "",
     bagAmount: "",
     bagNum: 0,
-    bagStatus: 0
+    bagStatus: 0,
+    headimgUrl:""
 };
 function newGuid() {//测试数据
     var guid = "";
@@ -80,16 +81,17 @@ function newGuid() {//测试数据
         if ((i == 8) || (i == 12) || (i == 16) || (i == 20))
             guid += "-";
     }
-    return guid + "";
+    return guid.toUpperCase() + "";
 }
 // 这里是注册集线器调用的方法,和1.0不同的是需要chat.client后注册,1.0则不需要
-chat.client.broadcastMessage = function (guid, count, Num, remark) {
-    LoadBag(guid, count, Num, remark);
+chat.client.broadcastMessage = function (guid, count, Num, remark, headimgurl) {
+    LoadBag(guid, count, Num, remark, headimgurl);
     bag.rID = guid;
     bag.userId = UserInfo.openid;
+    bag.
     bag.bagAmount = count;
     bag.bagNum = Num;
-
+    bag.headimgUrl = UserInfo.headimgurl;
 };
 chat.client.loadAmtMessage = function (openid, imgurl) {
     var html = "";
@@ -382,7 +384,7 @@ function OpenBag(guid, customerCode) {
     $.ajax({
         url: Apiurl + "api/test/getHasBag", // url  action是方法的名称
         type: "Get",
-        data: { bagId: guid, userId: customerCode },
+        data: { bagId: guid.toUpperCase(), userId: UserInfo.openid },
        // async: false,
         xhrFields: {
             withCredentials: true
@@ -404,7 +406,7 @@ function OpenBag(guid, customerCode) {
                     success: function (layero, index) {
                         var body = layer.getChildFrame('body', index);
                         var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
-                        body.find(':input[type=hidden]').val(guid + "_" + customerCode);
+                        body.find(':input[type=hidden]').val(guid.toUpperCase() + "_" + UserInfo.openid);
                     }
                 });
             }
@@ -429,14 +431,14 @@ function OpenBag(guid, customerCode) {
     //var ret = callBackTwoDataFunc("api/test/getHasBag", guid, customerCode, "");
    
 }
-function LoadBag(guid, count, Num, remark) {
+function LoadBag(guid, count, Num, remark, headimgurl) {
     var myDate = new Date();
     var h = myDate.getHours();
     var m = myDate.getMinutes();
     var bag = " <li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
     bag += " <div class=\"oz\">";
     bag += " <div class=\"right\">";
-    bag += "<a href=\"javascript:void(0);\" ><img src=\"" + UserInfo.headimgurl + "\" /></a>";
+    bag += "<a href=\"javascript:void(0);\" ><img src=\"" + headimgurl + "\" /></a>";
     bag += "</div>";
     bag += "<div class=\"cont_right\">";
     bag += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + guid + "','" + UserInfo.openid + "');\">";

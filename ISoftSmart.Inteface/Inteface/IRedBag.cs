@@ -10,13 +10,14 @@ using System.Threading.Tasks;
 
 namespace ISoftSmart.Inteface.Inteface
 {
-    public interface IRedBag :IDependency
+    public interface IRedBag : IDependency
     {
         List<RBCreateBag> GetBag(RBCreateBag bag);
         int ChangeBagStatus(RBCreateBag bag);
         int InsertBag(RBCreateBag bag);
         int SetUserBean(WXUserInfo bag);
         List<MyBagSerial> GetUserSerialList(MyBagSerial my);
+        List<MyBagSerial> GetUserSerial(MyBagSerial my);
         int InsertSerial(MyBagSerial my);
         int InsertSerialList(List<MyBagSerial> my);
         List<RBCreateBag> GetSendBag(RBCreateBag bag);

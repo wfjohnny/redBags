@@ -35,7 +35,7 @@ namespace ISoftSmart.Inteface.Implements
             SqlParameter[] sp = new SqlParameter[]
             {
                 new SqlParameter("@BagStatus",bag.BagStatus),
-                new SqlParameter("@RID",bag.RID),
+                new SqlParameter("@RID",bag.RID.ToString().ToUpper()),
             };
             var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where BagStatus=@BagStatus and RID=@RID", sp, CommandType.Text);
             if (result == "")
@@ -118,7 +118,20 @@ namespace ISoftSmart.Inteface.Implements
                 return null;
             return result.JsonDeserialize<List<MyBagSerial>>();
         }
-
+        public List<MyBagSerial> GetUserSerial(MyBagSerial my)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+            {
+                new SqlParameter("@RID",my.RID),
+                new SqlParameter("@UserId",my.UserId)
+            };
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[BagSerial] b left join [dbo].[UserInfo] u
+                on b.UserId = u.UserId
+                where b.RID =@RID and u.UserId=@UserId ", sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<MyBagSerial>>();
+        }
         public int InsertBag(RBCreateBag bag)
         {
             SqlParameter[] sp = new SqlParameter[]
