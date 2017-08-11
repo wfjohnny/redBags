@@ -145,6 +145,8 @@ namespace ISoftSmart.Inteface.Implements
                  new SqlParameter("@Winner",bag.Winner),
                  new SqlParameter("@WinnerAmount",bag.WinnerAmount),
                  new SqlParameter("@Remark",bag.Remark),
+                 new SqlParameter("@UserImgUrl",bag.CurrentUserImgUrl),
+                 new SqlParameter("@nikename",bag.nickname),
              };
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO CreateBag
                    ([RID]
@@ -155,7 +157,9 @@ namespace ISoftSmart.Inteface.Implements
                    ,[BagStatus]
                    ,[Winner]
                    ,[WinnerAmount]
-                   ,[Remark])
+                   ,[Remark]
+                   ,[UserImgUrl]
+                   ,[nikename])
              VALUES
                    (@RID
                    ,@UserId
@@ -164,7 +168,7 @@ namespace ISoftSmart.Inteface.Implements
                    ,@CreateTime
                    ,@BagStatus
                    ,@Winner
-                   ,@WinnerAmount,@Remark)", sp, CommandType.Text);
+                   ,@WinnerAmount,@Remark,@UserImgUrl,@nikename)", sp, CommandType.Text);
             return result;
         }
 

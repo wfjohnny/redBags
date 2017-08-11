@@ -19,5 +19,7 @@ namespace ISoftSmart.Model.RB
         public decimal WinnerAmount { get; set; }
         public List<RBBagSerial> SerialList { get; set; }
         public string Remark { get; set; }
+        public string CurrentUserImgUrl { get; set; }
+        public string nickname { get; set; }
     }
 }
