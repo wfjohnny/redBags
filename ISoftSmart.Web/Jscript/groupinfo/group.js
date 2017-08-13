@@ -88,7 +88,6 @@ chat.client.broadcastMessage = function (guid, count, Num, remark, headimgurl) {
     LoadBag(guid, count, Num, remark, headimgurl);
     bag.rID = guid;
     bag.userId = UserInfo.openid;
-    bag.
     bag.bagAmount = count;
     bag.bagNum = Num;
     bag.headimgUrl = UserInfo.headimgurl;

@@ -1,6 +1,6 @@
 ﻿$(function () {
     $("#nickname").html(parent.parent.CurUserBag.nickname);
-    $("#headimg").attr('src', parent.parent.CurUserBag.headimgurl);
+    $("#headimg").attr('src', parent.parent.CurUserBag.currentUserImgUrl);
     $("#bagNums").html("金蛋" + parent.parent.CurUserBag.bagNum + "个，等待对方领取");
     $("#remark").html(parent.parent.CurUserBag.remark);
     var html = "  <ul class=\"list-info\">";

@@ -316,6 +316,7 @@ namespace ISoftSmart.API.Controllers
                     var res = rt.InsertBag(bag);
                     Code = "SCCESS";
                     ResponseMessage = "金豆发放成功！";
+                    Result = bag;
                 }
             }
             else
@@ -326,6 +327,7 @@ namespace ISoftSmart.API.Controllers
                 Code = "SCCESS";
                 ResponseMessage = "金豆发放成功！";
                 var res = rt.InsertBag(bag);
+                Result = bag;
             }
             return Ok(new APIResponse<RBCreateBag>
             {
@@ -537,110 +539,117 @@ namespace ISoftSmart.API.Controllers
                 var ResponseMessage = string.Empty;
                 RBCreateBag result = new RBCreateBag();
                 Guid gRID = Guid.Parse(bagId.ToUpper());
-
-                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+                lock (this)
                 {
-                    var ret = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == gRID).ToList();
-                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
                     {
-                        var userList = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
-                        if (userList == null)
+                        var ret = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == gRID).ToList();
+                        if (ret.Count > 0)
                         {
-                            userList = rt.GetUserInfo(new WXUserInfo() { openid = userId });
-                        }
-                        foreach (var item in userList)
-                        {
-                            item.nickname = userList.ToList().Where(x => x.openid == item.openid).FirstOrDefault().nickname;
-                        }
-                        //var userBag= rt.GetUserSerial(new MyBagSerial() { RID = gRID, UserId = userId });
-                        var bagkeysss = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
-                        var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
-                        var userGetBag = ret.Where(x => x.UserId == userId).FirstOrDefault();
-                        if (userGetBag != null)
-                        {
-                            if (userBag.SerialList == null)
-                            {
-                                userBag.SerialList = new List<RBBagSerial>();
-                                userBag.SerialList = ret;
-                            }
-                            else
-                            {
-                                userBag.SerialList = ret;
-                            }
-                            int i = 0;
                             if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
                             {
-                                foreach (var item in userBag.SerialList)
+                                var userList = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
+                                if (userList == null)
                                 {
-                                    var hasUser = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == item.UserId).FirstOrDefault();
-
-                                    if (hasUser == null)
+                                    userList = rt.GetUserInfo(new WXUserInfo() { openid = userId });
+                                }
+                                //var userBag= rt.GetUserSerial(new MyBagSerial() { RID = gRID, UserId = userId });
+                                var bagkeysss = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                                var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
+                                var userGetBag = ret.Where(x => x.UserId == userId).FirstOrDefault();
+                                if (userGetBag != null)
+                                {
+                                    if (userBag.SerialList == null)
                                     {
-                                        var users = rt.GetUserInfo(new WXUserInfo() { openid = item.UserId }).FirstOrDefault();
-                                        item.nickname = users.nickname;
-                                        item.UserId = users.openid;
-                                        StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, users);
+                                        userBag.SerialList = new List<RBBagSerial>();
+                                        userBag.SerialList = ret;
                                     }
                                     else
                                     {
-                                        item.nickname = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == item.UserId).FirstOrDefault().nickname;
+                                        userBag.SerialList = ret;
+                                    }
+                                    int i = 0;
+                                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                                    {
+                                        foreach (var item in userBag.SerialList)
+                                        {
+                                            var hasUser = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == item.UserId).FirstOrDefault();
+
+                                            if (hasUser == null)
+                                            {
+                                                var users = rt.GetUserInfo(new WXUserInfo() { openid = item.UserId }).FirstOrDefault();
+                                                item.nickname = users.nickname;
+                                                item.UserId = users.openid;
+                                                StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, users);
+                                            }
+                                            else
+                                            {
+                                                item.nickname = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == item.UserId).FirstOrDefault().nickname;
+                                            }
+                                        }
+                                    }
+
+                                    if (userGetBag != null)
+                                    {
+                                        result = userBag;
+                                        Code = "ERROR";
+                                        ResponseMessage = "用户已抢到该红包！";
+                                    }
+                                    else
+                                    {
+                                        Code = "SCCESS";
+                                        ResponseMessage = "用户尚未抢到该红包！";
+                                        result = userBag;
                                     }
                                 }
-                            }
-
-                            if (userGetBag != null)
-                            {
-                                result = userBag;
-                                Code = "ERROR";
-                                ResponseMessage = "用户已抢到该红包！";
+                                else
+                                {
+                                    Code = "SCCESS";
+                                    ResponseMessage = "用户尚未抢到该红包！";
+                                    result = userBag;
+                                }
                             }
                             else
                             {
-                                Code = "SCCESS";
-                                ResponseMessage = "用户尚未抢到该红包！";
-                                result = userBag;
+                                var user = rt.GetUserInfo(new WXUserInfo() { openid = userId });
+                                if (user != null)
+                                {
+                                    foreach (var item in user)
+                                    {
+                                        item.nickname = user.ToList().Where(x => x.openid == item.openid).FirstOrDefault().nickname;
+                                    }
+                                    var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
+                                    userBag.SerialList = new List<RBBagSerial>();
+                                    userBag.SerialList = ret;
+                                    var serial = rt.GetUserSerialList(new MyBagSerial() { RID = gRID });
+                                    if (serial.Count != 0)
+                                    {
+                                        result = userBag;
+                                        Code = "ERROR";
+                                        ResponseMessage = "用户已抢到该红包！";
+                                    }
+                                    else
+                                    {
+                                        Code = "SCCESS";
+                                        ResponseMessage = "用户尚未抢到该红包！";
+                                        result = userBag;
+                                    }
+                                }
                             }
                         }
                         else
                         {
                             Code = "SCCESS";
                             ResponseMessage = "用户尚未抢到该红包！";
-                            result = userBag;
                         }
                     }
                     else
                     {
-                        var user = rt.GetUserInfo(new WXUserInfo() { openid = userId });
-                        if (user != null)
-                        {
-                            foreach (var item in user)
-                            {
-                                item.nickname = user.ToList().Where(x => x.openid == item.openid).FirstOrDefault().nickname;
-                            }
-                            var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
-                            userBag.SerialList = new List<RBBagSerial>();
-                            userBag.SerialList = ret;
-                            var serial = rt.GetUserSerialList(new MyBagSerial() { RID = gRID });
-                            if (serial.Count != 0)
-                            {
-                                result = userBag;
-                                Code = "ERROR";
-                                ResponseMessage = "用户已抢到该红包！";
-                            }
-                            else
-                            {
-                                Code = "SCCESS";
-                                ResponseMessage = "用户尚未抢到该红包！";
-                                result = userBag;
-                            }
-                        }
+                        Code = "SCCESS";
+                        ResponseMessage = "用户尚未抢到该红包！";
                     }
                 }
-                else
-                {
-                    Code = "SCCESS";
-                    ResponseMessage = "用户尚未抢到该红包！";
-                }
+               
                 return Ok(new APIResponse<RBCreateBag>
                 {
                     Code = Code,

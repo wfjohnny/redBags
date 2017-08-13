@@ -46,7 +46,7 @@ $(document).ready(function () {
                 }
                 else {
                     RBCreateBag.rid = data.result.rid.toUpperCase();
-                    RBCreateBag.userId = retJson.split("_")[0];
+                    RBCreateBag.userId = retJson.split("_")[1];
                     RBCreateBag.bagAmount = data.result.bagAmount;
                     RBCreateBag.bagNum = data.result.bagNum;
                     RBCreateBag.createTime = data.result.createTime;
