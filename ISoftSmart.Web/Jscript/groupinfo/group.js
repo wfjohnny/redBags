@@ -112,7 +112,7 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     MessageRecord.amtUserImg = UserInfo.headimgurl;
     var dataJson = JSON.stringify(MessageRecord);
     $.ajax({
-        url: Apiurl + "api/test/inserttext", // url  action是方法的名称
+        url: Apiurl + "api/test/istText", // url  action是方法的名称
         type: "Post",
         data: dataJson,
         //async: false,
@@ -126,7 +126,6 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
             //resdata = data;
         }
     });
-    //var res = callBackFuncJson("api/test/inserttext", dataJson, "");
 };
 chat.client.loadMessage = function (message,userImg, curUser, time) {
     var html = "";
@@ -137,7 +136,7 @@ chat.client.loadMessage = function (message,userImg, curUser, time) {
     MessageRecord.headImgUrl = userImg;
     var dataJson = JSON.stringify(MessageRecord);
     $.ajax({
-        url: Apiurl + "api/test/inserttext", // url  action是方法的名称
+        url: Apiurl + "api/test/istText", // url  action是方法的名称
         type: "Post",
         data: dataJson,
         //async: false,
@@ -180,7 +179,6 @@ chat.client.loadMessage = function (message,userImg, curUser, time) {
             $('#contentArea').scrollTop($('.bd').height());
         }
     });
-    //var res = callBackFuncJson("api/test/inserttext", dataJson, "");
    
     // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
     //if (curUser == customerCode) {
@@ -271,15 +269,6 @@ $.connection.hub.start().done(function () {
             $('#contentArea').scrollTop($('.bd').height());
         }
     });
-    $('#sendMsg').click(function () {
-        
-        var message = $("#textmsg").val();
-        if (message == "") {
-            layer.msg("不能发送空消息！");
-            return;
-        }
-        chat.server.sendMessage(message,UserInfo.headimgurl, UserInfo.openid);
-    });
     $('#getAmt').click(function () {
         if (UserInfo.openid == null)
         {
@@ -310,6 +299,15 @@ $.connection.hub.start().done(function () {
         });
     });
 
+});
+$('#sendMsg').click(function () {
+
+    var message = $("#textmsg").val();
+    if (message == "") {
+        layer.msg("不能发送空消息！");
+        return;
+    }
+    chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
 });
 $.connection.hub.stateChanged(function (state) {
     if (state.newState == $.signalR.connectionState.reconnecting) {

@@ -49,7 +49,7 @@ namespace ISoftSmart.Core.GlobalConfig
             _init.Messaging.SMSKey = "04fa25475e07669d4809d334f08fb35b";
             _init.Messaging.SMSSignType = "MD5";
             _init.Messaging.SMSItemID = 1011;
-            _init.Redis.Host = "localhost:6379";
+            _init.Redis.Host = "localhost:6379,password=1qaz@WSX";
             _init.Redis.Proxy = 0;
             _init.Socket.CommandPort = 8404;
             _init.Socket.DataPort = 8403;

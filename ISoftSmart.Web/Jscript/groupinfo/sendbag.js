@@ -65,7 +65,7 @@ $(function () {
                 console.log(parent.MessageRecord);
                 var dataJson1 = JSON.stringify(parent.MessageRecord);
                 $.ajax({
-                    url: Apiurl + "api/test/inserttext", // url  action是方法的名称
+                    url: Apiurl + "api/test/istText", // url  action是方法的名称
                     type: "Post",
                     data: dataJson1,
                     //async: false,

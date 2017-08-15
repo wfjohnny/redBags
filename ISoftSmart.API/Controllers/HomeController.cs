@@ -312,7 +312,7 @@ namespace ISoftSmart.API.Controllers
                     var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
                     bagcache.Add(bag);
                     StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
-                   
+
                     var res = rt.InsertBag(bag);
                     Code = "SCCESS";
                     ResponseMessage = "金豆发放成功！";
@@ -336,7 +336,7 @@ namespace ISoftSmart.API.Controllers
                 Result = Result
             });
         }
-        [Route("inserttext")]
+        [Route("istText")]
         [HttpPost]
         public IHttpActionResult InsertText(MessageRecord record)
         {
@@ -346,72 +346,81 @@ namespace ISoftSmart.API.Controllers
             WXUserInfo user = new WXUserInfo();
             try
             {
-                var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
-                record.CreateTime = DateTime.Now;
-                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                lock (this)
                 {
-                    var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
-                    if (record.MType == 1)
-                    {
-                        record.BagID = record.BagID.ToString();
-                        rt.InsertMessageRecordByBag(record);
-                        bagcache.Add(record);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
-                        Code = "SCCESS";
-                        ResponseMessage = "保存聊天记录成功！";
-                    }
-                    else if (record.MType == 0)
-                    {
+                    #region 发送消息
 
-                        bagcache.Add(record);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
-                        var res = rt.InsertMessageRecordByText(record);
-                        Code = "SCCESS";
-                        ResponseMessage = "保存聊天记录成功！";
+                    var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                    record.CreateTime = DateTime.Now;
+                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                    {
+                        var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
+                        if (record.MType == 1)//红包
+                        {
+                            record.BagID = record.BagID.ToString();
+                            rt.InsertMessageRecordByBag(record);
+                            bagcache.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                        else if (record.MType == 0)//文字
+                        {
+                            bagcache.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                            var res = rt.InsertMessageRecordByText(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                        else
+                        {
+                            bagcache.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                            var res = rt.InsertMessageRecordByImg(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
                     }
                     else
                     {
-                        bagcache.Add(record);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
-                        var res = rt.InsertMessageRecordByImg(record);
-                        Code = "SCCESS";
-                        ResponseMessage = "保存聊天记录成功！";
+                        if (record.MType == 1)
+                        {
+                            List<MessageRecord> rec = new List<MessageRecord>();
+                            record.BagID = record.BagID.ToString();
+                            rec.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                            var res = rt.InsertMessageRecordByBag(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                        else if (record.MType == 0)
+                        {
+                            List<MessageRecord> rec = new List<MessageRecord>();
+                            record.BagID = record.BagID.ToString();
+                            rec.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                            var res = rt.InsertMessageRecordByText(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                        else
+                        {
+                            List<MessageRecord> rec = new List<MessageRecord>();
+                            record.BagID = record.BagID.ToString();
+                            rec.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                            var res = rt.InsertMessageRecordByImg(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
                     }
+                    user = rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+                    #endregion
                 }
-                else
-                {
-                    if (record.MType == 1)
-                    {
-                        List<MessageRecord> rec = new List<MessageRecord>();
-                        record.BagID = record.BagID.ToString();
-                        rec.Add(record);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
-                        var res = rt.InsertMessageRecordByBag(record);
-                        Code = "SCCESS";
-                        ResponseMessage = "保存聊天记录成功！";
-                    }
-                    else if (record.MType == 0)
-                    {
-                        List<MessageRecord> rec = new List<MessageRecord>();
-                        record.BagID = record.BagID.ToString();
-                        rec.Add(record);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
-                        var res = rt.InsertMessageRecordByText(record);
-                        Code = "SCCESS";
-                        ResponseMessage = "保存聊天记录成功！";
-                    }
-                    else
-                    {
-                        List<MessageRecord> rec = new List<MessageRecord>();
-                        record.BagID = record.BagID.ToString();
-                        rec.Add(record);
-                        StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
-                        var res = rt.InsertMessageRecordByImg(record);
-                        Code = "SCCESS";
-                        ResponseMessage = "保存聊天记录成功！";
-                    }
-                }
-                user = rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+
             }
             catch (Exception ex)
             {
@@ -649,7 +658,7 @@ namespace ISoftSmart.API.Controllers
                         ResponseMessage = "用户尚未抢到该红包！";
                     }
                 }
-               
+
                 return Ok(new APIResponse<RBCreateBag>
                 {
                     Code = Code,
