@@ -150,8 +150,8 @@ chat.client.loadMessage = function (message,userImg, curUser, time) {
             time = time.split(" ")[1].split(":");
             if (data.code == "SCCESS") {
                 html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                html += " <div class=\"right\">";
-                html += "                     <a href=\"\"><img src=\"" + data.result.headimgurl + "\" /></a>";
+                html += " <div class=\"right\" style=\"width:20%\">";
+                html += "                     <a href=\"\"><img src=\"" + data.result.headimgurl + "\" style=\"width:3.5em;height:3.5em\"/></a>";
                 html += "                  </div>";
                 html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
                 html += "        <span class=\"bubble rightBubble\">";
@@ -229,10 +229,9 @@ $.connection.hub.start().done(function () {
             $(data.result).each(function (a, item) {
                 var time = item.createTime.split(" ")[1].split(":");
                 if (item.mType == 0) {
-
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                    html += " <div class=\"right\">";
-                    html += "                     <a href=\"\"><img src=\"" + item.headImgUrl + "\" /></a>";
+                    html += " <div class=\"right\" style=\"width:20%\">";
+                    html += "                     <a href=\"\"><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "                  </div>";
                     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
                     html += "        <span class=\"bubble rightBubble\">";
@@ -245,8 +244,8 @@ $.connection.hub.start().done(function () {
                 else if (item.mType == 1) {
                     html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"oz\">";
-                    html += " <div class=\"right\">";
-                    html += "<a href=\"javascript:void(0);\" ><img src=\"" + item.headImgUrl + "\" /></a>";
+                    html += " <div class=\"right\" style=\"width:20%\">";
+                    html += "<a href=\"javascript:void(0);\" ><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "</div>";
                     html += "<div class=\"cont_right\">";
                     html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + item.bagID + "','" + item.bagUserID + "');\">";
@@ -257,8 +256,8 @@ $.connection.hub.start().done(function () {
                 }
                 else {
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                    html += "  <div class=\"oz\"><div class=\"right\">";
-                    html += "                    <img src=\"" + item.amtUserImg + "\" /></div>";
+                    html += "  <div class=\"oz\"><div class=\"right\" style=\"width:20%\">";
+                    html += "                    <img src=\"" + item.amtUserImg + "\"  style=\"width:3.5em;height:3.5em\"/></div>";
                     html += "   <div style=\"float:right;margin-right:10px\">";
                     html += "      <img src=\"" + Apiurl + "QRFile/" + item.amtUserID + ".jpg\" style=\"width:180px;\" /> ";
                     html += "   </div></li>";
@@ -434,8 +433,8 @@ function LoadBag(guid, count, Num, remark, headimgurl) {
     var m = myDate.getMinutes();
     var bag = " <li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
     bag += " <div class=\"oz\">";
-    bag += " <div class=\"right\">";
-    bag += "<a href=\"javascript:void(0);\" ><img src=\"" + headimgurl + "\" /></a>";
+    bag += " <div class=\"right\" style=\"width:20%\">";
+    bag += "<a href=\"javascript:void(0);\" ><img src=\"" + headimgurl + "\" style=\"width:3.5em;height:3.5em\" /></a>";
     bag += "</div>";
     bag += "<div class=\"cont_right\">";
     bag += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + guid + "','" + UserInfo.openid + "');\">";

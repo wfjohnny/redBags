@@ -18,7 +18,7 @@
         <h2 class="tc">红包一群</h2>
     </div>
     <div class="banner">
-        <div class="picMarquee-top" id="contentArea" style="height:465px;overflow:auto">
+        <div class="picMarquee-top" id="contentArea" style="height:37em;overflow:auto">
             <div class="bd">
                 <ul class="" id="msg">
                     <!--<li>
@@ -262,12 +262,12 @@
 			if ($(".cont-index").hasClass("none")) {
 				$(".cont-index").removeClass("none").css("bottom",0);
 				$(".shurukuang").css("bottom", "133px");
-				$("#contentArea").css("height", "343px");
+				//$("#contentArea").css("height", "343px");
 				$('#contentArea').scrollTop($('.bd').height());
 			}else{
 				$(".cont-index").addClass("none");
 				$(".shurukuang").css("bottom", 0);
-				$("#contentArea").css("height", "465px");
+				//$("#contentArea").css("height", "465px");
 				$('#contentArea').scrollTop($('.bd').height());
 			}
 		});
