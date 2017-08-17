@@ -413,7 +413,7 @@ function OpenBag(guid, customerCode) {
             if (data.code == "SCCESS") {
                 index = layer.open({
                     type: 2,
-                    content: '../redenvelope.html',
+                    content: '../Main/openbag.html',
                     area: ['320px', '195px'],
                     maxmin: false,
                     closeBtn: 0,

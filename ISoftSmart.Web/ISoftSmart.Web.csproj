@@ -132,6 +132,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Authorization\auth.html" />
+    <Content Include="Demo\demos.html" />
+    <Content Include="Demo\styles.css" />
     <Content Include="init\initData.js" />
     <Content Include="init\jquery.cookie.js" />
     <Content Include="Jscript\auth\authjs.js" />
@@ -194,6 +196,7 @@
     <Content Include="Jscript\upload\mbUploadImg.js" />
     <Content Include="Main\baglist.html" />
     <Content Include="Main\menu.html" />
+    <Content Include="Main\openbag.html" />
     <Content Include="Main\sendbags.html" />
     <Content Include="Main\uploadfile.html" />
     <Content Include="Main\waitList.html" />
