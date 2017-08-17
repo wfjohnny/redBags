@@ -48,8 +48,7 @@ $.ajax({
     dataType: "json",
     contentType: "application/json",
     success: function (data) {
-        if (data.code)
-        {
+        if (data.code) {
             if (data.result != null) {
                 UserInfo.city = data.result.city;
                 UserInfo.country = data.result.country;
@@ -71,7 +70,7 @@ var bag = {
     bagAmount: "",
     bagNum: 0,
     bagStatus: 0,
-    headimgUrl:""
+    headimgUrl: ""
 };
 function newGuid() {//测试数据
     var guid = "";
@@ -101,12 +100,12 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     html += "  <div class=\"oz\"><div class=\"right\">";
     html += "                    <img src=\"" + imgurl + "\" /></div>";
     html += "   <div style=\"float:right;margin-right:10px\">";
-    html += "      <img src=\"" +Apiurl+"QRFile/"+ openid + ".jpg\" style=\"width:180px;\" /> ";
+    html += "      <img src=\"" + Apiurl + "QRFile/" + openid + ".jpg\" style=\"width:180px;\" /> ";
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
     MessageRecord.mID = newGuid();
-    MessageRecord.mType =2;//收款图片
+    MessageRecord.mType = 2;//收款图片
     MessageRecord.amtUserID = openid;
     MessageRecord.userID = openid;
     MessageRecord.amtUserImg = UserInfo.headimgurl;
@@ -127,7 +126,7 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
         }
     });
 };
-chat.client.loadMessage = function (message,userImg, curUser, time) {
+chat.client.loadMessage = function (message, userImg, curUser, time) {
     var html = "";
     MessageRecord.mID = newGuid();
     MessageRecord.mContent = message;
@@ -179,7 +178,7 @@ chat.client.loadMessage = function (message,userImg, curUser, time) {
             $('#contentArea').scrollTop($('.bd').height());
         }
     });
-   
+
     // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
     //if (curUser == customerCode) {
     //html += "<li><p class=\"am-text-center cf f12\">" + time + "</p>";
@@ -208,7 +207,7 @@ chat.client.loadMessage = function (message,userImg, curUser, time) {
     //    html += "       </span>";
     //    html += "    </div></li>";
     //}
-   
+
 };
 
 // 启动连接,这里和1.0也有区别
@@ -262,16 +261,21 @@ $.connection.hub.start().done(function () {
                     html += "   <div style=\"float:right;margin-right:10px\">";
                     html += "      <img src=\"" + Apiurl + "QRFile/" + item.amtUserID + ".jpg\" style=\"width:180px;\" /> ";
                     html += "   </div></li>";
-                   
+
                 }
             });
             $("#msg").append(html);
+            if ($("#initHeight").val() == "") {
+                $("#initHeight").val($(window).height());
+            }
+
+            var initheight =parseInt( $("#initHeight").val()) - $(".shurukuang").height() - $("h2").height();
+            $("#contentArea").css("height", initheight);
             $('#contentArea').scrollTop($('.bd').height());
         }
     });
     $('#getAmt').click(function () {
-        if (UserInfo.openid == null)
-        {
+        if (UserInfo.openid == null) {
             UserInfo.openid = openid;
         }
         $.ajax({
@@ -382,7 +386,7 @@ function OpenBag(guid, customerCode) {
         url: Apiurl + "api/test/getHasBag", // url  action是方法的名称
         type: "Get",
         data: { bagId: guid.toUpperCase(), userId: UserInfo.openid },
-       // async: false,
+        // async: false,
         xhrFields: {
             withCredentials: true
         },
@@ -426,7 +430,7 @@ function OpenBag(guid, customerCode) {
         }
     });
     //var ret = callBackTwoDataFunc("api/test/getHasBag", guid, customerCode, "");
-   
+
 }
 function LoadBag(guid, count, Num, remark, headimgurl) {
     var myDate = new Date();

@@ -8,9 +8,9 @@
             width: 100%;
         }
         .bubble{
-            max-width: 655px;
+            max-width: 80%;
             position: relative;
-            line-height: 30px;
+            line-height: 20px;
             padding-left: 10px;
             padding-top: 3px;
             padding-bottom: 3px;
@@ -38,13 +38,15 @@
             left: -8px;
             border-top: 10px solid #f8fdfc;
             border-left: 10px solid transparent;
-            z-index: 100;
+            z-index: -100;
         }
         .rightBubble{
             position: relative;
             margin-right: 25px;
+            margin-bottom:20px;
             float: right;
             border: 1px solid #aaa;
+            
         }
         .rightBubble .bottomLevel{
             position: absolute;

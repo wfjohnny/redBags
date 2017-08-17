@@ -18,7 +18,7 @@
         <h2 class="tc">红包一群</h2>
     </div>
     <div class="banner">
-        <div class="picMarquee-top" id="contentArea" style="height:465px;overflow:auto">
+        <div class="picMarquee-top" id="contentArea" style="overflow:auto">
             <div class="bd">
                 <ul class="" id="msg">
                     <!--<li>
@@ -236,6 +236,7 @@
             </div>
         </div>
     </div>
+    <input type="hidden" id="initHeight"/>
     <script src="../Script/jquery-2.1.4.min.js"></script>
     <script src="../Script/jquery.signalR-2.2.2.min.js"></script>
     <!--这里要注意,这是虚拟目录,也就是你在OWIN Startup中注册的地址-->
@@ -256,18 +257,23 @@
 //          loop: true,
 //          pagination: '.swiper-pagination',
 //      });
-        
+       
 //      点击加号,应用弹出和关闭
-		$(".yingyong").click(function(){
+        $(".yingyong").click(function () {
+            var bodyheight = $("#initHeight").val();
 			if ($(".cont-index").hasClass("none")) {
 				$(".cont-index").removeClass("none").css("bottom",0);
 				$(".shurukuang").css("bottom", "133px");
-				$("#contentArea").css("height", "343px");
+			    //$("#contentArea").css("height", "343px");
+				var height = parseInt(bodyheight) - ($(".shurukuang").height() + $(".cont-index").height()) - $(".shurukuang").height();
+				$("#contentArea").css("height", height);
+
 				$('#contentArea').scrollTop($('.bd').height());
-			}else{
+			} else {
+			    var contHeight = parseInt(bodyheight) -  $(".cont-index").height();
 				$(".cont-index").addClass("none");
 				$(".shurukuang").css("bottom", 0);
-				$("#contentArea").css("height", "465px");
+				$("#contentArea").css("height", contHeight);
 				$('#contentArea').scrollTop($('.bd').height());
 			}
 		});
