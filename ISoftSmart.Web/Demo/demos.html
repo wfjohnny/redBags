@@ -4,40 +4,35 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
 	<meta charset="utf-8" />
-    <link href="styles.css" rel="stylesheet" />
-
+    <script src="../Script/jquery-2.1.4.min.js"></script>
+    <script>
+        $(function () {
+            $("a").click(function () {
+                debugger
+                var offsetH = $("#pos").offset().top;
+                $("body").animate({ "scrollTop": offsetH }, 800);
+            })
+            //$("a").on("click", function () {
+           
+            //});
+        });
+    </script>
 </head>
 
 <body>
-
-    <div class="container" id="container">
-        <div class="hongbao">
-            <div class="topcontent">
-                <div class="avatar">
-                    <img src="http://placehold.it/80x80" alt="" width="80" height="80">
-                    <span id="close">+</span>
-                </div>
-                <h2>老罗</h2>
-                <span class="text">给你发了一个红包</span>
-                <div class="description">恭喜发财 大吉大利</div>
-            </div>
-            <div class="chai" id="chai">
-                <span>拆红包</span>
-            </div>
-        </div>
-    </div>
-    <script>
-
-        var oChai = document.getElementById("chai");
-        var oClose = document.getElementById("close");
-        var oContainer = document.getElementById("container");
-
-        oChai.onclick = function () {
-            oChai.setAttribute("class", "rotate");
-        }
-        oClose.onclick = function () {
-            oContainer.style.display = "none";
-        }
-</script>
+    <a href="#pos" id="aaa">点击这个链接</a>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <p>占位</p>
+    <div id="pos">点击上面的链接会移动到这个位置</div>
 </body>
 </html>
