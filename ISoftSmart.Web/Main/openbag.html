@@ -4,17 +4,20 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title></title>
 	<meta charset="utf-8" />
-    <script src="../Script/jquery-2.1.4.min.js"></script>
+
     <link href="../Demo/styles.css" rel="stylesheet" />
-    <script src="../Jscript/js/red.js"></script>
+
+    <script src="../Script/jquery-2.1.4.min.js"></script>
+    <script src="../init/initData.js"></script>
 </head>
 
 <body>
+    <input type="hidden" id="bagId" />
     <div class="container" id="container">
         <div class="hongbao">
             <div class="topcontent">
                 <div class="avatar">
-                    <img src="http://placehold.it/80x80" alt="" width="80" height="80" id="headimg">
+                    <img src="" alt="" width="80" height="80" id="headimg">
                     <span id="close">+</span>
                 </div>
                 <h2>老罗</h2>
@@ -27,15 +30,76 @@
         </div>
     </div>
     <script>
+        var RBCreateBag = {
+            rid: "",
+            userId: "",
+            bagAmount: 0,
+            bagNum: 0,
+            createTime: "",
+            bagStatus: 0
+        };
         var oChai = document.getElementById("chai");
         var oClose = document.getElementById("close");
         var oContainer = document.getElementById("container");
         oChai.onclick = function () {
             oChai.setAttribute("class", "rotate");
+            var retJson = $("#bagId").val();
+            $.ajax({
+                url: Apiurl + "api/test/t", // url  action是方法的名称
+                type: "Get",
+                data: { bagId: retJson },
+                // async: false,
+                xhrFields: {
+                    withCredentials: true
+                },
+                crossDomain: true,//新增cookie跨域配置
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    debugger
+                    if (data.code == "ERROR") {
+                       
+                    }
+                    else {
+                        oChai.setAttribute("class", "chai");
+                        oChai.css("display", "none");
+                        RBCreateBag.rid = data.result.rid.toUpperCase();
+                        RBCreateBag.userId = retJson.split("_")[1];
+                        RBCreateBag.bagAmount = data.result.bagAmount;
+                        RBCreateBag.bagNum = data.result.bagNum;
+                        RBCreateBag.createTime = data.result.createTime;
+                        RBCreateBag.bagStatus = data.result.bagStatus;
+                        // 点击redbutton按钮时执行以下全部
+
+                        // 在带有red样式的div中添加shake-chunk样式
+                        $.ajax({
+                            url: Apiurl + "api/test/openbag", // url  action是方法的名称
+                            type: "Post",
+                            data: JSON.stringify(RBCreateBag),
+                            //async: false,
+                            xhrFields: {
+                                withCredentials: true
+                            },
+                            crossDomain: true,//新增cookie跨域配置
+                            dataType: "json",
+                            contentType: "application/json",
+                            success: function (data) {
+                                if (data.code == "SUCCESS") {//抢到后
+                                   
+                                }
+                                else {
+                                  
+                                }
+                            }
+                        });
+                    }
+                }
+            });
         }
         oClose.onclick = function () {
             oContainer.style.display = "none";
         }
     </script>
+    <!--<script src="../Jscript/js/red.js"></script>-->
 </body>
 </html>

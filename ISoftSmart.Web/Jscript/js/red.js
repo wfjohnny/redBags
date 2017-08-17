@@ -1,3 +1,11 @@
+
+$("#chai").click(function () {
+    $("#chai").css("class", "rotate");
+    // oChai.setAttribute("class", "rotate");
+});
+$("#close").click(function () {
+    $("#oContainer").css("display", "none");
+})
 $(document).ready(function () {
     var RBCreateBag = {
         rid: "",
@@ -7,11 +15,10 @@ $(document).ready(function () {
         createTime: "",
         bagStatus: 0
     };
-
-   
+  
+  
     $('.redbutton').click(function () {
         var retJson = $("#bagId").val();
-        debugger
         $.ajax({
             url: Apiurl + "api/test/t", // url  action是方法的名称
             type: "Get",
