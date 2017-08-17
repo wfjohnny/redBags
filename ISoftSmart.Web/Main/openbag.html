@@ -9,26 +9,30 @@
 
     <script src="../Script/jquery-2.1.4.min.js"></script>
     <script src="../init/initData.js"></script>
+    <link href="../Jscript/hongbao/css/main.css" rel="stylesheet" />
 </head>
 
 <body>
     <input type="hidden" id="bagId" />
     <div class="container" id="container">
         <div class="hongbao">
-            <div class="topcontent">
-                <div class="avatar">
-                    <img src="" alt="" width="80" height="80" id="headimg">
-                    <span id="close">+</span>
+            <div id="showBag">
+                <div class="topcontent">
+                    <div class="avatar">
+                        <img src="" alt="" width="80" height="80" id="headimg">
+                        <span id="close">+</span>
+                    </div>
+                    <h2>老罗</h2>
+                    <span class="text">给你发了一个红包</span>
+                    <div class="description">恭喜发财 大吉大利</div>
                 </div>
-                <h2>老罗</h2>
-                <span class="text">给你发了一个红包</span>
-                <div class="description">恭喜发财 大吉大利</div>
-            </div>
-            <div class="chai" id="chai">
-                <span>拆红包</span>
+                <div class="chai" id="chai">
+                    <span>拆红包</span>
+                </div>
             </div>
         </div>
     </div>
+   
     <script>
         var RBCreateBag = {
             rid: "",
@@ -62,7 +66,11 @@
                     }
                     else {
                         oChai.setAttribute("class", "chai");
-                        oChai.css("display", "none");
+                        $("#chai").css("display", "none");
+                        $("#showBag").empty();
+                        $("#showBag").append(showDetails());
+                        //$("#container").fadeOut();
+                        //$("#details").fadeIn();
                         RBCreateBag.rid = data.result.rid.toUpperCase();
                         RBCreateBag.userId = retJson.split("_")[1];
                         RBCreateBag.bagAmount = data.result.bagAmount;
@@ -72,32 +80,82 @@
                         // 点击redbutton按钮时执行以下全部
 
                         // 在带有red样式的div中添加shake-chunk样式
-                        $.ajax({
-                            url: Apiurl + "api/test/openbag", // url  action是方法的名称
-                            type: "Post",
-                            data: JSON.stringify(RBCreateBag),
-                            //async: false,
-                            xhrFields: {
-                                withCredentials: true
-                            },
-                            crossDomain: true,//新增cookie跨域配置
-                            dataType: "json",
-                            contentType: "application/json",
-                            success: function (data) {
-                                if (data.code == "SUCCESS") {//抢到后
+                        //$.ajax({
+                        //    url: Apiurl + "api/test/openbag", // url  action是方法的名称
+                        //    type: "Post",
+                        //    data: JSON.stringify(RBCreateBag),
+                        //    //async: false,
+                        //    xhrFields: {
+                        //        withCredentials: true
+                        //    },
+                        //    crossDomain: true,//新增cookie跨域配置
+                        //    dataType: "json",
+                        //    contentType: "application/json",
+                        //    success: function (data) {
+                        //        if (data.code == "SUCCESS") {//抢到后
                                    
-                                }
-                                else {
+                        //        }
+                        //        else {
                                   
-                                }
-                            }
-                        });
+                        //        }
+                        //    }
+                        //});
                     }
                 }
             });
         }
         oClose.onclick = function () {
             oContainer.style.display = "none";
+        }
+        function showDetails() {
+            var html = "";
+            html +=" <div id=\"details\">";
+            html +="  <div class=\"top-2 am-text-center pr\">";
+            html +="    <img class=\"pa\" style=\"left:12px ;top: 30px;display: none ;\" src=\"images/jiantou-1.jpg\" />";
+            html +="    <!--<img style=\"width: 100%;height: auto;\" src=\"images/hb-new-bg.jpg\"/>-->";
+            html +="    <div class=\"touxiang am-text-center pa cf\">";
+
+            html +="        <div class=\"pr dianjixiaoguo\">";
+            html +="          <div class=\"pa pa-1 \">";
+
+            html +="           </div>";
+            html +="           <div class=\"pa pa-2 \">";
+
+            html +="          </div>";
+            html +="          <div class=\"pa pa-3 am-text-center\">";
+            html +="            拆红包";
+            html +="          </div>";
+            html +="       </div>";
+
+            html +="    </div>";
+            html +="  </div>";
+
+            html +="    <div class=\"pin c0 am-text-center\">";
+            html +="      <h3 class=\"n f18\">XXXXXXX店</h3>";
+            html +="        <p class=\"f14\">恭喜发财，大吉大利！</p>";
+            html +="    </div>";
+            html +="   <div class=\"yuan-new am-text-center\">";
+            html +="       2.00 <sub class=\"f14\">元</sub>";
+            html +="    </div>";
+            html +="    <div class=\"cunru am-text-center f12\">";
+            html +="       已存入零钱，可直接购买。";
+            html +="     </div>";
+            html +="    <div class=\"color-d f12\">";
+            html +="        每够满10元奖励红包一个，多买多送！";
+            html +="     </div>";
+            html +="     <div class=\"bot-new oz\">";
+            html +="         <div class=\"img-div\">";
+            html +="             <img src=\"\" alt=\"\" />";
+            html +="         </div>";
+            html +="        <p style=\"overflow: hidden ;\">";
+            html +="           <span style=\"float: right;margin-right: 15px;\">2.00元</span>";
+            html +="            XXXXXXX店";
+            html +="         </p>";
+            html +="         <p><a style=\"color: #0042A9;\" href=\"\">留言</a></p>";
+
+            html +="     </div>";
+            html += "   </div>";
+            return html;
         }
     </script>
     <!--<script src="../Jscript/js/red.js"></script>-->
