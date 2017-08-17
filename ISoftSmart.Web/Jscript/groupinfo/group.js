@@ -134,6 +134,7 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
     MessageRecord.userID = curUser;
     MessageRecord.headImgUrl = userImg;
     var dataJson = JSON.stringify(MessageRecord);
+    debugger
     $.ajax({
         url: Apiurl + "api/test/istText", // url  action是方法的名称
         type: "Post",
@@ -303,15 +304,7 @@ $.connection.hub.start().done(function () {
     });
 
 });
-$('#sendMsg').click(function () {
 
-    var message = $("#textmsg").val();
-    if (message == "") {
-        layer.msg("不能发送空消息！");
-        return;
-    }
-    chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
-});
 $.connection.hub.stateChanged(function (state) {
     if (state.newState == $.signalR.connectionState.reconnecting) {
         //正在连接
@@ -329,7 +322,15 @@ $.connection.hub.stateChanged(function (state) {
         $.connection.hub.start();
     }
 });
+$('#sendMsg').click(function () {
 
+    var message = $("#textmsg").val();
+    if (message == "") {
+        layer.msg("不能发送空消息！");
+        return;
+    }
+    chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
+});
 $.connection.hub.disconnected(function () {
     try {
         setTimeout(function () {
@@ -340,6 +341,7 @@ $.connection.hub.disconnected(function () {
     }
 });
 $(function () {
+
     var index;
     $("#sendBag").click(function () {
         index = layer.open({
