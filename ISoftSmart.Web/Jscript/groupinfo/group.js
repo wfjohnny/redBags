@@ -104,54 +104,23 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
-    MessageRecord.mID = newGuid();
-    MessageRecord.mType = 2;//收款图片
-    MessageRecord.amtUserID = openid;
-    MessageRecord.userID = openid;
-    MessageRecord.amtUserImg = UserInfo.headimgurl;
-    var dataJson = JSON.stringify(MessageRecord);
-    $.ajax({
-        url: Apiurl + "api/test/istText", // url  action是方法的名称
-        type: "Post",
-        data: dataJson,
-        //async: false,
-        xhrFields: {
-            withCredentials: true
-        },
-        crossDomain: true,//新增cookie跨域配置
-        dataType: "json",
-        contentType: "application/json",
-        success: function (data) {
-            //resdata = data;
-        }
-    });
+   
 };
 chat.client.loadMessage = function (message, userImg, curUser, time) {
     var html = "";
-    MessageRecord.mID = newGuid();
-    MessageRecord.mContent = message;
-    MessageRecord.mType = 0;
-    MessageRecord.userID = curUser;
-    MessageRecord.headImgUrl = userImg;
-    var dataJson = JSON.stringify(MessageRecord);
-    debugger
-    $.ajax({
-        url: Apiurl + "api/test/istText", // url  action是方法的名称
-        type: "Post",
-        data: dataJson,
-        //async: false,
-        xhrFields: {
-            withCredentials: true
-        },
-        crossDomain: true,//新增cookie跨域配置
-        dataType: "json",
-        contentType: "application/json",
-        success: function (data) {
+    //MessageRecord.mID = newGuid();
+    //MessageRecord.mContent = message;
+    //MessageRecord.mType = 0;
+    //MessageRecord.userID = curUser;
+    //MessageRecord.headImgUrl = userImg;
+    //var dataJson = JSON.stringify(MessageRecord);
+
+ 
             time = time.split(" ")[1].split(":");
-            if (data.code == "SCCESS") {
+            //if (data.code == "SCCESS") {
                 html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                 html += " <div class=\"right\" style=\"width:20%\">";
-                html += "                     <a href=\"\"><img src=\"" + data.result.headimgurl + "\" style=\"width:3.5em;height:3.5em\"/></a>";
+                html += "                     <a href=\"\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
                 html += "                  </div>";
                 html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
                 html += "        <span class=\"bubble rightBubble\">";
@@ -160,25 +129,24 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
                 html += "           <span class=\"topLevel\"></span>";
                 html += "        </span>";
                 html += "   </div></li>";
-            }
-            else {
-                html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                html += " <div class=\"oz\">";
-                html += " <div class=\"right\">";
-                html += "<a href=\"javascript:void(0);\" ><img src=\"" + data.headImgUrl + "\" /></a>";
-                html += "</div>";
-                html += "<div class=\"cont_right\">";
-                html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + data.bagID + "','" + data.bagUserID + "');\">";
-                html += "<div>" + data.bagRemark + " </div>";
-                html += "</a>";
-                html += "</div>";
-                html += "</div> </li>";
-            }
+            //}
+            //else {
+            //    html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+            //    html += " <div class=\"oz\">";
+            //    html += " <div class=\"right\">";
+            //    html += "<a href=\"javascript:void(0);\" ><img src=\"" + userImg + "\" /></a>";
+            //    html += "</div>";
+            //    html += "<div class=\"cont_right\">";
+            //    html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + data.bagID + "','" + data.bagUserID + "');\">";
+            //    html += "<div>" + data.bagRemark + " </div>";
+            //    html += "</a>";
+            //    html += "</div>";
+            //    html += "</div> </li>";
+            //}
             $("#msg").append(html);
             $("#textmsg").val("");
             $('#contentArea').scrollTop($('.bd').height());
-        }
-    });
+    
 
     // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
     //if (curUser == customerCode) {
@@ -298,7 +266,31 @@ $.connection.hub.start().done(function () {
                 }
                 var headUrl = UserInfo.headimgurl;
                 var userID = UserInfo.openid;
-                chat.server.sendAmtMessage(userID, headUrl);
+
+
+                MessageRecord.mID = newGuid();
+                MessageRecord.mType = 2;//收款图片
+                MessageRecord.amtUserID = userID;
+                MessageRecord.userID = userID;
+                MessageRecord.amtUserImg = UserInfo.headimgurl;
+                var dataJson = JSON.stringify(MessageRecord);
+                $.ajax({
+                    url: Apiurl + "api/test/istText", // url  action是方法的名称
+                    type: "Post",
+                    data: dataJson,
+                    //async: false,
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    crossDomain: true,//新增cookie跨域配置
+                    dataType: "json",
+                    contentType: "application/json",
+                    success: function (data) {
+                        //resdata = data;
+                        chat.server.sendAmtMessage(userID, headUrl);
+                    }
+                });
+               
             }
         });
     });
@@ -322,15 +314,7 @@ $.connection.hub.stateChanged(function (state) {
         $.connection.hub.start();
     }
 });
-$('#sendMsg').click(function () {
 
-    var message = $("#textmsg").val();
-    if (message == "") {
-        layer.msg("不能发送空消息！");
-        return;
-    }
-    chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
-});
 $.connection.hub.disconnected(function () {
     try {
         setTimeout(function () {
@@ -341,7 +325,36 @@ $.connection.hub.disconnected(function () {
     }
 });
 $(function () {
+    $('#sendMsg').click(function () {
 
+        var message = $("#textmsg").val();
+        if (message == "") {
+            layer.msg("不能发送空消息！");
+            return;
+        }
+        MessageRecord.mID = newGuid();
+        MessageRecord.mContent = message;
+        MessageRecord.mType = 0;
+        MessageRecord.userID = UserInfo.openid;
+        MessageRecord.headImgUrl = UserInfo.headimgurl;
+        var dataJson = JSON.stringify(MessageRecord);
+        $.ajax({
+            url: Apiurl + "api/test/istText", // url  action是方法的名称
+            type: "Post",
+            data: dataJson,
+            async: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true,//新增cookie跨域配置
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
+            }
+        });
+
+    });
     var index;
     $("#sendBag").click(function () {
         index = layer.open({
