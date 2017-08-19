@@ -1,0 +1,225 @@
+﻿* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    color: #fff;
+    font-size: 14px;
+}
+
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 15px 5px;
+    background-color: rgba(0,0,0,0.3);
+    height: 100%;
+    position: absolute;
+}
+
+.xqhongbao {
+    height: 450px;
+    background: #ffffff;
+    width: 300px;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+    margin: 0 auto;
+}
+
+.topcontent {
+    height: 100%;
+    border: 1px solid #BD503A;
+    background-color: #BD503A;
+    border-radius: 10px 10px 50% 50% / 10px 10px 15% 15%;
+    box-shadow: 0px 4px 0px -1px rgba(0,0,0,0.2);
+}
+
+.avatar {
+    position: relative;
+    height: 100%;
+    margin: 20px 0 70px 0;
+}
+
+    .avatar span {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        -webkit-transform: rotate(45deg);
+        -ms-transform: rotate(45deg);
+        transform: rotate(45deg);
+        font-size: 2em;
+        font-weight: bolder;
+    }
+
+#close {
+    margin-top: -25px;
+    color: rgba(0,0,0,0.5);
+}
+
+.avatar img {
+    border: 1px solid #BD503A;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-top: 10%;
+}
+
+.topcontent h2 {
+    margin: 15px 0;
+}
+
+.text {
+    color: #999;
+}
+
+.description {
+    margin: 15px 0 70px 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+#chai {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #FFA73A;
+    background-color: #FFA73A;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 20px;
+    display: inline-block;
+    margin-top: -50px;
+    box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.2);
+}
+
+    #chai span {
+        margin-top: 35px;
+        display: inline-block;
+    }
+.xqjiage {
+    height: 50px;
+    font-weight: 600;
+    line-height: 50px;
+    display: block;
+    margin-bottom: 20px;
+    font-size: 50px;
+    font-family: Gotham, Helvetica Neue, Helvetica, Arial," sans-serif";
+}
+
+.xqam-text-center {
+    text-align: center !important;
+}
+
+.xqc0 {
+    color: black;
+    font-family:;
+}
+
+.xqjiage sup {
+    font-size: 16px;
+    padding: 0 5px;
+    position: relative;
+    vertical-align: baseline;
+}
+
+
+.xqdianpumingc {
+    height: 70px;
+    color: black;
+    line-height: 30px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    center !important;
+    font-size: 14px;
+    font-family: "黑体", "Times New Roman", "宋体", Times, serif；;
+}
+
+    .xqdianpumingc h3 {
+        font-size: 16px;
+    }
+
+
+.xqc9 {
+    color: #5a7293;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.xqdmds {
+    color: #252525;
+    font-size: 12px;
+    line-height: 20px;
+    background-color: #E5E5E5;
+    width: 90%;
+    margin: 10px auto;
+    text-align: left;
+    padding: 5px 0 5px 10px;
+}
+
+
+.xqtopcontent {
+    height: 100%;
+    background-color: white;
+    text-align: center;
+}
+
+
+.xqliuyan {
+    height: 100%;
+    background-color: white;
+    display: block;
+}
+
+.chaileft {
+    float: left;
+    height: 60px;
+    width: 60px;
+    margin: 0px;
+    background: white;
+}
+
+#chaileft {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #FFA73A;
+    background-color: #FFA73A;
+    border-radius: 50%;
+    color: #fff;
+}
+
+    #chaileft span {
+        margin-top: 35px;
+    }
+
+.xqliuyanlb {
+    height: 70px;
+    width: 90%;
+    margin: 10px auto;
+    text-align: left;
+    color: black;
+}
+
+
+.xqliuyanright {
+    padding: 0px 30px;
+}
+
+.xqliuyanyuan {
+    float: right;
+}
+
+.xqliuyantit {
+    line-height: 40px;
+    font-size: 16px;
+    display: lock;
+    padding: 0 0 0 40px;
+    s;
+}
+
+.xqliuyanlink {
+    float: left;
+    padding: 0px 10px;
+}

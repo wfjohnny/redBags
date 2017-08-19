@@ -157,6 +157,7 @@
     <Content Include="Jscript\hongbao\a\6发出金蛋后的反馈信息.jpg" />
     <Content Include="Jscript\hongbao\a\8收到的金蛋信息列表页.jpg" />
     <Content Include="Jscript\hongbao\css\amazeui.css" />
+    <Content Include="Jscript\hongbao\css\bagdetails.css" />
     <Content Include="Jscript\hongbao\css\main.css" />
     <Content Include="Jscript\hongbao\css\swiper-3.4.2.min.css" />
     <Content Include="Jscript\hongbao\images\biaoqing.png" />
@@ -179,6 +180,9 @@
     <Content Include="Jscript\hongbao\js\jquery.11.min.js" />
     <Content Include="Jscript\hongbao\js\jquery.SuperSlide.2.1.1.js" />
     <Content Include="Jscript\hongbao\js\swiper-3.4.2.jquery.min.js" />
+    <Content Include="Jscript\hongbao\scroll\index.html" />
+    <Content Include="Jscript\hongbao\scroll\js\jquery.min.js" />
+    <Content Include="Jscript\hongbao\xqopenbag.html" />
     <Content Include="Jscript\hongbao\发红包.html" />
     <Content Include="Jscript\hongbao\图2.html" />
     <Content Include="Jscript\hongbao\图3.html" />
