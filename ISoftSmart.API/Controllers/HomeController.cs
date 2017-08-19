@@ -230,6 +230,8 @@ namespace ISoftSmart.API.Controllers
                             bsent.BagAmount = curAmount;
                             bsent.CreateTime = DateTime.Now;
                             bsent.RID = bag.RID;
+                            var userInfoCache = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == bag.UserId).FirstOrDefault();
+                            bsent.nickname = userInfoCache.nickname;
                             if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
                             {
                                 var bagkey = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey);
@@ -242,6 +244,9 @@ namespace ISoftSmart.API.Controllers
                                 bsList.Add(bsent);
                                 StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bsList);
                             }
+                            var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
+                          
+                            Result.SerialList = seriaList;
                             rt.InsertSerial(bsent);
                         }
                         else
@@ -258,6 +263,13 @@ namespace ISoftSmart.API.Controllers
                             }
                             StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
                             StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, setcache);
+                            var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
+                            if (Result == null)
+                            {
+                                Result = new RBCreateBag();
+                                Result.SerialList = new List<RBBagSerial>();
+                            }
+                            Result.SerialList = seriaList;
                         }
                     }
                 }
@@ -613,9 +625,19 @@ namespace ISoftSmart.API.Controllers
                                 }
                                 else
                                 {
-                                    Code = "SCCESS";
-                                    ResponseMessage = "用户尚未抢到该红包！";
-                                    result = userBag;
+                                    userBag.SerialList = ret;
+                                    if (userBag.BagNum == 0)
+                                    {
+                                        Code = "ERROR";
+                                        ResponseMessage = "红包已抢完！";
+                                        result = userBag;
+                                    }
+                                    else
+                                    {
+                                        Code = "SCCESS";
+                                        ResponseMessage = "用户尚未抢到该红包！";
+                                        result = userBag;
+                                    }
                                 }
                             }
                             else
@@ -628,6 +650,10 @@ namespace ISoftSmart.API.Controllers
                                         item.nickname = user.ToList().Where(x => x.openid == item.openid).FirstOrDefault().nickname;
                                     }
                                     var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
+                                    if (userBag == null)
+                                    {
+                                        userBag = new RBCreateBag();
+                                    }
                                     userBag.SerialList = new List<RBBagSerial>();
                                     userBag.SerialList = ret;
                                     var serial = rt.GetUserSerialList(new MyBagSerial() { RID = gRID });
@@ -650,17 +676,29 @@ namespace ISoftSmart.API.Controllers
                         {
                             Code = "SCCESS";
                             ResponseMessage = "用户尚未抢到该红包！";
+                            var userBag = new RBCreateBag();
+                            var bagInfo = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
+                            var userInfo = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == bagInfo.UserId).FirstOrDefault();
+                           
+                            result.CurrentUserImgUrl = userInfo.headimgurl;
+                            result.nickname = userInfo.nickname;
+                            result.UserId = userInfo.openid;
+                            result.Remark = bagInfo.Remark;
                         }
                     }
                     else
                     {
                         Code = "SCCESS";
                         ResponseMessage = "用户尚未抢到该红包！";
-                        var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
-                        var userinfo = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == userId).FirstOrDefault();
+                        var userBag = new RBCreateBag();
+                        var bagInfo = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
+                        var userinfo = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == bagInfo.UserId).FirstOrDefault();
+                      
                         userBag.CurrentUserImgUrl = userinfo.headimgurl;
+                        userBag.UserId= userinfo.openid;
                         userBag.nickname = userinfo.nickname;
                         result = userBag;
+                        result.Remark = bagInfo.Remark;
                     }
                 }
 

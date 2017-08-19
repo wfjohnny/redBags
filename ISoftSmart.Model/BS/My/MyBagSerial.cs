@@ -9,5 +9,6 @@ namespace ISoftSmart.Model.BS.My
     public class MyBagSerial :BagSerial
     {
         public string UserName { get; set; }
+        public string nickname { get; set; }
     }
 }

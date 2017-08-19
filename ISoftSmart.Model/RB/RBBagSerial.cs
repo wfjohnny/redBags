@@ -15,6 +15,7 @@ namespace ISoftSmart.Model.RB
         public DateTime CreateTime { get; set; }
         public int BagNum { get; set; }
         public string nickname { get; set; }
+        public string headImg { get; set; }
     }
 
 }

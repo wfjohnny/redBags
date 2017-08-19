@@ -4,7 +4,9 @@
     $("#bagNums").html("金蛋" + parent.parent.CurUserBag.bagNum + "个，等待对方领取");
     $("#remark").html(parent.parent.CurUserBag.remark);
     var html = "  <ul class=\"list-info\">";
+    debugger
     $(parent.parent.CurUserBag.serialList).each(function (key, val) {
+        debugger
         html += "<li>";
         html += "   <a class=\"oz c0\" href=\"javascript:void(0);\">";
         html += "      <b class=\"n right\">" + val.bagAmount + "个</b>";
