@@ -33,7 +33,7 @@
                     <div class="description">恭喜发财 大吉大利</div>
                 </div>
                 <div class="chai" id="chai">
-                    <span>拆红包</span>
+                    <span>抢金豆</span>
                 </div>
             </div>
             <div id="showDet" class="panel">
@@ -41,7 +41,7 @@
                     <div id="showBag">
                         <div class="topcontent" style="height:200px">
                             <div class="avatar">
-                                <h2>红包详情</h2>
+                                <h2>金豆详情</h2>
                                 <img src="" alt="" width="80" height="80" id="detheadimg">
                                 <span id="closed">+</span>
                             </div>
@@ -148,6 +148,7 @@
                                     $("#showBag").css("display", "none");
                                     $("#showDet").slideUp("slow");
                                     $("#showDet").fadeIn();
+                                    $("h3").html(parent.CurUserBag.remark);
                                     if (data.code == "SUCCESS") {//抢到后
                                         $("#detheadimg").attr('src', parent.CurUserBag.currentUserImgUrl);
                                         $("#amtlabel").show();

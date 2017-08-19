@@ -1,28 +1,19 @@
 ﻿$(function () {
     $("#nickname").html(parent.parent.CurUserBag.nickname);
-    $("#headimg").attr('src', parent.parent.CurUserBag.currentUserImgUrl);
-    $("#bagNums").html("金蛋" + parent.parent.CurUserBag.bagNum + "个，等待对方领取");
-    $("#remark").html(parent.parent.CurUserBag.remark);
-    var html = "  <ul class=\"list-info\">";
+    $("#detheadimg").attr('src', parent.parent.CurUserBag.currentUserImgUrl);
+    $(".xqdmds").html("金豆" + parent.parent.CurUserBag.bagNum + "个，等待对方领取");
     debugger
+    $("h3").html(parent.parent.CurUserBag.remark);
+    var html = "";
     $(parent.parent.CurUserBag.serialList).each(function (key, val) {
-        debugger
-        html += "<li>";
-        html += "   <a class=\"oz c0\" href=\"javascript:void(0);\">";
-        html += "      <b class=\"n right\">" + val.bagAmount + "个</b>";
-        //if (val.userName == null) {
-        //    html += "       <p>" + val.nickname + "</p>";
-        //}
-        //else {
-            html += "       <p>" + val.nickname + "</p>";
-        //}
-        html += "  </a>";
-        html += "    <span class=\"c8 f16\">" + val.createTime.split(" ")[1] + "</span>";
-        html += " </li>";
+        html += "  <div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
+        html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
+        html += "    <font size=\"2\" face=\"黑体\" color=\"black\">" + val.bagAmount + "元</font> ";
+        html += "   </div>";
+        html += "  </div>";
     });
-    html += " </ul>";
-    $("#userList").append(html);
-    $("#close").click(function () {
+    $(".xqliuyanright").append(html);
+    $("#closed").click(function () {
         parent.layer.closeAll('iframe');
         parent.parent.layer.closeAll('iframe');
     });
