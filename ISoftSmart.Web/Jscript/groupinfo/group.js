@@ -409,6 +409,7 @@ function OpenBag(guid, customerCode) {
         contentType: "application/json",
         success: function (data) {
             CurUserBag = data.result;
+            console.log(CurUserBag);
             var index;
             if (data.code == "SCCESS") {
                 index = layer.open({

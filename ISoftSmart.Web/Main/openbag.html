@@ -28,8 +28,8 @@
                         <img src="" alt="" width="80" height="80" id="headimg">
                         <span id="close">+</span>
                     </div>
-                    <h2>老罗</h2>
-                    <span class="text">给你发了一个红包</span>
+                    <h2 id="nickname">老罗</h2>
+                    <!--<span class="text">给你发了一个红包</span>-->
                     <div class="description">恭喜发财 大吉大利</div>
                 </div>
                 <div class="chai" id="chai">
@@ -42,7 +42,6 @@
                         <div class="topcontent">
                             <div class="avatar">
                                 <h2>红包详情</h2>
-                                <li>凭此卡进店消费抵2元现金</li>
                                 <span id="closed">+</span>
                             </div>
                         </div>
@@ -89,6 +88,10 @@
             createTime: "",
             bagStatus: 0
         };
+        //load
+        $("#headimg").attr('src', parent.CurUserBag.currentUserImgUrl);
+        $("#nickname").html(parent.CurUserBag.nickname);
+        $("#description").html(parent.CurUserBag.remark);
         var oChai = document.getElementById("chai");
         var oClose = document.getElementById("close");
         var oContainer = document.getElementById("container");

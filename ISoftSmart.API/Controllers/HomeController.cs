@@ -656,6 +656,11 @@ namespace ISoftSmart.API.Controllers
                     {
                         Code = "SCCESS";
                         ResponseMessage = "用户尚未抢到该红包！";
+                        var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
+                        var userinfo = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == userId).FirstOrDefault();
+                        userBag.CurrentUserImgUrl = userinfo.headimgurl;
+                        userBag.nickname = userinfo.nickname;
+                        result = userBag;
                     }
                 }
 
