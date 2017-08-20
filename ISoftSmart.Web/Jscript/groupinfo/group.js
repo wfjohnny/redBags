@@ -104,49 +104,73 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
-   
+
+};
+chat.client.loadImgMessage = function (typeid, imgurl) {
+    var html = "";
+    var myDate = new Date();
+    var h = myDate.getHours();
+    var m = myDate.getMinutes();
+    var type = "";
+    if (typeid == "1")
+    {
+        type = "start";
+    }
+    if (typeid == "2") {
+        type = "stop";
+    }
+    if (typeid == "3") {
+        type = "any";
+    }
+    if (typeid == "4") {
+        type = "speend";
+    }
+    if (typeid == "5") {
+        type = "next";
+    }
+    html += "<li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
+    html += "  <div class=\"oz\"><div class=\"right\">";
+    html += "                    <img src=\"" + imgurl + "\" /></div>";
+    html += "   <div style=\"float:right;margin-right:10px\">";
+    html += "      <img src=\"" + Weburl + "image/" + type + ".png\" style=\"width:100px;\" /> ";
+    html += "   </div></li>";
+    $("#msg").append(html);
+    $('#contentArea').scrollTop($('.bd').height());
+
 };
 chat.client.loadMessage = function (message, userImg, curUser, time) {
     var html = "";
-    //MessageRecord.mID = newGuid();
-    //MessageRecord.mContent = message;
-    //MessageRecord.mType = 0;
-    //MessageRecord.userID = curUser;
-    //MessageRecord.headImgUrl = userImg;
-    //var dataJson = JSON.stringify(MessageRecord);
+    time = time.split(" ")[1].split(":");
+    //if (data.code == "SCCESS") {
+    html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+    html += " <div class=\"right\" style=\"width:20%\">";
+    html += "                     <a href=\"\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
+    html += "                  </div>";
+    html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+    html += "        <span class=\"bubble rightBubble\">";
+    html += "            " + message + "";
+    html += "            <span class=\"bottomLevel\"></span>";
+    html += "           <span class=\"topLevel\"></span>";
+    html += "        </span>";
+    html += "   </div></li>";
+    //}
+    //else {
+    //    html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+    //    html += " <div class=\"oz\">";
+    //    html += " <div class=\"right\">";
+    //    html += "<a href=\"javascript:void(0);\" ><img src=\"" + userImg + "\" /></a>";
+    //    html += "</div>";
+    //    html += "<div class=\"cont_right\">";
+    //    html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + data.bagID + "','" + data.bagUserID + "');\">";
+    //    html += "<div>" + data.bagRemark + " </div>";
+    //    html += "</a>";
+    //    html += "</div>";
+    //    html += "</div> </li>";
+    //}
+    $("#msg").append(html);
+    $("#textmsg").val("");
+    $('#contentArea').scrollTop($('.bd').height());
 
- 
-            time = time.split(" ")[1].split(":");
-            //if (data.code == "SCCESS") {
-                html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                html += " <div class=\"right\" style=\"width:20%\">";
-                html += "                     <a href=\"\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
-                html += "                  </div>";
-                html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-                html += "        <span class=\"bubble rightBubble\">";
-                html += "            " + message + "";
-                html += "            <span class=\"bottomLevel\"></span>";
-                html += "           <span class=\"topLevel\"></span>";
-                html += "        </span>";
-                html += "   </div></li>";
-            //}
-            //else {
-            //    html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-            //    html += " <div class=\"oz\">";
-            //    html += " <div class=\"right\">";
-            //    html += "<a href=\"javascript:void(0);\" ><img src=\"" + userImg + "\" /></a>";
-            //    html += "</div>";
-            //    html += "<div class=\"cont_right\">";
-            //    html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + data.bagID + "','" + data.bagUserID + "');\">";
-            //    html += "<div>" + data.bagRemark + " </div>";
-            //    html += "</a>";
-            //    html += "</div>";
-            //    html += "</div> </li>";
-            //}
-            $("#msg").append(html);
-            $("#textmsg").val("");
-            $('#contentArea').scrollTop($('.bd').height());
-    
 
     // alert("customerCode" + customerCode + "_sdsdds_" + curUser);
     //if (curUser == customerCode) {
@@ -237,7 +261,7 @@ $.connection.hub.start().done(function () {
                 $("#initHeight").val($(window).height());
             }
 
-            var initheight =parseInt( $("#initHeight").val()) - $(".shurukuang").height() - $("h2").height();
+            var initheight = parseInt($("#initHeight").val()) - $(".shurukuang").height() - $("h2").height();
             $("#contentArea").css("height", initheight);
             $('#contentArea').scrollTop($('.bd').height());
         }
@@ -290,13 +314,35 @@ $.connection.hub.start().done(function () {
                         chat.server.sendAmtMessage(userID, headUrl);
                     }
                 });
-               
+
             }
         });
     });
-
+   
 });
-
+function sendImg(type) {
+    var headUrl = UserInfo.headimgurl;
+    chat.server.sendImgMessage(type, headUrl);
+}
+//$('#start').click(function () {
+  
+//})
+//$("#stop").click(function () {
+//    var headUrl = UserInfo.headimgurl;
+//    chat.server.sendImgMessage("2", headUrl);
+//})
+//$("#any").click(function () {
+//    var headUrl = UserInfo.headimgurl;
+//    chat.server.sendImgMessage("3", headUrl);
+//})
+//$("#speend").click(function () {
+//    var headUrl = UserInfo.headimgurl;
+//    chat.server.sendImgMessage("4", headUrl);
+//})
+//$("#next").click(function () {
+//    var headUrl = UserInfo.headimgurl;
+//    chat.server.sendImgMessage("5", headUrl);
+//})
 $.connection.hub.stateChanged(function (state) {
     if (state.newState == $.signalR.connectionState.reconnecting) {
         //正在连接

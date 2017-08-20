@@ -320,6 +320,11 @@
     <Content Include="Ctrl\style\stylesheets\theme.css" />
     <Content Include="Demo\demos.html" />
     <Content Include="Demo\styles.css" />
+    <Content Include="image\any.png" />
+    <Content Include="image\next.png" />
+    <Content Include="image\speend.png" />
+    <Content Include="image\start.png" />
+    <Content Include="image\stop.png" />
     <Content Include="init\initData.js" />
     <Content Include="init\jquery.cookie.js" />
     <Content Include="Jscript\auth\authjs.js" />

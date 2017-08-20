@@ -29,6 +29,14 @@ namespace ISoftSmart.Web.signalr
             Clients.All.loadMessage(message, userHeadImg,customeCode, DateTime.Now.ToString());
         }
         /// <summary>
+        /// 发图片
+        /// </summary>
+        /// <param name="message"></param>
+        public void SendImgMessage(string typeid, string userHeadImg)
+        {
+            Clients.All.loadImgMessage(typeid, userHeadImg);
+        }
+        /// <summary>
         /// 收款码
         /// </summary>
         /// <param name="message"></param>
