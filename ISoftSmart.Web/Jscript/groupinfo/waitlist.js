@@ -8,7 +8,8 @@
     $(parent.parent.CurUserBag.serialList).each(function (key, val) {
         html += "  <div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
         html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
-        html += "    <font size=\"2\" face=\"黑体\" color=\"black\">" + val.bagAmount + "元</font> ";
+        var num = Number(val.bagAmount).toFixed(2);
+        html += "    <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
         html += "   </div>";
         html += "  </div>";
     });

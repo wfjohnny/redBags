@@ -212,11 +212,11 @@ namespace ISoftSmart.API.Controllers
                         if (tr != null && tr.BagNum > 0)
                         {
                             decimal curAmount = 0;
-                            var openResult = GenerateBag(tr, out outbag, out curAmount);
+                            var openResult = GenerateBag(tr,bag.UserId, out outbag, out curAmount);
                             bagcache.Remove(bagcache.Where(x => x.RID == outbag.RID).FirstOrDefault());
                             bagcache.Add(outbag);
                             Code = "SUCCESS";
-                            ResponseMessage = "抢到" + curAmount + "个金豆！";
+                            ResponseMessage = "抢到" + curAmount.ToString("0.00") + "个金豆！";
                             Result = openResult;
                             StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
                             var userInfo = IoCFactory.Instance.CurrentContainer.Resolve<WXUserInfo>();//注册对象
@@ -782,7 +782,7 @@ namespace ISoftSmart.API.Controllers
             }
 
         }
-        RBCreateBag GenerateBag(RBCreateBag bag, out RBCreateBag outbag, out decimal curAmount)
+        RBCreateBag GenerateBag(RBCreateBag bag,string userid, out RBCreateBag outbag, out decimal curAmount)
         {
             bag.BagNum -= 1;
             curAmount = 0;
@@ -791,11 +791,20 @@ namespace ISoftSmart.API.Controllers
                 if (StackExchangeRedisExtensions.HasKey(db, CacheKey.Winner))
                 {
                     var amtnum = StackExchangeRedisExtensions.Get<BagWinner>(db, CacheKey.Winner);
-                    if (amtnum.openid == bag.UserId)
+                    if (amtnum.openid == userid)
                     {
                         curAmount = amtnum.amt;
                         bag.BagAmount -= curAmount;
                         StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
+                    }
+                    else
+                    {
+                        Random ran = new Random();
+                        var Num = Decimal.ToInt32(bag.BagAmount * 100 - bag.BagNum);
+                        double RandKey = ran.Next(1, Num);
+                        decimal f = (decimal)(RandKey * 0.01);
+                        bag.BagAmount -= f;
+                        curAmount = f;
                     }
                 }
                 else
