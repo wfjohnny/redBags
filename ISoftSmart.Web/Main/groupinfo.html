@@ -40,7 +40,7 @@
             <img src="../Jscript/hongbao/images/yingyong.png"style="width:30px" />
         </div>
         <div class="left tc fasong">
-            <a class="c3" href="javascript:void(0);" id="sendMsg" style="margin-top:15px">发送</a>
+            <a class="c3" href="javascript:void(0);" id="sendMsg" style="margin-top:15px;">发送</a>
         </div>
     </div>
     <div id="models" class="cont-index none"> 
@@ -147,16 +147,27 @@
             if ($("#models").hasClass("none")) {
                 $("#models").removeClass("none").css("bottom", 0);
 				$(".shurukuang").css("bottom", "133px");
-			    //$("#contentArea").css("height", "343px");
 				var height = parseInt(bodyheight) - ($(".shurukuang").height() + $("#models").height()) - $(".shurukuang").height();
 				$("#contentArea").css("height", height);
 				$('#contentArea').scrollTop($('.bd').height());
+
+                //图片
+				if (!$("#emojmodels").hasClass("none")) {
+				    var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
+				    $("#emojmodels").addClass("none");
+				}
 			} else {
                 var contHeight = parseInt(bodyheight) - $("#models").height();
                 $("#models").addClass("none");
 				$(".shurukuang").css("bottom", 0);
 				$("#contentArea").css("height", contHeight);
 				$('#contentArea').scrollTop($('.bd').height());
+				if (!$("#emojmodels").hasClass("none")) {
+				    var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
+				    $("#emojmodels").addClass("none");
+				}
+                //图片
+
 			}
         });
         $(".biaoqing").click(function () {
@@ -170,16 +181,23 @@
             if ($("#emojmodels").hasClass("none")) {
                 $("#emojmodels").removeClass("none").css("bottom", 0);
                 $(".shurukuang").css("bottom", "133px");
-                //$("#contentArea").css("height", "343px");
                 var height = parseInt(bodyheight) - ($(".shurukuang").height() + $("#emojmodels").height()) - $(".shurukuang").height();
                 $("#contentArea").css("height", height);
                 $('#contentArea').scrollTop($('.bd').height());
+                if (!$("#models").hasClass("none")) {
+                    var contHeight = parseInt(bodyheight) - $("#models").height();
+                    $("#models").addClass("none");
+                }
             } else {
                 var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
                 $("#emojmodels").addClass("none");
                 $(".shurukuang").css("bottom", 0);
                 $("#contentArea").css("height", contHeight);
                 $('#contentArea').scrollTop($('.bd').height());
+                if (!$("#models").hasClass("none")) {
+                    var contHeight = parseInt(bodyheight) - $("#models").height();
+                    $("#models").addClass("none");
+                }
             }
         })
         

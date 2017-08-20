@@ -6,11 +6,12 @@ var HomeUrl = "http://www.isoftsmart.com/bagWeb/Main/groupinfo.html";
 //var HomeUrl = "http://localhost/bagWeb/Main/groupinfo.html";
 //请求API后台地址
 
-var Apiurl = "http://localhost/bagAPI/";
-var Weburl = "http://localhost/bagWeb/";
-var Signalr = "http://localhost/";
-//var Apiurl = "http://www.isoftsmart.com/bagAPI/";
-//var Signalr = "http://www.isoftsmart.com/";
+//var Apiurl = "http://localhost/bagAPI/";
+//var Weburl = "http://localhost/bagWeb/";
+//var Signalr = "http://localhost/";
+var Apiurl = "http://www.isoftsmart.com/bagAPI/";
+var Weburl = "http://www.isoftsmart.com/bagWeb/";
+var Signalr = "http://www.isoftsmart.com/";
     //调用后台链接，json字符串，请求类型：post，get
     function callBackFuncJson(url, jsonVal, type) {
         var resdata;
