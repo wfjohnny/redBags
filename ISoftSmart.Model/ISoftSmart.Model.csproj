@@ -61,6 +61,7 @@
     <Compile Include="RB\RBCreateBag.cs" />
     <Compile Include="ServicesException.cs" />
     <Compile Include="UserDetail.cs" />
+    <Compile Include="UserInfo\BagWinner.cs" />
     <Compile Include="UserInfo\UserInfo.cs" />
     <Compile Include="WX\AccessTokenOpenId.cs" />
     <Compile Include="WX\MessageRecord.cs" />

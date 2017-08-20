@@ -548,6 +548,69 @@ namespace ISoftSmart.API.Controllers
                 Result = ret
             });
         }
+        [Route("getwxUserList")]
+        [HttpGet]
+        public IHttpActionResult GetwxUserList()
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            List<WXUserInfo> user = new List<WXUserInfo>();
+            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+            {
+                var userlist = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
+                user = userlist;
+            }
+            else
+            {
+                var userlist=rt.GetUserInfo(new WXUserInfo());
+                user = userlist;
+            }
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            ResponseMessage = "获取已抢用户列表成功！";
+            return Ok(new APIResponse<List<WXUserInfo>>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = user
+            });
+        }
+        [Route("saveUserBagWinner")]
+        [HttpPost]
+        public IHttpActionResult SaveUserBagWinner(BagWinner win)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.Winner))
+            {
+                StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
+                var winner = new BagWinner()
+                {
+                    openid = win.openid,
+                    amt = win.amt,
+                    status = 0
+                };
+                StackExchangeRedisExtensions.Set(db, CacheKey.Winner, winner);
+            }
+            else
+            {
+                var winner = new BagWinner()
+                {
+                    openid = win.openid,
+                    amt = win.amt,
+                    status = 0
+                };
+                StackExchangeRedisExtensions.Set(db, CacheKey.Winner, winner);
+            }
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            ResponseMessage = "获取已抢用户列表成功！";
+            return Ok(new APIResponse<List<WXUserInfo>>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+            });
+        }
         [Route("getHasBag")]
         [HttpGet]
         public IHttpActionResult GetHasBag(string bagId, string userId)
@@ -725,12 +788,25 @@ namespace ISoftSmart.API.Controllers
             curAmount = 0;
             if (bag.BagNum != 0)
             {
-                Random ran = new Random();
-                var Num = Decimal.ToInt32(bag.BagAmount * 100 - bag.BagNum);
-                double RandKey = ran.Next(1, Num);
-                decimal f = (decimal)(RandKey * 0.01);
-                bag.BagAmount -= f;
-                curAmount = f;
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.Winner))
+                {
+                    var amtnum = StackExchangeRedisExtensions.Get<BagWinner>(db, CacheKey.Winner);
+                    if (amtnum.openid == bag.UserId)
+                    {
+                        curAmount = amtnum.amt;
+                        bag.BagAmount -= curAmount;
+                        StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
+                    }
+                }
+                else
+                {
+                    Random ran = new Random();
+                    var Num = Decimal.ToInt32(bag.BagAmount * 100 - bag.BagNum);
+                    double RandKey = ran.Next(1, Num);
+                    decimal f = (decimal)(RandKey * 0.01);
+                    bag.BagAmount -= f;
+                    curAmount = f;
+                }
             }
             else
             {

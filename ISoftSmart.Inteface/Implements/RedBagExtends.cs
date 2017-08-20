@@ -60,14 +60,29 @@ namespace ISoftSmart.Inteface.Implements
         /// <returns></returns>
         public List<WXUserInfo> GetUserInfo(WXUserInfo user)
         {
-            SqlParameter[] sp = new SqlParameter[]
+            if (user.openid == null)
             {
+                SqlParameter[] sp = new SqlParameter[]
+                {
+                new SqlParameter("@OpenId"," 1=1 ")
+                };
+                var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[UserInfo] where 1=1", sp,CommandType.Text);
+                if (result == "")
+                    return null;
+                return result.JsonDeserialize<List<WXUserInfo>>();
+            }
+            else
+            {
+                SqlParameter[] sp = new SqlParameter[]
+                {
                 new SqlParameter("@OpenId",user.openid)
-            };
-            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[UserInfo] b where b.OpenId=@OpenId ", sp, CommandType.Text);
-            if (result == "")
-                return null;
-            return result.JsonDeserialize<List<WXUserInfo>>();
+                };
+                var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[UserInfo] b where b.OpenId=@OpenId ", sp, CommandType.Text);
+                if (result == "")
+                    return null;
+                return result.JsonDeserialize<List<WXUserInfo>>();
+            }
+
         }
         public int InsertUserInfo(WXUserInfo user)
         {

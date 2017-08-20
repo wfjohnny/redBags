@@ -13,5 +13,6 @@ namespace ISoftSmart.API
         public const string WxAccessToken = "WxAccessToken";
         public const string WxUserList = "WxUserList";
         public const string MsgRecord = "MsgRecord";
+        public const string Winner = "Winner";
     }
 }
