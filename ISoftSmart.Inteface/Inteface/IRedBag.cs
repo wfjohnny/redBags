@@ -13,6 +13,7 @@ namespace ISoftSmart.Inteface.Inteface
     public interface IRedBag : IDependency
     {
         List<RBCreateBag> GetBag(RBCreateBag bag);
+        List<RBCreateBag> GetBagInfo(RBCreateBag bag);
         int ChangeBagStatus(RBCreateBag bag);
         int InsertBag(RBCreateBag bag);
         int SetUserBean(WXUserInfo bag);

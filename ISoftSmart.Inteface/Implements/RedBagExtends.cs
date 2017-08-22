@@ -42,6 +42,17 @@ namespace ISoftSmart.Inteface.Implements
                 return null;
             return result.JsonDeserialize<List<RBCreateBag>>();
         }
+        public List<RBCreateBag> GetBagInfo(RBCreateBag bag)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+            {
+                new SqlParameter("@RID",bag.RID.ToString().ToUpper()),
+            };
+            var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where RID=@RID", sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<RBCreateBag>>();
+        }
         public List<RBCreateBag> GetSendBag(RBCreateBag bag)
         {
             SqlParameter[] sp = new SqlParameter[]
