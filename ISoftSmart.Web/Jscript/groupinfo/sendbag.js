@@ -43,6 +43,7 @@ $(function () {
         bag.remark = remark;
         bag.nickname = parent.UserInfo.nickname;
         bag.currentUserImgUrl = parent.UserInfo.headimgurl;
+        debugger
         var dataJson = JSON.stringify(bag);
         $.ajax({
             url: Apiurl + "api/test/insertbag", // url  action是方法的名称
