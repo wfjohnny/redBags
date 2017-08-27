@@ -16,6 +16,9 @@ $(function () {
         var code = getUrlParam("code");
         var wxUrls = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + AppId + "&secret=" + AppSecret + "";
         var ret = callBackWeChatFunc("api/test/wxGetUserInfo", wxUrls, code, "");
-        window.location.href = HomeUrl + "?openid=" + ret.result.openid;
+        var myDate = new Date();
+        var h = myDate.getHours();
+        var m = myDate.getMinutes();
+        window.location.href = HomeUrl + "?openid=" + ret.result.openid + "&v=" + h + m;
     }
 });

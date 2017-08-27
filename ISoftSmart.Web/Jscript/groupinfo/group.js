@@ -29,12 +29,12 @@ var MessageRecord = {
     amtUserImg: ""
 };
 var openid;
-if (getUrlParam("openid") == null) {
-    openid = "olDlVsy5vYjAhbWIDMYaj5PSVp04";
-}
-else {
+//if (getUrlParam("openid") == null) {
+//    openid = "olDlVsy5vYjAhbWIDMYaj5PSVp04";
+//}
+//else {
     openid = getUrlParam("openid");
-}
+//}
 var wxUserres;
 $.ajax({
     url: Apiurl + "api/test/getWxUser", // url  action是方法的名称
@@ -100,7 +100,7 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     html += "  <div class=\"oz\"><div class=\"right\">";
     html += "                    <img src=\"" + imgurl + "\" /></div>";
     html += "   <div style=\"float:right;margin-right:10px\">";
-    html += "      <img src=\"" + Apiurl + "QRFile/" + openid + ".jpg\" style=\"width:180px;\" /> ";
+    html += "      <img src=\"" + Apiurl + "QRFile/" + openid + ".jpg\" style=\"width:210px;\" /> ";
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
@@ -147,7 +147,7 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
     html += "                     <a href=\"\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
     html += "                  </div>";
     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-    html += "        <span class=\"bubble rightBubble\">";
+    html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
     html += "            " + message + "";
     html += "            <span class=\"bottomLevel\"></span>";
     html += "           <span class=\"topLevel\"></span>";
@@ -226,7 +226,7 @@ $.connection.hub.start().done(function () {
                     html += "                     <a href=\"\"><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "                  </div>";
                     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-                    html += "        <span class=\"bubble rightBubble\">";
+                    html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
                     html += "            " + item.mContent + "";
                     html += "            <span class=\"bottomLevel\"></span>";
                     html += "           <span class=\"topLevel\"></span>";
@@ -460,7 +460,7 @@ function OpenBag(guid, customerCode) {
             if (data.code == "SCCESS") {
                 index = layer.open({
                     type: 2,
-                    content: '../Main/openbag.html',
+                    content: '../Main/openbag.html?v=1.0',
                     area: ['320px', '195px'],
                     maxmin: false,
                     closeBtn: 0,
@@ -468,7 +468,7 @@ function OpenBag(guid, customerCode) {
                     success: function (layero, index) {
                         var body = layer.getChildFrame('body', index);
                         var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
-                        body.find(':input[type=hidden]').val(guid.toUpperCase() + "_" + UserInfo.openid);
+                        body.find(':input[type=hidden]').val(guid.toUpperCase() + "|" + UserInfo.openid);
                     }
                 });
             }
@@ -483,7 +483,7 @@ function OpenBag(guid, customerCode) {
                     success: function (layero, index) {
                         var body = layer.getChildFrame('body', index);
                         var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
-                        body.find(':input[type=hidden]').val(guid + "_" + customerCode);
+                        body.find(':input[type=hidden]').val(guid + "|" + customerCode);
                     }
                 });
             }

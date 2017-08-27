@@ -44,7 +44,7 @@ namespace ISoftSmart.API.Controllers
         string RetUrl = System.Configuration.ConfigurationManager.AppSettings["RetUrl"].ToString();
         string GetUser = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={0}&openid={1}";
         string GetOpenID = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
-        int pageSize = 100;
+        int pageSize = 50;
         IDatabase db = RedisManager.Instance.GetDatabase();
         [Route("t")]
         [HttpGet]
@@ -91,7 +91,7 @@ namespace ISoftSmart.API.Controllers
             //var bag = IoCFactory.Instance.CurrentContainer.Resolve<RBCreateBag>();//注册对象
             //bag = rt.GetBag(bag);
             var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//注册对象
-            Guid rId = Guid.Parse(bagId.Split('_')[0]);
+            Guid rId = Guid.Parse(bagId.Split('|')[0]);
             try
             {
                 if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
@@ -112,7 +112,7 @@ namespace ISoftSmart.API.Controllers
                         var bag = new RBCreateBag();//注册对象
                         List<RBCreateBag> bList = new List<RBCreateBag>();
                         bag.BagStatus = 0;
-                        bag.RID = Guid.Parse(bagId.Split('_')[0]);
+                        bag.RID = Guid.Parse(bagId.Split('|')[0]);
                         bList = rt.GetBag(bag);
                         return Ok(new APIResponse<RBCreateBag>
                         {
@@ -127,7 +127,7 @@ namespace ISoftSmart.API.Controllers
                     var bag = IoCFactory.Instance.CurrentContainer.Resolve<RBCreateBag>();//注册对象
                     List<RBCreateBag> bagList = new List<RBCreateBag>();
                     bag.BagStatus = 0;
-                    bag.RID = Guid.Parse(bagId.Split('_')[0]);
+                    bag.RID = Guid.Parse(bagId.Split('|')[0]);
                     bagList = rt.GetBag(bag);
                     if (bagList != null)
                     {
@@ -192,8 +192,6 @@ namespace ISoftSmart.API.Controllers
         public IHttpActionResult OpenBag(RBCreateBag bag)
         {
             var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
-            //bag.CreateTime = DateTime.Now;
-            //var res = await Task.Run(() =>rt.GetBag(bag));
             var Code = string.Empty;
             var ResponseMessage = string.Empty;
             RBCreateBag Result = null;
@@ -322,8 +320,25 @@ namespace ISoftSmart.API.Controllers
                 lock (_locker)
                 {
                     var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
-                    bagcache.Add(bag);
-                    StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
+                    if (bagcache.Count >= 1)
+                    {
+                        if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+                        {
+                            var bagkey = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey);
+                            StackExchangeRedisExtensions.Remove(db, CacheKey.SerialKey);
+                        }
+
+                        StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
+                        var bagList = new List<RBCreateBag>();
+                        bagList.Add(bag);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagList);
+                    }
+                    else
+                    {
+                        bagcache.Add(bag);
+                        StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
+                    }
+
 
                     var res = rt.InsertBag(bag);
                     Code = "SCCESS";
@@ -361,7 +376,16 @@ namespace ISoftSmart.API.Controllers
                 lock (this)
                 {
                     #region 发送消息
-
+                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                    {
+                        var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
+                        if (bagcache.Count > 20)
+                        {
+                          var msgList=  bagcache.OrderBy(x => x.CreateTime).Take(20).ToList();
+                            StackExchangeRedisExtensions.Remove(db, CacheKey.MsgRecord);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, msgList);
+                        }
+                    }
                     var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
                     record.CreateTime = DateTime.Now;
                     if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
@@ -744,7 +768,7 @@ namespace ISoftSmart.API.Controllers
                             if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
                             {
                                 bagInfo = rt.GetBagInfo(new RBCreateBag() { RID = gRID }).FirstOrDefault();
-                                StackExchangeRedisExtensions.Set(db,CacheKey.BagKey, bagInfo);
+                                StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagInfo);
                             }
                             else
                             {
@@ -790,6 +814,7 @@ namespace ISoftSmart.API.Controllers
                         }
                         else
                         {
+                            var bagInfo1 = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).ToList();
                             bagInfo = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
                             if (bagInfo == null)
                             {
@@ -1073,12 +1098,12 @@ namespace ISoftSmart.API.Controllers
             WXUserInfo user = new WXUserInfo()
             {
                 hasImg = 1,
-                openid = wxCurrentUser == null ? "olDlVsy5vYjAhbWIDMYaj5PSVp04" : wxCurrentUser.openid
+                openid = wxCurrentUser.openid// wxCurrentUser == null ? "olDlVsy5vYjAhbWIDMYaj5PSVp04" : wxCurrentUser.openid
             };
             var res = rt.SetUserImage(user);
             if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
             {
-                var openid = wxCurrentUser == null ? "olDlVsy5vYjAhbWIDMYaj5PSVp04" : wxCurrentUser.openid;
+                var openid = wxCurrentUser.openid;// wxCurrentUser == null ? "olDlVsy5vYjAhbWIDMYaj5PSVp04" : wxCurrentUser.openid;
                 var userList = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList);
                 if (userList.Count > 0)
                 {

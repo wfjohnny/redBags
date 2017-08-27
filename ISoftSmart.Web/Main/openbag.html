@@ -2,13 +2,16 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title></title>
     <meta charset="utf-8" />
 
     <link href="../Demo/styles.css" rel="stylesheet" />
 
     <script src="../Script/jquery-2.1.4.min.js"></script>
-    <script src="../init/initData.js"></script>
+    <script src="../init/initData.js?v=1.0"></script>
     <link href="../Jscript/hongbao/css/main.css" rel="stylesheet" />
     <link href="../Jscript/hongbao/css/bagdetails.css" rel="stylesheet" />
     <style>
@@ -103,6 +106,7 @@
         var oChai = document.getElementById("chai");
         var oClose = document.getElementById("close");
         var oContainer = document.getElementById("container");
+        debugger
         oChai.onclick = function () {
             oChai.setAttribute("class", "rotate");
             var retJson = $("#bagId").val();
@@ -125,7 +129,7 @@
                     else {
                         setTimeout(function () {
                             RBCreateBag.rid = data.result.rid.toUpperCase();
-                            RBCreateBag.userId = retJson.split("_")[1];
+                            RBCreateBag.userId = retJson.split("|")[1];
                             RBCreateBag.bagAmount = data.result.bagAmount;
                             RBCreateBag.bagNum = data.result.bagNum;
                             RBCreateBag.createTime = data.result.createTime;

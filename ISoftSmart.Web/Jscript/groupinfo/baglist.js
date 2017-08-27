@@ -1,5 +1,5 @@
 ﻿var bagId = parent.getBagId();
-bagId = bagId.split("_")[0];
+bagId = bagId.split("|")[0];
 
 $(function () {
     $.ajax({

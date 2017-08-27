@@ -57,7 +57,7 @@ $(function () {
             dataType: "json",
             contentType: "application/json",
             success: function (data) {
-                parent.MessageRecord.mID = parent.newGuid().toUpperCase();
+                parent.MessageRecord.mID = parent.newGuid();
                 parent.MessageRecord.bagID = bag.rID;
                 parent.MessageRecord.mType = 1;
                 parent.MessageRecord.bagUserID = parent.UserInfo.openid;
