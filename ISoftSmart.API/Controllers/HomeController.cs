@@ -662,7 +662,7 @@ namespace ISoftSmart.API.Controllers
                                     userList = rt.GetUserInfo(new WXUserInfo() { openid = userId });
                                 }
                                 //var userBag= rt.GetUserSerial(new MyBagSerial() { RID = gRID, UserId = userId });
-                                var bagkeysss = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                                //var bagkeysss = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
                                 var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
                                 var userGetBag = ret.Where(x => x.UserId == userId).FirstOrDefault();
                                 if (userGetBag != null)
