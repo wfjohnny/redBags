@@ -63,6 +63,24 @@ $.ajax({
         }
     }
 });
+$.ajax({
+    url: Apiurl + "api/test/getUsercount", // url  action是方法的名称
+    type: "Get",
+    //data: { bagId: openid },
+    //async: false,
+    xhrFields: {
+        withCredentials: true
+    },
+    crossDomain: true,//新增cookie跨域配置
+    dataType: "json",
+    contentType: "application/json",
+    success: function (data) {
+            if (data.result != null) {
+                $('#title').html("金豆一群 (" + data.result + ") ");
+            }
+        
+    }
+});
 
 var bag = {
     rID: "",
@@ -144,7 +162,7 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
     //if (data.code == "SCCESS") {
     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
     html += " <div class=\"right\" style=\"width:20%\">";
-    html += "                     <a href=\"\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
+    html += "                     <a href=\"javascript(void:0);\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
     html += "                  </div>";
     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
     html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
@@ -223,7 +241,7 @@ $.connection.hub.start().done(function () {
                 if (item.mType == 0) {
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"right\" style=\"width:20%\">";
-                    html += "                     <a href=\"\"><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
+                    html += "                     <a href=\"javascript(void:0);\"><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "                  </div>";
                     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
                     html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";

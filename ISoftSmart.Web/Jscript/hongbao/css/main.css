@@ -59,9 +59,10 @@ body{background: #fff;}
 .cont-index{background: #ECECEC;position: fixed;width:100%;}
 
 .admin-content-list{padding:20px 10px 0 10px;margin-bottom:0;width: 100%;}
-.admin-content-list li a{display: block;width: 100%;}
-.admin-content-list li a img{width: 60px;height: 60px;}
-.admin-content-list li a p{line-height: 35px;font-size: 14px;color: #8A8A8A;margin: 0;padding-bottom: 20px;}
+.admin-content-list li{width: 24%;display: inline-block;}
+.admin-content-list li a{display: block;width: 100%;text-align: center;}
+.admin-content-list li a img{width: 60px;height: 60px;border-radius: 20px;}
+.admin-content-list li a p{line-height: 35px;font-size: 14px;color: #8A8A8A;margin: 0;padding-bottom: 20px;text-align: center;}
 
 
 /*发金蛋*/

@@ -306,6 +306,32 @@ namespace ISoftSmart.API.Controllers
                 Result = Result
             });
         }
+        [Route("getUsercount")]
+        [HttpGet]
+        public IHttpActionResult getUsercount()
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            var userList = rt.GetUserInfo(new WXUserInfo() { });
+            return Ok(new APIResponse<int>
+            {
+                Code = "SCCESS",
+                ResponseMessage = "获得人数成功！",
+                Result = userList.Count
+            });
+        }
+        [Route("getUserInfocount")]
+        [HttpGet]
+        public IHttpActionResult getInfoUsercount()
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            var userList = rt.GetUserInfo(new WXUserInfo() { });
+            return Ok(new APIResponse<List<WXUserInfo>>
+            {
+                Code = "SCCESS",
+                ResponseMessage = "获得人员信息列表成功！",
+                Result = userList
+            });
+        }
         [Route("insertbag")]
         [HttpPost]
         public IHttpActionResult InsertBag(RBCreateBag bag)
@@ -381,7 +407,7 @@ namespace ISoftSmart.API.Controllers
                         var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
                         if (bagcache.Count > 20)
                         {
-                          var msgList=  bagcache.OrderBy(x => x.CreateTime).Take(20).ToList();
+                            var msgList = bagcache.OrderByDescending(x => x.CreateTime).Take(20).ToList();
                             StackExchangeRedisExtensions.Remove(db, CacheKey.MsgRecord);
                             StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, msgList);
                         }
@@ -814,7 +840,6 @@ namespace ISoftSmart.API.Controllers
                         }
                         else
                         {
-                            var bagInfo1 = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).ToList();
                             bagInfo = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
                             if (bagInfo == null)
                             {
