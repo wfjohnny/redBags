@@ -31,6 +31,7 @@ using System.Net.Http.Headers;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
+using System.Security.Cryptography;
 
 namespace ISoftSmart.API.Controllers
 {
@@ -42,6 +43,7 @@ namespace ISoftSmart.API.Controllers
         string AppId = System.Configuration.ConfigurationManager.AppSettings["AppId"].ToString();
         string AppSecret = System.Configuration.ConfigurationManager.AppSettings["AppSecret"].ToString();
         string RetUrl = System.Configuration.ConfigurationManager.AppSettings["RetUrl"].ToString();
+        string ShareUrl = System.Configuration.ConfigurationManager.AppSettings["ShareUrl"].ToString();
         string GetUser = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={0}&openid={1}";
         string GetOpenID = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
         int pageSize = 50;
@@ -228,22 +230,29 @@ namespace ISoftSmart.API.Controllers
                             bsent.BagAmount = curAmount;
                             bsent.CreateTime = DateTime.Now;
                             bsent.RID = bag.RID;
-                            var userInfoCache = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == bag.UserId).FirstOrDefault();
-                            bsent.nickname = userInfoCache.nickname;
-                            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+                            if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
                             {
-                                var bagkey = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey);
-                                bagkey.Add(bsent);
-                                StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bagkey);
+                                var userInfoCache = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == bag.UserId).FirstOrDefault();
+                                bsent.nickname = userInfoCache.nickname;
+                                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.SerialKey))
+                                {
+                                    var bagkey = StackExchangeRedisExtensions.Get<List<MyBagSerial>>(db, CacheKey.SerialKey);
+                                    bagkey.Add(bsent);
+                                    StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bagkey);
+                                }
+                                else
+                                {
+                                    List<MyBagSerial> bsList = new List<MyBagSerial>();
+                                    bsList.Add(bsent);
+                                    StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bsList);
+                                }
                             }
                             else
                             {
-                                List<MyBagSerial> bsList = new List<MyBagSerial>();
-                                bsList.Add(bsent);
-                                StackExchangeRedisExtensions.Set(db, CacheKey.SerialKey, bsList);
+                                var user = rt.GetUserInfo(new WXUserInfo() { openid = bag.UserId }).FirstOrDefault();
+                                bsent.nickname = user.nickname;
                             }
                             var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
-
                             Result.SerialList = seriaList;
                             rt.InsertSerial(bsent);
                         }
@@ -311,7 +320,7 @@ namespace ISoftSmart.API.Controllers
         public IHttpActionResult getUsercount()
         {
             var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
-            var userList = rt.GetUserInfo(new WXUserInfo() { });
+            var userList = rt.GetUserInfo(new WXUserInfo() { }).Where(x => x.Invite == 1).ToList();
             return Ok(new APIResponse<int>
             {
                 Code = "SCCESS",
@@ -324,7 +333,7 @@ namespace ISoftSmart.API.Controllers
         public IHttpActionResult getInfoUsercount()
         {
             var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
-            var userList = rt.GetUserInfo(new WXUserInfo() { });
+            var userList = rt.GetUserInfo(new WXUserInfo() { }).Where(x => x.Invite == 1).ToList();
             return Ok(new APIResponse<List<WXUserInfo>>
             {
                 Code = "SCCESS",
@@ -437,11 +446,19 @@ namespace ISoftSmart.API.Controllers
                             Code = "SCCESS";
                             ResponseMessage = "保存聊天记录成功！";
                         }
-                        else
+                        else if(record.MType==2)//收款
                         {
                             bagcache.Add(record);
                             StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
                             var res = rt.InsertMessageRecordByImg(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                        else if (record.MType ==3)//图片
+                        {
+                            bagcache.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                            var res = rt.InsertMessageRecordByImgs(record);
                             Code = "SCCESS";
                             ResponseMessage = "保存聊天记录成功！";
                         }
@@ -468,13 +485,23 @@ namespace ISoftSmart.API.Controllers
                             Code = "SCCESS";
                             ResponseMessage = "保存聊天记录成功！";
                         }
-                        else
+                        else if (record.MType == 2)
                         {
                             List<MessageRecord> rec = new List<MessageRecord>();
                             record.BagID = record.BagID.ToString();
                             rec.Add(record);
                             StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
                             var res = rt.InsertMessageRecordByImg(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                        else if (record.MType == 3)
+                        {
+                            List<MessageRecord> rec = new List<MessageRecord>();
+                            record.BagID = record.BagID.ToString();
+                            rec.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                            var res = rt.InsertMessageRecordByImgs(record);
                             Code = "SCCESS";
                             ResponseMessage = "保存聊天记录成功！";
                         }
@@ -625,6 +652,49 @@ namespace ISoftSmart.API.Controllers
                 Result = user
             });
         }
+        [Route("getUserList")]
+        [HttpPost]
+        public IHttpActionResult GetUserList(PageModel info)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            List<WXUserInfo> user = new List<WXUserInfo>();
+            int count = 0;
+            WXUserInfo wxinfo = JsonConvert.DeserializeObject<WXUserInfo>(info.Model.ToString());
+            var userlist = rt.GetUserInfoByPage(new WXUserInfo() { Invite = wxinfo.Invite,nickname=wxinfo.nickname },info.PageIndex,info.PageSize,out count);
+            user = userlist;
+            PageModel pm = new PageModel();
+            pm.Model = user;
+            pm.PageIndex = info.PageIndex;
+            pm.PageSize = info.PageSize;
+            pm.Count = count;
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            ResponseMessage = "获取已抢用户列表成功！";
+            return Ok(new APIResponse<PageModel>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = pm
+            });
+        }
+        [Route("changshareStatus")]
+        [HttpPost]
+        public IHttpActionResult ChangeShareStatus(PageModel page)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            WXUserInfo wxinfo = JsonConvert.DeserializeObject<WXUserInfo>(page.Model.ToString());
+            var userlist = rt.ChangeUserStatus(new WXUserInfo() { Invite = wxinfo.Invite, openid =wxinfo.openid  });
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            ResponseMessage = "修改分享状态成功！";
+            return Ok(new APIResponse<PageModel>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+            });
+        }
         [Route("saveUserBagWinner")]
         [HttpPost]
         public IHttpActionResult SaveUserBagWinner(BagWinner win)
@@ -661,6 +731,56 @@ namespace ISoftSmart.API.Controllers
                 ResponseMessage = ResponseMessage,
             });
         }
+        [Route("getsharepara")]
+        [HttpPost]
+        public IHttpActionResult GetSharePara()
+        {
+            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            var tsStr = Convert.ToInt64(ts.TotalSeconds).ToString();
+            Random random = new Random();
+            var mdt = GetMD5(random.Next(1000).ToString(), "GBK");
+            WxShareModel model = new WxShareModel();
+            model.appid = AppId;
+            model.timestamp = tsStr;
+            model.nonceStr = mdt;
+            if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.WxAccessToken))
+            {
+                string accessToken = string.Empty;
+                string openid = string.Empty;
+                getAccessTokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + AppId + "&secret=" + AppSecret + "";
+                GetAccessToken("", out accessToken, out openid);
+                StackExchangeRedisExtensions.Set(db, CacheKey.WxAccessToken, accessToken);
+            }
+            var token = StackExchangeRedisExtensions.Get(db, CacheKey.WxAccessToken);
+            if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.Jsapi_ticket))
+            {
+                string urljson = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=" + token + "&type=jsapi";
+
+                var jsonStr = CallBackUrl(urljson);
+                var dep = JsonConvert.DeserializeObject<WxRetMode>(jsonStr);
+                if (jsonStr.Contains("ticket"))
+                {
+                    model.jsapi_ticket = dep.ticket;
+                    StackExchangeRedisExtensions.Set(db, CacheKey.Jsapi_ticket, dep.ticket, 120);
+                }
+            }
+            else
+            {
+                model.jsapi_ticket = StackExchangeRedisExtensions.Get<string>(db, CacheKey.Jsapi_ticket);
+            }
+            model.signature = Getsignature(model.nonceStr, tsStr, model.jsapi_ticket);
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            ResponseMessage = "获取分享链接参数！";
+            return Ok(new APIResponse<WxShareModel>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = model
+            });
+        }
+
         [Route("getHasBag")]
         [HttpGet]
         public IHttpActionResult GetHasBag(string bagId, string userId)
@@ -1229,7 +1349,191 @@ namespace ISoftSmart.API.Controllers
             }
 
         }
+        [Route("getshareuser")]
+        [HttpGet]
+        public IHttpActionResult GetShareUser(string url, string code)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            ////获取code和state
+            //var wxUrls = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + AppId + "&redirect_uri=" + ShareUrl + "&response_type=code&scope=snsapi_base&state=1#wechat_redirect";
+            getAccessTokenUrl = url;
 
+            //var jsonStr = CallBackUrl(wxUrls);
+            //var dep1 = JsonConvert.DeserializeObject<WxRetMode>(jsonStr);
+            //获取用户id
+            Code = "SCCESS";
+            string accessToken = string.Empty;
+            string openid = string.Empty;
+            WXUserInfo UserInfo = new WXUserInfo();
+            var tokens = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + AppId + "&secret=" + AppSecret + "";
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            try
+            {
+                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxAccessToken))
+                {
+                    var wxToken = StackExchangeRedisExtensions.Get<string>(db, CacheKey.WxAccessToken);
+                    var urls = string.Format(GetOpenID, AppId, AppSecret, code);
+                    var msg = CallBackUrl(urls);//获取用户OpenId
+                                                //获取用户信息
+                    var dep = JsonConvert.DeserializeObject<AccessTokenOpenId>(msg);
+                    var token = StackExchangeRedisExtensions.Get(db, CacheKey.WxAccessToken);
+                    var UserInfoMsg = CallBackUrl(string.Format(GetUser, token, dep.openid));
+                    UserInfo = JsonConvert.DeserializeObject<WXUserInfo>(UserInfoMsg);
+                    if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                    {
+                        var userMsg = rt.GetUserInfo(UserInfo);
+                        if (userMsg == null)
+                        {
+                            UserInfo.hasImg = 0;
+                            UserInfo.Invite = 0;
+                            rt.InsertUserInfo(UserInfo);
+                        }
+                        else
+                        {
+                            UserInfo.hasImg = userMsg.FirstOrDefault().hasImg;
+                        }
+                    }
+                    else
+                    {
+                        UserInfo.hasImg = 0;
+                        var userMsg = rt.GetUserInfo(new WXUserInfo() { openid = UserInfo.openid });
+                        if (userMsg == null)
+                        {
+                            UserInfo.hasImg = 0;
+                            UserInfo.Invite = 0;
+                            rt.InsertUserInfo(UserInfo);
+                        }
+                        else
+                        {
+                            UserInfo = userMsg.FirstOrDefault();
+                        }
+                    }
+                }
+                else
+                {
+                    GetAccessToken("", out accessToken, out openid);
+                    StackExchangeRedisExtensions.Set(db, CacheKey.WxAccessToken, accessToken, 120);
+                    var urls = string.Format(GetOpenID, AppId, AppSecret, code);
+                    var openIdmsg = CallBackUrl(urls);//获取用户OpenId
+                    var dep = JsonConvert.DeserializeObject<WXUserInfo>(openIdmsg);
+                    var UserInfoMsg = CallBackUrl(string.Format(GetUser, accessToken, dep.openid));
+                    UserInfo = JsonConvert.DeserializeObject<WXUserInfo>(UserInfoMsg);
+
+                    var wxUserList = new List<WXUserInfo>();
+                    var userMsg = rt.GetUserInfo(UserInfo);
+                    if (userMsg == null)
+                    {
+                        UserInfo.hasImg = 0;
+                        UserInfo.Invite = 0;
+                        rt.InsertUserInfo(UserInfo);
+                    }
+                    else
+                    {
+                        UserInfo.hasImg = userMsg.FirstOrDefault().hasImg;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                StackExchangeRedisExtensions.Set(db, "02", ex.Message);
+            }
+
+            ResponseMessage = "获取用户信息成功！";
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = UserInfo
+            });
+        }
+        [Route("changeuserstatus")]
+        [HttpPost]
+        public IHttpActionResult ChangeUserStatus(WXUserInfo info)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            WXUserInfo UserInfo = new WXUserInfo();
+            var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            try
+            {
+                var userMsg = rt.GetUserInfo(new WXUserInfo() { openid = info.openid });
+                if (userMsg == null)
+                {
+                    rt.InsertUserInfo(UserInfo);
+                }
+                else
+                {
+                    rt.ChangeUserStatus(new WXUserInfo() { openid = info.openid, Invite = info.Invite });
+                }
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "02", ex.Message);
+            }
+
+            ResponseMessage = "获取用户信息成功！";
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = UserInfo
+            });
+        }
+        /** 获取大写的MD5签名结果 */
+        public static string GetMD5(string encypStr, string charset)
+        {
+            string retStr;
+            MD5CryptoServiceProvider m5 = new MD5CryptoServiceProvider();
+
+            //创建md5对象
+            byte[] inputBye;
+            byte[] outputBye;
+
+            //使用GB2312编码方式把字符串转化为字节数组．
+            try
+            {
+                inputBye = Encoding.GetEncoding(charset).GetBytes(encypStr);
+            }
+            catch (Exception ex)
+            {
+                inputBye = Encoding.GetEncoding("GB2312").GetBytes(encypStr);
+            }
+            outputBye = m5.ComputeHash(inputBye);
+
+            retStr = System.BitConverter.ToString(outputBye);
+            retStr = retStr.Replace("-", "").ToUpper();
+            return retStr;
+        }
+        public string Getsignature(string nonceStr, string timespanstr, string ticket, string type = "")
+        {
+            var token = StackExchangeRedisExtensions.Get(db, CacheKey.WxAccessToken);
+            string url = ShareUrl;
+            string str = string.Empty;
+
+            str = "jsapi_ticket=" + ticket + "&noncestr=" + nonceStr +
+        "&timestamp=" + timespanstr + "&url=" + url + "?oid=" + wxCurrentUser.openid;// +"&wxref=mp.weixin.qq.com";
+
+            string singature = getSha1(str).ToLower();
+            string ss = singature;
+            return ss;
+        }
+        public static String getSha1(String str)
+        {
+            //建立SHA1对象
+            SHA1 sha = new SHA1CryptoServiceProvider();
+            //将mystr转换成byte[] 
+            ASCIIEncoding enc = new ASCIIEncoding();
+            byte[] dataToHash = enc.GetBytes(str);
+            //Hash运算
+            byte[] dataHashed = sha.ComputeHash(dataToHash);
+            //将运算结果转换成string
+            string hash = BitConverter.ToString(dataHashed).Replace("-", "");
+            return hash;
+        }
         #endregion 获取微信凭证
 
     }

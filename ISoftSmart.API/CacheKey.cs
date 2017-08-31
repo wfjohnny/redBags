@@ -11,6 +11,7 @@ namespace ISoftSmart.API
         public const string OpenBagKey = "OpenBagKey";
         public const string SerialKey = "SerialKey";
         public const string WxAccessToken = "WxAccessToken";
+        public const string Jsapi_ticket = "Jsapi_ticket";
         public const string WxUserList = "WxUserList";
         public const string MsgRecord = "MsgRecord";
         public const string Winner = "Winner";

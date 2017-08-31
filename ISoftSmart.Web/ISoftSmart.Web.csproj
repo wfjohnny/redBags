@@ -133,6 +133,7 @@
   <ItemGroup>
     <Content Include="Authorization\auth.html" />
     <Content Include="Ctrl\ctrlCenter.html" />
+    <Content Include="Ctrl\invite.html" />
     <Content Include="Ctrl\js\ctrl.js" />
     <Content Include="Ctrl\style\images\140x140.gif" />
     <Content Include="Ctrl\style\images\170x170.gif" />
@@ -331,11 +332,15 @@
     <Content Include="Jscript\css\bubbles.css" />
     <Content Include="Jscript\css\csshake.min.css" />
     <Content Include="Jscript\css\style.css" />
+    <Content Include="Jscript\demo.js" />
     <Content Include="Jscript\groupinfo\auth.js" />
     <Content Include="Jscript\groupinfo\baglist.js" />
     <Content Include="Jscript\groupinfo\group.js" />
+    <Content Include="Jscript\groupinfo\invite.js" />
     <Content Include="Jscript\groupinfo\menu.js" />
     <Content Include="Jscript\groupinfo\sendbag.js" />
+    <Content Include="Jscript\groupinfo\share.js" />
+    <Content Include="Jscript\groupinfo\sharebox.js" />
     <Content Include="Jscript\groupinfo\waitlist.js" />
     <Content Include="Jscript\hongbao\1enter.html" />
     <Content Include="Jscript\hongbao\3发金蛋.html" />
@@ -401,6 +406,8 @@
     <Content Include="Main\menu.html" />
     <Content Include="Main\openbag.html" />
     <Content Include="Main\sendbags.html" />
+    <Content Include="Main\share.html" />
+    <Content Include="Main\testtt.html" />
     <Content Include="Main\uploadfile.html" />
     <Content Include="Main\waitList.html" />
     <Content Include="Script\jquery.signalR-2.2.2.js" />

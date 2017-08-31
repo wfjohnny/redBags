@@ -77,7 +77,7 @@ namespace ISoftSmart.Inteface.Implements
                 {
                 new SqlParameter("@OpenId"," 1=1 ")
                 };
-                var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[UserInfo] where 1=1", sp,CommandType.Text);
+                var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[UserInfo] where 1=1", sp, CommandType.Text);
                 if (result == "")
                     return null;
                 return result.JsonDeserialize<List<WXUserInfo>>();
@@ -95,6 +95,66 @@ namespace ISoftSmart.Inteface.Implements
             }
 
         }
+        /// <summary>
+        /// 获取用户信息
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public List<WXUserInfo> GetUserInfoByPage(WXUserInfo user, int pageindex, int pagesize,out int pageCount)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            List<SqlParameter> spList = new List<SqlParameter>();
+            string strWhere = string.Empty;
+            string countsql = "select * from UserInfo where 1=1";
+            string sql = @"SELECT TOP " + pagesize + @" * FROM
+                (
+                    SELECT ROW_NUMBER() OVER (ORDER BY openid) AS RowNumber,* FROM [UserInfo]
+                )   as A  
+            WHERE RowNumber > " + pagesize + @"*(" + pageindex + @"-1) ";
+            if (user.nickname != null)
+            {
+                spList.Add(new SqlParameter("@NickName", user.nickname));
+                strWhere += " and NickName like '%" + user.nickname + "%' ";
+            }
+            spList.Add(new SqlParameter("@Invite", user.Invite));
+            if (user.Invite!= -1)
+            {
+                strWhere += " and Invite = " + user.Invite + " ";
+            }
+          
+            
+            SqlParameter[] sp = spList.ToArray();
+            SqlParameter[] spcount = spList.ToArray();
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(sql+strWhere, sp, CommandType.Text);
+            var countresult = Dapper.Helper.SQLHelper.QueryDataSet(countsql+strWhere, spcount, CommandType.Text);
+            if (countresult == "")
+                pageCount = 0;
+            else
+            {
+                pageCount = countresult.JsonDeserialize<List<WXUserInfo>>().Count;
+            }
+               
+            if (result == "")
+            {
+                return null;
+            }
+            return result.JsonDeserialize<List<WXUserInfo>>();
+
+
+        }
+        public int ChangeUserStatus(WXUserInfo bag)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+           {
+                new SqlParameter("@OpenId",bag.openid),
+                new SqlParameter("@Invite",bag.Invite)
+           };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            UPDATE[dbo].[UserInfo]
+               SET[Invite] =@Invite
+             WHERE  [OpenId] =@OpenId", sp, CommandType.Text);
+            return result;
+        }
         public int InsertUserInfo(WXUserInfo user)
         {
             SqlParameter[] sp = new SqlParameter[]
@@ -108,6 +168,7 @@ namespace ISoftSmart.Inteface.Implements
                  new SqlParameter("@City",user.city),
                  new SqlParameter("@Sex",user.sex),
                  new SqlParameter("@HasImg",user.hasImg),
+                 new SqlParameter("@Invite",user.Invite),
               };
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[UserInfo]
            ([UserId]
@@ -118,7 +179,8 @@ namespace ISoftSmart.Inteface.Implements
            ,[Province]
            ,[City]
            ,[Sex]
-           ,[HasImg])
+           ,[HasImg]
+            ,Invite)
      VALUES
            (@UserId
            ,@OpenId
@@ -128,7 +190,8 @@ namespace ISoftSmart.Inteface.Implements
            ,@Province
            ,@City
            ,@Sex
-           ,@HasImg)", sp, CommandType.Text);
+           ,@HasImg
+            ,@Invite)", sp, CommandType.Text);
             return result;
         }
         public List<MyBagSerial> GetUserSerialList(MyBagSerial my)
@@ -361,6 +424,33 @@ namespace ISoftSmart.Inteface.Implements
                    ,@MType
                    ,@AmtUserID
                    ,@AmtUserImg
+                   ,@CreateTime)", sp, CommandType.Text);
+            return result;
+        }
+        public int InsertMessageRecordByImgs(MessageRecord record)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@MID",Guid.NewGuid()),
+                 new SqlParameter("@MType",record.MType),
+                 new SqlParameter("@HeadImgUrl",record.HeadImgUrl),
+                 new SqlParameter("@ImgUserID",record.ImgUserID),
+                 new SqlParameter("@ImgUrl",record.ImgUrl),
+                 new SqlParameter("@CreateTime",record.CreateTime),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
+                   ([MID]
+                   ,[MType]
+                    ,[HeadImgUrl]
+                   ,[ImgUserID]
+                   ,[ImgUrl]
+                   ,[CreateTime])
+             VALUES
+                   (@MID
+                   ,@MType
+                    ,@HeadImgUrl
+                   ,@ImgUserID
+                   ,@ImgUrl
                    ,@CreateTime)", sp, CommandType.Text);
             return result;
         }

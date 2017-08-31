@@ -56,6 +56,7 @@
     <Compile Include="JObjectParse.cs" />
     <Compile Include="ModelMaster.cs" />
     <Compile Include="PageData.cs" />
+    <Compile Include="PageModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RB\My\MyRBCreateBag.cs" />
     <Compile Include="RB\RBBagSerial.cs" />
@@ -67,6 +68,8 @@
     <Compile Include="WX\AccessTokenOpenId.cs" />
     <Compile Include="WX\MessageRecord.cs" />
     <Compile Include="WX\UserOpenIdInfo.cs" />
+    <Compile Include="WX\WxRetMode.cs" />
+    <Compile Include="WX\WxShareModel.cs" />
     <Compile Include="WX\WXUserInfo.cs" />
   </ItemGroup>
   <ItemGroup>

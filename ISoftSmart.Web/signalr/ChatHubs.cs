@@ -32,9 +32,9 @@ namespace ISoftSmart.Web.signalr
         /// 发图片
         /// </summary>
         /// <param name="message"></param>
-        public void SendImgMessage(string typeid, string userHeadImg)
+        public void SendImgMessage(string typeid,string openid, string userHeadImg)
         {
-            Clients.All.loadImgMessage(typeid, userHeadImg);
+            Clients.All.loadImgMessage(typeid,openid, userHeadImg);
         }
         /// <summary>
         /// 收款码

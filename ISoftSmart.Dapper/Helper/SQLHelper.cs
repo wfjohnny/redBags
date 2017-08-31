@@ -148,6 +148,7 @@ namespace ISoftSmart.Dapper.Helper
                         {
                             DataSet ds = new DataSet();
                             da.Fill(ds);
+                            cmd.Parameters.Clear();
                             return ds.GetJsonByDataset();
                         }
                     }

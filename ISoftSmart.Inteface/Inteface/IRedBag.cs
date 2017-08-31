@@ -27,7 +27,11 @@ namespace ISoftSmart.Inteface.Inteface
         int InsertMessageRecordByText(MessageRecord message);
         int InsertMessageRecordByBag(MessageRecord msg);
         int InsertMessageRecordByImg(MessageRecord record);
+        int InsertMessageRecordByImgs(MessageRecord record);
+
         List<MessageRecord> GetMsgList(DateTime startTime, DateTime endTime);
         int SetUserImage(WXUserInfo info);
+        int ChangeUserStatus(WXUserInfo bag);
+        List<WXUserInfo> GetUserInfoByPage(WXUserInfo user, int pageindex, int pagesize,out int pageCount);
     }
 }

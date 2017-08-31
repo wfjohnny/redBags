@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分享</title>
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/amazeui.css" />
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/swiper-3.4.2.min.css" />
+    <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/main.css" />
+    <script src="../Script/jquery-2.1.4.min.js"></script>
+    <script src="../init/initData.js"></script>
+    <script src="../Jscript/layer/layer.js"></script>
+    <script>
+        //var customerNick = "Customer" + Math.random().toString().substring(2, 5);
+        //获取url中的参数
+        function getUrlParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
+            var r = window.location.search.substr(1).match(reg); //匹配目标参数
+            if (r != null) return unescape(r[2]); return null; //返回参数值
+        }
+        var wxUserInfo = {
+            city: "",
+            country: "",
+            headimgurl: "",
+            nickname: "",
+            openid: "",
+            privilege: "",
+            province: "",
+            sex: "",
+            unionid: "",
+            invite: ""
+        };
+        var openid = "";
+        var rr = getUrlParam("code");
+        if (getUrlParam("code") == null && getUrlParam("state") == null) {
+
+            var RetUrl = "http://www.isoftsmart.com/bagWeb/Main/share.html";
+            var wxUrls = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=" + AppId + "&redirect_uri=" + RetUrl + "&response_type=code&scope=snsapi_base&state=1#wechat_redirect";
+            window.location.href = wxUrls;
+        }
+        else {
+            var code = getUrlParam("code");
+            var wxUrls = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=" + AppId + "&secret=" + AppSecret + "";
+            $.ajax({
+                url: Apiurl + "api/test/GetShareUser", // url  action是方法的名称
+                type: "Get",
+                data: { url: wxUrls, code: code },
+                //async: false,
+                xhrFields: {
+                    withCredentials: true
+                },
+                crossDomain: true,//新增cookie跨域配置
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    if (data.code == "SCCESS") {
+                        if (data.result != null) {
+                            wxUserInfo.city = data.result.city;
+                            wxUserInfo.country = data.result.country;
+                            wxUserInfo.headimgurl = data.result.headimgurl;
+                            wxUserInfo.nickname = data.result.nickname;
+                            wxUserInfo.openid = data.result.openid;
+                            wxUserInfo.privilege = data.result.privilege;
+                            wxUserInfo.province = data.result.province;
+                            wxUserInfo.sex = data.result.sex;
+                            wxUserInfo.unionid = data.result.unionid;
+                            if (data.result.invite == 0) {
+                                $("#closed").hide();
+                                $("#facepreview").html("您已被邀请进入群聊<br/>是否接受邀请？");
+                                $("#btnshare").show();
+                                $("#divdone").show();
+                                $("#btncancel").hide();
+                                $("#divcancel").hide();
+                            }
+                            else if (data.result.invite == 1) {
+                                var RetUrl = "http://www.isoftsmart.com/bagWeb/Authorization/auth.html";
+                                window.location.href = RetUrl;
+                            }
+                            else if (data.result.invite == 2) {
+                                $("#facepreview").html("您已提交申请<br/>请等待群主同意");
+                            }
+                            else {
+                                $("#facepreview").html("您已提交申请<br/>请等待群主同意");
+                                $("#btnshare").show();
+                                $("#btncancel").show();
+                                $("#btncancel").val("关   闭");
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    <script src="../Jscript/groupinfo/share.js"></script>
+</head>
+
+
+<body>
+    <input type="hidden" id="haintive" />
+    <div class="hongbao-top pr am-text-center c2" style="height:60px">
+        <a class="pa shut-fa c3" href="javascript:void(0);" id="closed" style="display:none">关闭</a>
+    </div>
+    <div class="floats" style="text-align:center;border: none;width: 100%;">
+        <p id="facepreview" style="height:240px;width: 100%;display: block;"></p>
+        <a href="#" id="btnshare" style="width: 80%;margin: auto;position: relative;text-decoration: none;display: block;">
+            <div id="divdone" style="display:none;width: 100%;height: 40px;line-height:40px;border: 1px solid #ddd;border-radius: 5px;background: #19AC18;color: #fff;font-size: 16px;text-align: center;">
+                接受邀请
+            </div>
+        </a>
+        <br />
+        <a href="#" id="btncancel" style="width: 80%;margin: auto;position: relative;text-decoration: none;display: block;">
+            <div id="divcancel" style="display:none;width: 100%;height: 40px;line-height:40px;border: 1px solid #ddd;border-radius: 5px;background: white;color: black;font-size: 16px;text-align: center;">
+                拒绝邀请
+            </div>
+        </a>
+    </div>
+</body>
+</html>

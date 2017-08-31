@@ -19,6 +19,6 @@ $(function () {
         var myDate = new Date();
         var h = myDate.getHours();
         var m = myDate.getMinutes();
-        window.location.href = HomeUrl + "?openid=" + ret.result.openid + "&v=" + h + m;
+        window.location.href = HomeUrl + "?oid=" + ret.result.openid;
     }
 });

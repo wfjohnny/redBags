@@ -26,14 +26,17 @@ var MessageRecord = {
     bagUserID: "",
     bagRemark: "",
     amtUserID: "",
-    amtUserImg: ""
+    amtUserImg: "",
+    imgUserID: "",
+    imgUrl:""
+
 };
 var openid;
 //if (getUrlParam("openid") == null) {
 //    openid = "olDlVsy5vYjAhbWIDMYaj5PSVp04";
 //}
 //else {
-    openid = getUrlParam("openid");
+openid = getUrlParam("oid");
 //}
 var wxUserres;
 $.ajax({
@@ -59,6 +62,11 @@ $.ajax({
                 UserInfo.province = data.result.province;
                 UserInfo.sex = data.result.sex;
                 UserInfo.unionid = data.result.unionid;
+
+                if (data.result.invite != 1) {
+                    layer.msg("您没有接受邀请，不能进入群聊");
+                    wx.closeWindow();
+                }
             }
         }
     }
@@ -75,10 +83,10 @@ $.ajax({
     dataType: "json",
     contentType: "application/json",
     success: function (data) {
-            if (data.result != null) {
-                $('#title').html("金豆一群 (" + data.result + ") ");
-            }
-        
+        if (data.result != null) {
+            $('#title').html("金豆一群 (" + data.result + ") ");
+        }
+
     }
 });
 
@@ -124,14 +132,13 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     $('#contentArea').scrollTop($('.bd').height());
 
 };
-chat.client.loadImgMessage = function (typeid, imgurl) {
+chat.client.loadImgMessage = function (typeid,userID, imgurl) {
     var html = "";
     var myDate = new Date();
     var h = myDate.getHours();
     var m = myDate.getMinutes();
     var type = "";
-    if (typeid == "1")
-    {
+    if (typeid == "1") {
         type = "start";
     }
     if (typeid == "2") {
@@ -154,6 +161,29 @@ chat.client.loadImgMessage = function (typeid, imgurl) {
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
+    debugger
+    MessageRecord.mID = newGuid();
+    MessageRecord.mType = 3;//收款图片
+    MessageRecord.imgUserID = userID;
+    MessageRecord.headImgUrl = imgurl;
+    MessageRecord.imgUrl =Weburl + "image/" + type + ".png";
+    var dataJson = JSON.stringify(MessageRecord);
+    $.ajax({
+        url: Apiurl + "api/test/istText", // url  action是方法的名称
+        type: "Post",
+        data: dataJson,
+        //async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            //resdata = data;
+           // chat.server.sendAmtMessage(userID, headUrl);
+        }
+    });
 
 };
 chat.client.loadMessage = function (message, userImg, curUser, time) {
@@ -264,12 +294,21 @@ $.connection.hub.start().done(function () {
                     html += "</div>";
                     html += "</div> </li>";
                 }
-                else {
+                else if (item.mType == 2) {
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += "  <div class=\"oz\"><div class=\"right\" style=\"width:20%\">";
                     html += "                    <img src=\"" + item.amtUserImg + "\"  style=\"width:3.5em;height:3.5em\"/></div>";
                     html += "   <div style=\"float:right;margin-right:10px\">";
                     html += "      <img src=\"" + Apiurl + "QRFile/" + item.amtUserID + ".jpg\" style=\"width:180px;\" /> ";
+                    html += "   </div></li>";
+
+                }
+                else if (item.mType ==3) {
+                    html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                    html += "  <div class=\"oz\"><div class=\"right\">";
+                    html += "                    <img src=\"" + item.imgUrl + "\" /></div>";
+                    html += "   <div style=\"float:right;margin-right:10px\">";
+                    html += "      <img src=\"" +item.imgUrl+"\" style=\"width:100px;\" /> ";
                     html += "   </div></li>";
 
                 }
@@ -336,14 +375,14 @@ $.connection.hub.start().done(function () {
             }
         });
     });
-   
+
 });
 function sendImg(type) {
     var headUrl = UserInfo.headimgurl;
-    chat.server.sendImgMessage(type, headUrl);
+    chat.server.sendImgMessage(type,UserInfo.openid, headUrl);
 }
 //$('#start').click(function () {
-  
+
 //})
 //$("#stop").click(function () {
 //    var headUrl = UserInfo.headimgurl;

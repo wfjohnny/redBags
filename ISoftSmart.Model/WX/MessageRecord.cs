@@ -19,6 +19,8 @@ namespace ISoftSmart.Model.WX
         public string HeadImgUrl { get; set; }
         public string AmtUserImg { get; set; }
         public string AmtUserID { get; set; }
+        public string ImgUrl { get; set; }
+        public string ImgUserID { get; set; }
 
     }
 }
