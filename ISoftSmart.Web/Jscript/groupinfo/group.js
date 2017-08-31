@@ -153,6 +153,7 @@ chat.client.loadImgMessage = function (typeid,userID, imgurl) {
     if (typeid == "5") {
         type = "next";
     }
+    debugger
     html += "<li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
     html += "  <div class=\"oz\"><div class=\"right\">";
     html += "                    <img src=\"" + imgurl + "\" /></div>";
@@ -306,7 +307,7 @@ $.connection.hub.start().done(function () {
                 else if (item.mType ==3) {
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += "  <div class=\"oz\"><div class=\"right\">";
-                    html += "                    <img src=\"" + item.imgUrl + "\" /></div>";
+                    html += "                    <img src=\"" + item.headImgUrl + "\" /></div>";
                     html += "   <div style=\"float:right;margin-right:10px\">";
                     html += "      <img src=\"" +item.imgUrl+"\" style=\"width:100px;\" /> ";
                     html += "   </div></li>";
