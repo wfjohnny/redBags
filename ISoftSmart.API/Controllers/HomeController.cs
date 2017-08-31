@@ -1391,7 +1391,7 @@ namespace ISoftSmart.API.Controllers
                         }
                         else
                         {
-                            UserInfo.hasImg = userMsg.FirstOrDefault().hasImg;
+                            UserInfo = userMsg.FirstOrDefault();
                         }
                     }
                     else
