@@ -550,7 +550,7 @@ namespace ISoftSmart.API.Controllers
                     if (msgList != null)
                     {
                         StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, msgList);
-                        Result = msgList.Skip(pageSize * (pageIndex - 1)).OrderByDescending(x => x.CreateTime).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
+                        Result = msgList.Skip(pageSize * (pageIndex - 1)).OrderBy(x => x.CreateTime).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
                     }
                     Code = "SCCESS";
                     ResponseMessage = "获取聊天记录成功！";
