@@ -153,7 +153,6 @@ chat.client.loadImgMessage = function (typeid,userID, imgurl) {
     if (typeid == "5") {
         type = "next";
     }
-    debugger
     html += "<li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
     html += "  <div class=\"oz\"><div class=\"right\">";
     html += "                    <img src=\"" + imgurl + "\" /></div>";
@@ -162,7 +161,6 @@ chat.client.loadImgMessage = function (typeid,userID, imgurl) {
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
-    debugger
     MessageRecord.mID = newGuid();
     MessageRecord.mType = 3;//收款图片
     MessageRecord.imgUserID = userID;

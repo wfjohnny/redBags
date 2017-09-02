@@ -1,6 +1,6 @@
 ﻿var info = {
     pageindex: 1,
-    pagesize: 3,
+    pagesize: 10,
     model:
         {
             invite: 0,

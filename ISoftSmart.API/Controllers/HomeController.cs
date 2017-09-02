@@ -732,8 +732,8 @@ namespace ISoftSmart.API.Controllers
             });
         }
         [Route("getsharepara")]
-        [HttpPost]
-        public IHttpActionResult GetSharePara()
+        [HttpGet]
+        public IHttpActionResult GetSharePara(string oid)
         {
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
             var tsStr = Convert.ToInt64(ts.TotalSeconds).ToString();
@@ -768,7 +768,7 @@ namespace ISoftSmart.API.Controllers
             {
                 model.jsapi_ticket = StackExchangeRedisExtensions.Get<string>(db, CacheKey.Jsapi_ticket);
             }
-            model.signature = Getsignature(model.nonceStr, tsStr, model.jsapi_ticket);
+            model.signature = Getsignature(model.nonceStr, tsStr, model.jsapi_ticket,oid);
             var Code = string.Empty;
             var ResponseMessage = string.Empty;
             Code = "SCCESS";
@@ -960,7 +960,11 @@ namespace ISoftSmart.API.Controllers
                         }
                         else
                         {
-                            bagInfo = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
+                            bagInfo = rt.GetBagInfo(new RBCreateBag() { RID = gRID }).FirstOrDefault();
+                           // StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagInfo);
+                            //var ss=StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID);
+
+                            //bagInfo = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
                             if (bagInfo == null)
                             {
                                 bagInfo = rt.GetBagInfo(new RBCreateBag() { RID = gRID }).FirstOrDefault();
@@ -1508,14 +1512,14 @@ namespace ISoftSmart.API.Controllers
             retStr = retStr.Replace("-", "").ToUpper();
             return retStr;
         }
-        public string Getsignature(string nonceStr, string timespanstr, string ticket, string type = "")
+        public string Getsignature(string nonceStr, string timespanstr, string ticket,string oid, string type = "")
         {
             var token = StackExchangeRedisExtensions.Get(db, CacheKey.WxAccessToken);
             string url = ShareUrl;
             string str = string.Empty;
 
             str = "jsapi_ticket=" + ticket + "&noncestr=" + nonceStr +
-        "&timestamp=" + timespanstr + "&url=" + url + "?oid=" + wxCurrentUser.openid;// +"&wxref=mp.weixin.qq.com";
+        "&timestamp=" + timespanstr + "&url=" + url + "?oid=" + oid;// +"&wxref=mp.weixin.qq.com";
 
             string singature = getSha1(str).ToLower();
             string ss = singature;
