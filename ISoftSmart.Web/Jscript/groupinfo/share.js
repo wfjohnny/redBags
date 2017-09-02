@@ -3,7 +3,8 @@
         location.href = Weburl + "Authorization/auth.html";
     });
     $("#btnshare").click(function () {
-        wxUserInfo.invite = 2;
+        wxUserInfo.invite = 1;
+        //wxUserInfo.invite = 2;
         debugger
         var dataJson = JSON.stringify(wxUserInfo);
         $.ajax({

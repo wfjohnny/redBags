@@ -71,19 +71,18 @@
                                 已存入零钱，可直接购买
                             </p>-->
                             <div class="xqliuyan">
-                                <p class="xqdmds ">
+                                <p class="xqdmds " id="xqd">
                                     以下是已抢到的用户
                                 </p>
                                 <div class="xqliuyanlb">
                                     <!--<div class="chaileft" id="chaileft"></div>-->
-                                    <div class="xqliuyanright" style="margin-left:-65px">
+                                    <div class="xqliuyanright" style="margin-left:-30px">
 
                                     </div>
 
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -97,7 +96,8 @@
             bagAmount: 0,
             bagNum: 0,
             createTime: "",
-            bagStatus: 0
+            bagStatus: 0,
+            currentUserImgUrl:""
         };
         //load
         $("#headimg").attr('src', parent.CurUserBag.currentUserImgUrl);
@@ -132,6 +132,7 @@
                             RBCreateBag.bagNum = data.result.bagNum;
                             RBCreateBag.createTime = data.result.createTime;
                             RBCreateBag.bagStatus = data.result.bagStatus;
+                            RBCreateBag.currentUserImgUrl = parent.UserInfo.headimgurl;
                             // 点击redbutton按钮时执行以下全部
                             $.ajax({
                                 url: Apiurl + "api/test/openbag", // url  action是方法的名称
@@ -155,17 +156,27 @@
                                         $("#detheadimg").attr('src', parent.CurUserBag.currentUserImgUrl);
                                         $("#amtlabel").show();
                                         $("#noamtlabel").hide();
+                                        $("#xqd").html("共" + data.result.bagCount + "个金豆，剩余" + data.result.bagNum + "个等待对方领取");
                                         var html = "";
                                         $(data.result.serialList).each(function (key, val) {
                                             if (val.userId == parent.UserInfo.openid) {
                                                 $("#num").html(Number(val.bagAmount).toFixed(2));
                                             }
-                                            html += "  <div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
+
+                                            html += "  <div  style=\"width:105%;float:left;height:50px\"><img style=\"width:40px;border-radius:5px\" src=\"" + val.headImg + "\"/>";
+                                            html += "    <label style=\"vertical-align:top;font-size:18px;font-family:黑体\"> " + val.nickname + "<br/><br/><div style=\"vertical-align:top;font-size:small;font-family:黑体;color:#919191;margin:-42px;margin-left:45px;width:100px\">" + val.createTime.split(" ")[1] + "</div></label>";
                                             html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
                                             var num = Number(val.bagAmount).toFixed(2);
-                                            html += "    <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
+                                            html += "  <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
                                             html += "   </div>";
                                             html += "  </div>";
+
+                                            //html += "  <div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
+                                            //html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
+                                            //var num = Number(val.bagAmount).toFixed(2);
+                                            //html += "    <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
+                                            //html += "   </div>";
+                                            //html += "  </div>";
                                         });
                                         $(".xqliuyanright").append(html);
                                     }
@@ -176,12 +187,20 @@
                                         $("#msg").html(data.message);
                                        var html = "";
                                         $(data.result.serialList).each(function (key, val) {
-                                            html += "<div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
-                                            html += "<div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
+                                            //html += "<div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
+                                            //html += "<div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
+                                            //var num = Number(val.bagAmount).toFixed(2);
+                                            //html += "<font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
+                                            //html += "</div>";
+                                            //html += "</div>";
+
+                                            html += "  <div  style=\"width:105%;float:left;height:50px\"><img style=\"width:40px;border-radius:5px\" src=\"" + val.headImg + "\"/>";
+                                            html += "    <label style=\"vertical-align:top;font-size:18px;font-family:黑体\"> " + val.nickname + "<br/><br/><div style=\"vertical-align:top;font-size:small;font-family:黑体;color:#919191;margin:-42px;margin-left:45px;width:100px\">" + val.createTime.split(" ")[1] + "</div></label>";
+                                            html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
                                             var num = Number(val.bagAmount).toFixed(2);
-                                            html += "<font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
-                                            html += "</div>";
-                                            html += "</div>";
+                                            html += "  <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
+                                            html += "   </div>";
+                                            html += "  </div>";
                                         });
                                         $(".xqliuyanright").append(html);
                                     }

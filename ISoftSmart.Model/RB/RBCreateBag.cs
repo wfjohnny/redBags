@@ -11,7 +11,7 @@ namespace ISoftSmart.Model.RB
 {
     public class RBCreateBag :MyRBCreateBag
     {
-        public Guid RID { get; set; }
+        public string RID { get; set; }
         public string UserId { get; set; }
         public decimal BagAmount { get; set; }
         public int BagNum { get; set; }
@@ -25,5 +25,6 @@ namespace ISoftSmart.Model.RB
         public string CurrentUserImgUrl { get; set; }
         //[JsonIgnore]
         public string nickname { get; set; }
+        public int bagCount { get; set; }
     }
 }

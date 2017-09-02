@@ -34,10 +34,10 @@ namespace ISoftSmart.Inteface.Implements
         {
             SqlParameter[] sp = new SqlParameter[]
             {
-                new SqlParameter("@BagStatus",bag.BagStatus),
+                //new SqlParameter("@BagStatus",bag.BagStatus),
                 new SqlParameter("@RID",bag.RID.ToString().ToUpper()),
             };
-            var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where BagStatus=@BagStatus and RID=@RID", sp, CommandType.Text);
+            var result = Dapper.Helper.SQLHelper.QueryDataSet("select * from CreateBag where RID=@RID", sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<RBCreateBag>>();
@@ -201,7 +201,7 @@ namespace ISoftSmart.Inteface.Implements
                 new SqlParameter("@RID",my.RID)
             };
             var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[BagSerial] b left join [dbo].[UserInfo] u
-                on b.UserId = u.UserId
+                on b.UserId = u.OpenId
                 where b.RID =@RID ", sp, CommandType.Text);
             if (result == "")
                 return null;
@@ -215,8 +215,8 @@ namespace ISoftSmart.Inteface.Implements
                 new SqlParameter("@UserId",my.UserId)
             };
             var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[BagSerial] b left join [dbo].[UserInfo] u
-                on b.UserId = u.UserId
-                where b.RID =@RID and u.UserId=@UserId ", sp, CommandType.Text);
+                on b.UserId = u.OpenId
+                where b.RID =@RID and u.openid=@UserId ", sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<MyBagSerial>>();
@@ -458,11 +458,11 @@ namespace ISoftSmart.Inteface.Implements
         {
             SqlParameter[] sp = new SqlParameter[]
             {
-                new SqlParameter("@startTime",startTime),
-                new SqlParameter("@endTime",endTime)
+                new SqlParameter("@startTime",startTime.ToShortDateString()+" 0:00:00"),
+                new SqlParameter("@endTime",endTime.ToShortDateString()+" 23:59:59")
             };
-            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT *
-          FROM [dbo].[MessageRecord] where CreateTime between @startTime and @endTime", sp, CommandType.Text);
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT top 50 *
+          FROM [dbo].[MessageRecord] where CreateTime between @startTime and @endTime order by CreateTime desc", sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<MessageRecord>>();

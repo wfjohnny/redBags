@@ -10,5 +10,7 @@ namespace ISoftSmart.Model.BS.My
     {
         public string UserName { get; set; }
         public string nickname { get; set; }
+        public string headimg { get; set; }
+        public string headImgUrl { get; set; }
     }
 }

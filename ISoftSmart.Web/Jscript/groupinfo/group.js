@@ -63,10 +63,10 @@ $.ajax({
                 UserInfo.sex = data.result.sex;
                 UserInfo.unionid = data.result.unionid;
 
-                if (data.result.invite != 1) {
-                    layer.msg("您没有接受邀请，不能进入群聊");
-                    wx.closeWindow();
-                }
+                //if (data.result.invite != 1) {
+                //    layer.msg("您没有接受邀请，不能进入群聊");
+                //    wx.closeWindow();
+                //}
             }
         }
     }
@@ -191,7 +191,7 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
     //if (data.code == "SCCESS") {
     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
     html += " <div class=\"right\" style=\"width:20%\">";
-    html += "                     <a href=\"javascript(void:0);\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
+    html += "                     <a href=\"javascript:;\" onclick=\"return false;\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
     html += "                  </div>";
     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
     html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
@@ -215,7 +215,6 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
     //    html += "</div> </li>";
     //}
     $("#msg").append(html);
-    $("#textmsg").val("");
     $('#contentArea').scrollTop($('.bd').height());
 
 
@@ -270,7 +269,7 @@ $.connection.hub.start().done(function () {
                 if (item.mType == 0) {
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"right\" style=\"width:20%\">";
-                    html += "                     <a href=\"javascript(void:0);\"><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
+                    html += "                     <a href=\"javascript(void:0);\"><img onclick=\"return false;\" src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "                  </div>";
                     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
                     html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
@@ -284,7 +283,7 @@ $.connection.hub.start().done(function () {
                     html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"oz\">";
                     html += " <div class=\"right\" style=\"width:20%\">";
-                    html += "<a href=\"javascript:void(0);\" ><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
+                    html += "<a href=\"javascript:void(0);\" onclick=\"return false;\" ><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "</div>";
                     html += "<div class=\"cont_right\">";
                     html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + item.bagID + "','" + item.bagUserID + "');\">";
@@ -378,27 +377,9 @@ $.connection.hub.start().done(function () {
 });
 function sendImg(type) {
     var headUrl = UserInfo.headimgurl;
+    $("#textmsg").val("");
     chat.server.sendImgMessage(type,UserInfo.openid, headUrl);
 }
-//$('#start').click(function () {
-
-//})
-//$("#stop").click(function () {
-//    var headUrl = UserInfo.headimgurl;
-//    chat.server.sendImgMessage("2", headUrl);
-//})
-//$("#any").click(function () {
-//    var headUrl = UserInfo.headimgurl;
-//    chat.server.sendImgMessage("3", headUrl);
-//})
-//$("#speend").click(function () {
-//    var headUrl = UserInfo.headimgurl;
-//    chat.server.sendImgMessage("4", headUrl);
-//})
-//$("#next").click(function () {
-//    var headUrl = UserInfo.headimgurl;
-//    chat.server.sendImgMessage("5", headUrl);
-//})
 $.connection.hub.stateChanged(function (state) {
     if (state.newState == $.signalR.connectionState.reconnecting) {
         //正在连接
