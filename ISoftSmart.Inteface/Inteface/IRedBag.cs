@@ -22,6 +22,7 @@ namespace ISoftSmart.Inteface.Inteface
         int InsertSerial(MyBagSerial my);
         int InsertSerialList(List<MyBagSerial> my);
         List<RBCreateBag> GetSendBag(RBCreateBag bag);
+        List<RBCreateBag> GetBagByAndUser(RBCreateBag rb);
         List<WXUserInfo> GetUserInfo(WXUserInfo user);
         int InsertUserInfo(WXUserInfo user);
         int InsertMessageRecordByText(MessageRecord message);

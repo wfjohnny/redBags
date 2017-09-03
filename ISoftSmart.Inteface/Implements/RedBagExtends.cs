@@ -64,6 +64,28 @@ namespace ISoftSmart.Inteface.Implements
                 return null;
             return result.JsonDeserialize<List<RBCreateBag>>();
         }
+        public List<RBCreateBag> GetBagByAndUser(RBCreateBag rb)
+        {
+            List<SqlParameter> spList = new List<SqlParameter>();
+      
+            string strWhere = " where 1=1";
+            if (rb.RID != null)
+            {
+                strWhere += " and r.RID=@RID";
+                spList.Add(new SqlParameter("@RID", rb.RID));
+            }
+            if (rb.UserId != null)
+            {
+                strWhere += " and u.openid=@OpenID";
+                spList.Add(new SqlParameter("@OpenID", rb.UserId));
+            }
+            SqlParameter[] sp = spList.ToArray();
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"  select * from [dbo].[CreateBag]  r
+            left join[dbo].[UserInfo] u on r.UserId = u.openid"+strWhere, sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<RBCreateBag>>();
+        }
         /// <summary>
         /// 获取用户信息
         /// </summary>
@@ -100,7 +122,7 @@ namespace ISoftSmart.Inteface.Implements
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public List<WXUserInfo> GetUserInfoByPage(WXUserInfo user, int pageindex, int pagesize,out int pageCount)
+        public List<WXUserInfo> GetUserInfoByPage(WXUserInfo user, int pageindex, int pagesize, out int pageCount)
         {
             Dictionary<string, string> dic = new Dictionary<string, string>();
             List<SqlParameter> spList = new List<SqlParameter>();
@@ -117,23 +139,23 @@ namespace ISoftSmart.Inteface.Implements
                 strWhere += " and NickName like '%" + user.nickname + "%' ";
             }
             spList.Add(new SqlParameter("@Invite", user.Invite));
-            if (user.Invite!= -1)
+            if (user.Invite != -1)
             {
                 strWhere += " and Invite = " + user.Invite + " ";
             }
-          
-            
+
+
             SqlParameter[] sp = spList.ToArray();
             SqlParameter[] spcount = spList.ToArray();
-            var result = Dapper.Helper.SQLHelper.QueryDataSet(sql+strWhere, sp, CommandType.Text);
-            var countresult = Dapper.Helper.SQLHelper.QueryDataSet(countsql+strWhere, spcount, CommandType.Text);
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(sql + strWhere, sp, CommandType.Text);
+            var countresult = Dapper.Helper.SQLHelper.QueryDataSet(countsql + strWhere, spcount, CommandType.Text);
             if (countresult == "")
                 pageCount = 0;
             else
             {
                 pageCount = countresult.JsonDeserialize<List<WXUserInfo>>().Count;
             }
-               
+
             if (result == "")
             {
                 return null;
@@ -209,14 +231,22 @@ namespace ISoftSmart.Inteface.Implements
         }
         public List<MyBagSerial> GetUserSerial(MyBagSerial my)
         {
-            SqlParameter[] sp = new SqlParameter[]
+            List<SqlParameter> spList = new List<SqlParameter>();
+            string strWhere = " where 1=1 ";
+            if (my.RID != null)
             {
-                new SqlParameter("@RID",my.RID),
-                new SqlParameter("@UserId",my.UserId)
-            };
+                strWhere += " and b.RID =@RID ";
+                spList.Add(new SqlParameter("@RID", my.RID));
+            }
+            if (my.UserId != null)
+            {
+                strWhere += " and u.openid=@UserId ";
+                spList.Add(new SqlParameter("@UserId", my.UserId));
+            }
+            SqlParameter[] sp = spList.ToArray();
             var result = Dapper.Helper.SQLHelper.QueryDataSet(@"select * from [dbo].[BagSerial] b left join [dbo].[UserInfo] u
                 on b.UserId = u.OpenId
-                where b.RID =@RID and u.openid=@UserId ", sp, CommandType.Text);
+                   " + strWhere, sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<MyBagSerial>>();

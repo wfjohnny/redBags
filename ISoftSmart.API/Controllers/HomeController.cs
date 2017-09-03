@@ -214,6 +214,10 @@ namespace ISoftSmart.API.Controllers
                     {
                         var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
                         var tr = bagcache.Where(x => x.RID == bag.RID).FirstOrDefault();
+                        if (tr == null)
+                        {
+                            tr = rt.GetBag(new RBCreateBag() { RID = bag.RID }).FirstOrDefault();
+                        }
                         if (tr != null && tr.BagNum > 0)
                         {
                             decimal curAmount = 0;
@@ -224,33 +228,46 @@ namespace ISoftSmart.API.Controllers
                                 if (SettingBag.Count == 0)
                                 {
                                     GenerateBagBySetting(tr, bag.UserId, out outbag, out curAmount);
-                                    //if (bagCurUser.openid == bag.UserId)
-                                    //{
-                                    //    curAmount = bagCurUser.amt;
-                                    //    StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
-                                    //    outbag = tr;
-                                    //    outbag.BagAmount -= bagCurUser.amt;
-                                    //    outbag.BagNum -= 1;
-                                    //}
+
                                 }
                                 if (bagCurUser.openid == bag.UserId)
                                 {
-                                    curAmount = bagCurUser.amt;
-                                    StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
-                                    outbag = tr;
-                                    outbag.BagAmount -= bagCurUser.amt;
-                                    outbag.BagNum -= 1;
-                                    curAmount = bagCurUser.amt;
-                                    openResult = outbag;
+                                    List<string> list = new List<string>(SettingBag.Keys);
+                                    for (int i = 0; i < list.Count; i++)
+                                    {
+                                        if (list[i] == bag.UserId)
+                                        {
+                                            curAmount = bagCurUser.amt;
+                                            StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
+                                            outbag = tr;
+                                            outbag.BagAmount -= bagCurUser.amt;
+                                            outbag.BagNum -= 1;
+                                            curAmount = bagCurUser.amt;
+                                            openResult = outbag;
+                                            SettingBag.Remove(list[i]);
+                                            SettingBag.Clear();
+                                            break;
+                                        }
+                                    }
+
                                 }
                                 else
                                 {
-                                    var curamt = SettingBag.Where(x => x.Key != bag.UserId).LastOrDefault().Value;
-                                    outbag = tr;
-                                    outbag.BagAmount -= curamt;
-                                    outbag.BagNum -= 1;
-                                    curAmount = curamt;
-                                    openResult = outbag;
+                                    List<string> list = new List<string>(SettingBag.Keys);
+                                    for (int i = 0; i < list.Count; i++)
+                                    {
+                                        if (list[i].StartsWith("A"))
+                                        {
+                                            outbag = tr;
+                                            outbag.BagAmount -= SettingBag[list[i]];
+                                            outbag.BagNum -= 1;
+                                            curAmount = SettingBag[list[i]];
+                                            openResult = outbag;
+                                            SettingBag.Remove(list[i]);
+                                            break;
+                                        }
+                                    }
+
                                 }
                             }
                             else
@@ -261,6 +278,17 @@ namespace ISoftSmart.API.Controllers
                             bagcache.Remove(bagcache.Where(x => x.RID == outbag.RID).FirstOrDefault());
                             bagcache.Add(outbag);
                             Code = "SUCCESS";
+                            if (curAmount == 0)
+                            {
+                                Code = "ERROR";
+                                ResponseMessage = "金豆抢完了！";
+                                return Ok(new APIResponse<RBCreateBag>
+                                {
+                                    Code = Code,
+                                    ResponseMessage = ResponseMessage,
+                                    Result = Result
+                                });
+                            }
                             ResponseMessage = "抢到" + curAmount.ToString("0.00") + "个金豆！";
                             Result = openResult;
                             StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
@@ -309,7 +337,7 @@ namespace ISoftSmart.API.Controllers
                                 bsent.nickname = user.nickname;
                             }
                             var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
-                            Result.SerialList = seriaList.OrderByDescending(x=>x.CreateTime).ToList();
+                            Result.SerialList = seriaList.OrderByDescending(x => x.CreateTime).ToList();
                             Result.bagCount = Result.BagNum + seriaList.Count;
                             rt.InsertSerial(bsent);
                         }
@@ -319,40 +347,41 @@ namespace ISoftSmart.API.Controllers
                             ResponseMessage = "金豆抢完了！";
                             bag.BagStatus = 1;
                             rt.ChangeBagStatus(bag);
-                            var setcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
-                            setcache.Remove(bagcache.Where(x => x.RID == bag.RID).FirstOrDefault());
-                            if (setcache.Count > 0)
+                          
+                            //var setcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
+                            //setcache.Remove(bagcache.Where(x => x.RID == bag.RID).FirstOrDefault());
+                            //if (setcache.Count > 0)
+                            //{
+                            //    setcache.Add(outbag);
+                            //}
+                            //StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
+                            SettingBag.Clear();
+                            var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
+                            if (seriaList.Count == 0)
                             {
-                                setcache.Add(outbag);
+                                var tseriaList = rt.GetUserSerialList(new MyBagSerial() { RID = bag.RID.ToString() });
+                                foreach (var item in tseriaList)
+                                {
+                                    RBBagSerial rs = new RBBagSerial()
+                                    {
+                                        BagAmount = item.BagAmount,
+                                        CreateTime = item.CreateTime,
+                                        headImg = item.headImgUrl,
+                                        nickname = item.nickname,
+                                        RID = item.RID,
+                                        SerialId = item.SerialId,
+                                        UserId = item.UserId
+                                    };
+                                    seriaList.Add(rs);
+                                }
                             }
-                            StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
-                            //StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, setcache);
-                            //var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
-                            //if (seriaList.Count == 0)
-                            //{
-                            //    var tseriaList = rt.GetUserSerialList(new MyBagSerial() { RID = bag.RID.ToString() });
-                            //    foreach (var item in tseriaList)
-                            //    {
-                            //        RBBagSerial rs = new RBBagSerial()
-                            //        {
-                            //            BagAmount = item.BagAmount,
-                            //            CreateTime = item.CreateTime,
-                            //            headImg = item.headImgUrl,
-                            //            nickname = item.nickname,
-                            //            RID = item.RID,
-                            //            SerialId = item.SerialId,
-                            //            UserId = item.UserId
-                            //        };
-                            //        seriaList.Add(rs);
-                            //    }
-                            //}
-                            //if (Result == null)
-                            //{
-                            //    Result = new RBCreateBag();
-                            //    Result.SerialList = new List<RBBagSerial>();
-                            //}
-                            //Result.SerialList = seriaList;
-                            //Result.bagCount = Result.BagNum + seriaList.Count;
+                            if (Result == null)
+                            {
+                                Result = new RBCreateBag();
+                                Result.SerialList = new List<RBBagSerial>();
+                            }
+                            Result.SerialList = seriaList;
+                            Result.bagCount = Result.BagNum + seriaList.Count;
                         }
                     }
                 }
@@ -875,9 +904,19 @@ namespace ISoftSmart.API.Controllers
                             if (StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
                             {
                                 var userList = rt.GetUserInfo(new WXUserInfo() { openid = userId });
-                                //var userBag= rt.GetUserSerial(new MyBagSerial() { RID = gRID, UserId = userId });
-                                //var bagkeysss = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
-                                var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
+                                RBCreateBag userBag = new RBCreateBag();
+                                if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
+                                {
+                                    userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID).FirstOrDefault();
+                                    if (userBag == null)
+                                    {
+                                        userBag = rt.GetBag(new RBCreateBag() { RID = gRID }).FirstOrDefault();
+                                    }
+                                }
+                                else
+                                {
+                                    userBag = rt.GetBag(new RBCreateBag() { RID = gRID }).FirstOrDefault();
+                                }
                                 var userGetBag = ret.Where(x => x.UserId == userId).FirstOrDefault();
                                 if (userGetBag != null)
                                 {
@@ -915,9 +954,13 @@ namespace ISoftSmart.API.Controllers
                                             }
                                         }
                                     }
-                                    userBag.bagCount = userBag.BagNum + +(userBag.SerialList == null ? 0 : userBag.SerialList.Count);
+                                    userBag.bagCount = userBag.BagNum +(userBag.SerialList == null ? 0 : userBag.SerialList.Count);
                                     if (userGetBag != null)
                                     {
+                                        if (userBag.CurrentUserImgUrl == null)
+                                        {
+                                            userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { RID = gRID }).FirstOrDefault().CurrentUserImgUrl;
+                                        }
                                         result = userBag;
                                         Code = "ERROR";
                                         ResponseMessage = "用户已抢到该红包！";
@@ -931,6 +974,23 @@ namespace ISoftSmart.API.Controllers
                                 }
                                 else
                                 {
+                                    List<WXUserInfo> userinfo = new List<WXUserInfo>();
+                                    if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.WxUserList))
+                                    {
+                                        userinfo = rt.GetUserInfo(new WXUserInfo() { openid = userBag.UserId });
+                                        StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, userinfo);
+                                    }
+                                    else
+                                    {
+                                        userinfo = StackExchangeRedisExtensions.Get<List<WXUserInfo>>(db, CacheKey.WxUserList).Where(x => x.openid == userBag.UserId).ToList();
+                                        if (userinfo.Count == 0)
+                                        {
+                                            userinfo = rt.GetUserInfo(new WXUserInfo() { openid = userBag.UserId });
+                                           
+                                            StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, userinfo);
+                                        }
+                                        userBag.CurrentUserImgUrl = userinfo.FirstOrDefault().headimgurl;
+                                    }
                                     userBag.bagCount = ret.Count;
                                     userBag.SerialList = ret.OrderByDescending(x => x.CreateTime).ToList();
                                     if (userBag.BagNum == 0)
@@ -952,20 +1012,32 @@ namespace ISoftSmart.API.Controllers
                                 var user = rt.GetUserInfo(new WXUserInfo() { openid = userId });
                                 if (user != null)
                                 {
-                                    foreach (var item in user)
+                                    //foreach (var item in user)
+                                    //{
+                                    //    item.nickname = user.ToList().Where(x => x.openid == item.openid).FirstOrDefault().nickname;
+                                    //}
+                                    RBCreateBag userBag = new RBCreateBag();
+                                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
                                     {
-                                        item.nickname = user.ToList().Where(x => x.openid == item.openid).FirstOrDefault().nickname;
+                                        userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
+                                        if (userBag == null)
+                                        {
+                                            userBag = new RBCreateBag();
+                                            userBag = rt.GetBag(new RBCreateBag() { RID = gRID, UserId = userId }).FirstOrDefault();
+                                            userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { RID = userId }).FirstOrDefault().headImgUrl;
+                                        }
                                     }
-                                    var userBag = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey).Where(x => x.RID == gRID && x.UserId == userId).FirstOrDefault();
-                                    if (userBag == null)
+                                    else
                                     {
-                                        userBag = new RBCreateBag();
+                                        userBag = rt.GetBag(new RBCreateBag() { RID = gRID, UserId = userId }).FirstOrDefault();
+                                        userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { RID = gRID }).FirstOrDefault().headImgUrl;
                                     }
                                     userBag.SerialList = new List<RBBagSerial>();
                                     userBag.SerialList = ret.OrderByDescending(x => x.CreateTime).ToList();
                                     var grid = gRID.ToString();
                                     var serial = rt.GetUserSerialList(new MyBagSerial() { RID = grid });
-                                    userBag.bagCount = userBag.BagNum + +(userBag.SerialList == null ? 0 : userBag.SerialList.Count);
+                                    userBag.bagCount = userBag.BagNum;
+                                    userBag.BagNum = userBag.bagCount - (userBag.SerialList == null ? 0 : userBag.SerialList.Count);
                                     if (serial.Count != 0)
                                     {
                                         result = userBag;
@@ -1018,13 +1090,15 @@ namespace ISoftSmart.API.Controllers
                                 userinfo = rt.GetUserInfo(new WXUserInfo() { openid = bagInfo.UserId });
                                 StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, userinfo);
                             }
+                            result = bagInfo;
                             result.CurrentUserImgUrl = userinfo.FirstOrDefault().headimgurl;
                             result.nickname = userinfo.FirstOrDefault().nickname;
                             result.UserId = userinfo.FirstOrDefault().openid;
                             result.Remark = bagInfo.Remark;
-                            var rtb = rt.GetUserSerial(new MyBagSerial() { UserId = userId, RID = gRID });
+                            var rtb = rt.GetUserSerial(new MyBagSerial() { RID = gRID });
                             if (rtb != null)
                             {
+                                result.SerialList = new List<RBBagSerial>();
                                 foreach (var item in rtb)
                                 {
                                     RBBagSerial rs = new RBBagSerial()
@@ -1037,11 +1111,12 @@ namespace ISoftSmart.API.Controllers
                                         SerialId = item.SerialId,
                                         UserId = item.UserId
                                     };
-                                    result.SerialList = new List<RBBagSerial>();
                                     result.SerialList.Add(rs);
                                 }
                                 Code = "ERROR";
                                 ResponseMessage = "用户已抢到该红包";
+                                result.bagCount = result.BagNum;
+                                result.BagNum = result.bagCount - (result.SerialList == null ? 0 : result.SerialList.Count);
                                 result.SerialList = result.SerialList.OrderByDescending(x => x.CreateTime).ToList();
                             }
 
@@ -1092,9 +1167,10 @@ namespace ISoftSmart.API.Controllers
                         userBag.bagCount = userBag.BagNum + (userBag.SerialList == null ? 0 : userBag.SerialList.Count);
                         result = userBag;
                         result.Remark = bagInfo.Remark;
-                        var rtb = rt.GetUserSerial(new MyBagSerial() { UserId = userId, RID = gRID });
+                        var rtb = rt.GetUserSerial(new MyBagSerial() { RID = gRID });
                         if (rtb != null)
                         {
+                            result.SerialList = new List<RBBagSerial>();
                             foreach (var item in rtb)
                             {
                                 RBBagSerial rs = new RBBagSerial()
@@ -1107,9 +1183,10 @@ namespace ISoftSmart.API.Controllers
                                     SerialId = item.SerialId,
                                     UserId = item.UserId
                                 };
-                                result.SerialList = new List<RBBagSerial>();
                                 result.SerialList.Add(rs);
                             }
+                            userBag.bagCount = userBag.BagNum + (result.SerialList == null ? 0 : result.SerialList.Count);
+                            result.bagCount = userBag.bagCount;
                             result.SerialList = result.SerialList.OrderByDescending(x => x.CreateTime).ToList();
                             Code = "ERROR";
                             ResponseMessage = "用户已抢到该红包";

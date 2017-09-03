@@ -170,13 +170,6 @@
                                             html += "  <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
                                             html += "   </div>";
                                             html += "  </div>";
-
-                                            //html += "  <div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
-                                            //html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
-                                            //var num = Number(val.bagAmount).toFixed(2);
-                                            //html += "    <font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
-                                            //html += "   </div>";
-                                            //html += "  </div>";
                                         });
                                         $(".xqliuyanright").append(html);
                                     }
@@ -187,13 +180,6 @@
                                         $("#msg").html(data.message);
                                        var html = "";
                                         $(data.result.serialList).each(function (key, val) {
-                                            //html += "<div class=\"xqliuyantit\"><font size=\"2\" face=\"黑体\" color=\"black\">" + val.nickname + " </font> ";
-                                            //html += "<div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";
-                                            //var num = Number(val.bagAmount).toFixed(2);
-                                            //html += "<font size=\"2\" face=\"黑体\" color=\"black\">" + num + "元</font> ";
-                                            //html += "</div>";
-                                            //html += "</div>";
-
                                             html += "  <div  style=\"width:105%;float:left;height:50px\"><img style=\"width:40px;border-radius:5px\" src=\"" + val.headImg + "\"/>";
                                             html += "    <label style=\"vertical-align:top;font-size:18px;font-family:黑体\"> " + val.nickname + "<br/><br/><div style=\"vertical-align:top;font-size:small;font-family:黑体;color:#919191;margin:-42px;margin-left:45px;width:100px\">" + val.createTime.split(" ")[1] + "</div></label>";
                                             html += "  <div class=\"xqliuyanyuan\" style=\"margin-right:-20px\">";

@@ -433,6 +433,7 @@ $(function () {
             dataType: "json",
             contentType: "application/json",
             success: function (data) {
+                $("#textmsg").val("");
                 chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
             }
         });

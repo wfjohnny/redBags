@@ -26,5 +26,6 @@ namespace ISoftSmart.Model.RB
         //[JsonIgnore]
         public string nickname { get; set; }
         public int bagCount { get; set; }
+        public string headImgUrl { get; set; }
     }
 }
