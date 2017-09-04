@@ -28,7 +28,8 @@ var MessageRecord = {
     amtUserID: "",
     amtUserImg: "",
     imgUserID: "",
-    imgUrl:""
+    imgUrl: "",
+    nickname: ""
 
 };
 var openid;
@@ -132,7 +133,7 @@ chat.client.loadAmtMessage = function (openid, imgurl) {
     $('#contentArea').scrollTop($('.bd').height());
 
 };
-chat.client.loadImgMessage = function (typeid,userID, imgurl) {
+chat.client.loadImgMessage = function (typeid, userID, imgurl, nickname) {
     var html = "";
     var myDate = new Date();
     var h = myDate.getHours();
@@ -165,7 +166,8 @@ chat.client.loadImgMessage = function (typeid,userID, imgurl) {
     MessageRecord.mType = 3;//收款图片
     MessageRecord.imgUserID = userID;
     MessageRecord.headImgUrl = imgurl;
-    MessageRecord.imgUrl =Weburl + "image/" + type + ".png";
+    MessageRecord.imgUrl = Weburl + "image/" + type + ".png";
+    MessageRecord.nickname = nickname;
     var dataJson = JSON.stringify(MessageRecord);
     $.ajax({
         url: Apiurl + "api/test/istText", // url  action是方法的名称
@@ -180,26 +182,43 @@ chat.client.loadImgMessage = function (typeid,userID, imgurl) {
         contentType: "application/json",
         success: function (data) {
             //resdata = data;
-           // chat.server.sendAmtMessage(userID, headUrl);
+            // chat.server.sendAmtMessage(userID, headUrl);
         }
     });
 
 };
-chat.client.loadMessage = function (message, userImg, curUser, time) {
+chat.client.loadMessage = function (mid, nickname, message, userImg, curUser, time, type) {
     var html = "";
+    var curTime = time;
     time = time.split(" ")[1].split(":");
+    debugger
     //if (data.code == "SCCESS") {
-    html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-    html += " <div class=\"right\" style=\"width:20%\">";
-    html += "                     <a href=\"javascript:;\" onclick=\"return false;\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
-    html += "                  </div>";
-    html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-    html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
-    html += "            " + message + "";
-    html += "            <span class=\"bottomLevel\"></span>";
-    html += "           <span class=\"topLevel\"></span>";
-    html += "        </span>";
-    html += "   </div></li>";
+    if (type == 0) {
+        html += "<li id=\"li_" + mid + "\"><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+        html += " <div class=\"right\" style=\"width:20%\">";
+        html += "                     <a href=\"javascript:;\" onclick=\"return false;\"><img src=\"" + userImg + "\" style=\"width:3.5em;height:3.5em\"/></a>";
+        html += "                  </div>";
+        html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+        html += "        <span class=\"bubble rightBubble\" id=\"" + mid + "\" onclick=\"showCancel('" + mid + "','" + nickname + "',this,'" + curTime + "')\" style=\"max-width:70%\">";
+        html += "          <div id=\"div_" + mid + "\">" + message + "</div>";
+        html += "            <span class=\"bottomLevel\"></span>";
+        html += "           <span class=\"topLevel\"></span>";
+        html += "        </span>";
+        html += "   </div></li>";
+    }
+    else {
+        $("#li_" + mid).empty();
+        var html = "";
+        html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+        html += "   <div>   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+        html += "        <span  id=\"" + mid + "\" style=\"max-width:70%\">";
+        html += "          <div id=\"div_" + mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + MessageRecord.mContent + "</div>";
+        html += "            <span class=\"bottomLevel\"></span>";
+        html += "           <span class=\"topLevel\"></span>";
+        html += "        </span>";
+        html += "   </div></li>";
+        $("#li_" + mid).html(html);
+    }
     //}
     //else {
     //    html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
@@ -214,7 +233,9 @@ chat.client.loadMessage = function (message, userImg, curUser, time) {
     //    html += "</div>";
     //    html += "</div> </li>";
     //}
-    $("#msg").append(html);
+    if (type == 0) {
+        $("#msg").append(html);
+    }
     $('#contentArea').scrollTop($('.bd').height());
 
 
@@ -267,17 +288,29 @@ $.connection.hub.start().done(function () {
             $(data.result).each(function (a, item) {
                 var time = item.createTime.split(" ")[1].split(":");
                 if (item.mType == 0) {
-                    html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                    html += "<li id=\"li_" + item.mid + "\"><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += " <div class=\"right\" style=\"width:20%\">";
-                    html += "                     <a href=\"javascript(void:0);\"><img onclick=\"return false;\" src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
+                    html += "                     <a href=\"javascript:;\" onclick=\"return false;\"><img src=\"" + item.headImgUrl + "\" style=\"width:3.5em;height:3.5em\"/></a>";
                     html += "                  </div>";
                     html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-                    html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
-                    html += "            " + item.mContent + "";
+                    html += "        <span class=\"bubble rightBubble\" id=\"" + item.mid + "\" onclick=\"showCancel('" + item.mid + "','" + item.nickname + "',this,'" + item.createTime + "')\" style=\"max-width:70%\">";
+                    html += "          <div id=\"div_" + item.mid + "\">" + item.mContent + "</div>";
                     html += "            <span class=\"bottomLevel\"></span>";
                     html += "           <span class=\"topLevel\"></span>";
                     html += "        </span>";
                     html += "   </div></li>";
+
+                    //html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                    //html += " <div class=\"right\" style=\"width:20%\">";
+                    //html += "                     <a href=\"javascript(void:0);\"><img onclick=\"return false;\" src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
+                    //html += "                  </div>";
+                    //html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+                    //html += "        <span class=\"bubble rightBubble\" style=\"max-width:70%\">";
+                    //html += "            " + item.mContent + "";
+                    //html += "            <span class=\"bottomLevel\"></span>";
+                    //html += "           <span class=\"topLevel\"></span>";
+                    //html += "        </span>";
+                    //html += "   </div></li>";
                 }
                 else if (item.mType == 1) {
                     html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
@@ -301,14 +334,32 @@ $.connection.hub.start().done(function () {
                     html += "   </div></li>";
 
                 }
-                else if (item.mType ==3) {
+                else if (item.mType == 3) {
                     html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
                     html += "  <div class=\"oz\"><div class=\"right\">";
                     html += "                    <img src=\"" + item.headImgUrl + "\" /></div>";
                     html += "   <div style=\"float:right;margin-right:10px\">";
-                    html += "      <img src=\"" +item.imgUrl+"\" style=\"width:100px;\" /> ";
+                    html += "      <img src=\"" + item.imgUrl + "\" style=\"width:100px;\" /> ";
                     html += "   </div></li>";
 
+                }
+                else if (item.mType == 5) {
+                    html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                    html += "   <div>   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+                    html += "        <span  id=\"" + item.mid + "\" style=\"max-width:70%\">";
+                    html += "          <div id=\"div_" + item.mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + item.mContent + "</div>";
+                    html += "            <span class=\"bottomLevel\"></span>";
+                    html += "           <span class=\"topLevel\"></span>";
+                    html += "        </span>";
+                    html += "   </div></li>";
+                    //html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                    //html += "   <div>   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+                    //html += "        <span  id=\"" + item.mid + "\" style=\"max-width:70%\">";
+                    //html += "          <div id=\"div_" + item.mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + item.mContent + "</div>";
+                    //html += "            <span class=\"bottomLevel\"></span>";
+                    //html += "           <span class=\"topLevel\"></span>";
+                    //html += "        </span>";
+                    //html += "   </div></li>";
                 }
             });
             $("#msg").append(html);
@@ -352,6 +403,7 @@ $.connection.hub.start().done(function () {
                 MessageRecord.amtUserID = userID;
                 MessageRecord.userID = userID;
                 MessageRecord.amtUserImg = UserInfo.headimgurl;
+                MessageRecord.nickname = UserInfo.nickname;
                 var dataJson = JSON.stringify(MessageRecord);
                 $.ajax({
                     url: Apiurl + "api/test/istText", // url  action是方法的名称
@@ -376,9 +428,10 @@ $.connection.hub.start().done(function () {
 
 });
 function sendImg(type) {
+
     var headUrl = UserInfo.headimgurl;
     $("#textmsg").val("");
-    chat.server.sendImgMessage(type,UserInfo.openid, headUrl);
+    chat.server.sendImgMessage(type, UserInfo.openid, headUrl, UserInfo.nickname);
 }
 $.connection.hub.stateChanged(function (state) {
     if (state.newState == $.signalR.connectionState.reconnecting) {
@@ -407,6 +460,7 @@ $.connection.hub.disconnected(function () {
         console.log(e);
     }
 });
+
 $(function () {
     $('#sendMsg').click(function () {
 
@@ -420,6 +474,7 @@ $(function () {
         MessageRecord.mType = 0;
         MessageRecord.userID = UserInfo.openid;
         MessageRecord.headImgUrl = UserInfo.headimgurl;
+        MessageRecord.nickname = UserInfo.nickname;
         var dataJson = JSON.stringify(MessageRecord);
         $.ajax({
             url: Apiurl + "api/test/istText", // url  action是方法的名称
@@ -434,7 +489,7 @@ $(function () {
             contentType: "application/json",
             success: function (data) {
                 $("#textmsg").val("");
-                chat.server.sendMessage(message, UserInfo.headimgurl, UserInfo.openid);
+                chat.server.sendMessage(MessageRecord.mID, UserInfo.nickname, message, UserInfo.headimgurl, UserInfo.openid, 0);
             }
         });
 
@@ -478,6 +533,11 @@ $(function () {
         });
         layer.full(index);
     });
+    //$(".bubble").click(function () {
+    //    alert("11");
+    //})
+    /*设置一个长按的计时器，如果点击这个图层超过2秒则触发，mydiv里面的文字从out变in的动作*/
+
 });
 function OpenBag(guid, customerCode) {
     $.ajax({
@@ -550,4 +610,49 @@ function LoadBag(guid, count, Num, remark, headimgurl) {
     $("#msg").append(bag);
     $('#contentArea').scrollTop($('.bd').height());
 }
+function showCancel(mid, nickname, ctl, time) {
+    MessageRecord.mID = mid;
+    MessageRecord.userID = UserInfo.openid;
+    var dataJson = JSON.stringify(MessageRecord);
+    $.ajax({
+        url: Apiurl + "api/test/showcancelmenu", // url  action是方法的名称
+        type: "Post",
+        data: dataJson,
+        async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            if (data.code == "SCCESS")
+            {
+                layer.tips('<a href="javascript:;" style=\"color:white\" onclick=\'cancelMsg("' + mid + '","' + nickname + '")\'>撤回</a>', ctl, {
+                    tips: [1, 'black'] //还可配置颜色
+                });
+            }
+        }
+    });
+}
+function cancelMsg(mid, nickname) {
+    MessageRecord.mID = mid;
+    MessageRecord.mContent = nickname + "撤回了一条消息。";
+    var dataJson = JSON.stringify(MessageRecord);
+    $.ajax({
+        url: Apiurl + "api/test/cancelMsg", // url  action是方法的名称
+        type: "Post",
+        data: dataJson,
+        async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            chat.server.sendMessage(MessageRecord.mID, UserInfo.nickname, MessageRecord.mContent, UserInfo.headimgurl, UserInfo.openid, 5);
 
+        }
+    });
+}

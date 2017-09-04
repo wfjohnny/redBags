@@ -347,14 +347,6 @@ namespace ISoftSmart.API.Controllers
                             ResponseMessage = "金豆抢完了！";
                             bag.BagStatus = 1;
                             rt.ChangeBagStatus(bag);
-                          
-                            //var setcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
-                            //setcache.Remove(bagcache.Where(x => x.RID == bag.RID).FirstOrDefault());
-                            //if (setcache.Count > 0)
-                            //{
-                            //    setcache.Add(outbag);
-                            //}
-                            //StackExchangeRedisExtensions.Remove(db, CacheKey.BagKey);
                             SettingBag.Clear();
                             var seriaList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
                             if (seriaList.Count == 0)
@@ -607,6 +599,157 @@ namespace ISoftSmart.API.Controllers
                             rec.Add(record);
                             StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
                             var res = rt.InsertMessageRecordByImgs(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                    }
+                    user = rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+                    #endregion
+                }
+
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message, 240);
+            }
+
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = user
+            });
+        }
+
+        [Route("showcancelmenu")]
+        [HttpPost]
+        public IHttpActionResult ShowCancelMenu(MessageRecord record)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            MessageRecord Result = null;
+            record.MType = 5;
+            WXUserInfo user = new WXUserInfo();
+            try
+            {
+                lock (this)
+                {
+                    #region 发送消息
+
+                    var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                    {
+                        var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord).Where(x => x.MID == record.MID).FirstOrDefault();
+                        if (bagcache == null)
+                        {
+                            bagcache = rt.GetMsgRecord(record).FirstOrDefault();
+                        }
+                        TimeSpan timeSpan = DateTime.Now - bagcache.CreateTime;
+                        if (timeSpan.TotalMinutes > 2)
+                        {
+                            Code = "ERROR";
+                        }
+                        else
+                        {
+                            if (bagcache.UserID == record.UserID)
+                                Code = "SCCESS";
+                            else
+                                Code = "ERROR";
+                        }
+                    }
+                    else
+                    {
+                        var bagcache = rt.GetMsgRecord(record).FirstOrDefault();
+                        TimeSpan timeSpan = DateTime.Now - bagcache.CreateTime;
+                        if (timeSpan.TotalMinutes > 2)
+                        {
+                            Code = "ERROR";
+                        }
+                        else
+                        {
+                            if (bagcache.UserID == record.UserID)
+                                Code = "SCCESS";
+                            else
+                                Code = "ERROR";
+                        }
+                    }
+                    user = rt.GetUserInfo(new WXUserInfo() { openid = record.UserID }).FirstOrDefault();
+                    #endregion
+                }
+
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message, 240);
+            }
+
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+                Result = user
+            });
+        }
+        [Route("cancelMsg")]
+        [HttpPost]
+        public IHttpActionResult CancelMsg(MessageRecord record)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            MessageRecord Result = null;
+            record.MType = 5;
+            WXUserInfo user = new WXUserInfo();
+            try
+            {
+                lock (this)
+                {
+                    #region 发送消息
+                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                    {
+                        var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
+                        if (bagcache.Count > 20)
+                        {
+                            var msgList = bagcache.OrderByDescending(x => x.CreateTime).Take(20).ToList();
+                            StackExchangeRedisExtensions.Remove(db, CacheKey.MsgRecord);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, msgList);
+                        }
+                    }
+                    var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                    record.CreateTime = DateTime.Now;
+                    if (StackExchangeRedisExtensions.HasKey(db, CacheKey.MsgRecord))
+                    {
+                        var bagcache = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord);
+
+                        if (record.MType == 5)//文字
+                        {
+                            var removeitem = StackExchangeRedisExtensions.Get<List<MessageRecord>>(db, CacheKey.MsgRecord).Where(x => x.MID == record.MID).FirstOrDefault();
+
+                            for (int i = 0; i < bagcache.Count; i++)
+                            {
+                                if (bagcache[i].MID == removeitem.MID)
+                                {
+                                    bagcache.RemoveAt(i);
+                                }
+                            }
+
+                            removeitem.MType = record.MType;
+                            removeitem.MContent = record.MContent;
+                            bagcache.Add(removeitem);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, bagcache, 240);
+                            var res = rt.ModifyMessageRecordByText(record);
+                            Code = "SCCESS";
+                            ResponseMessage = "保存聊天记录成功！";
+                        }
+                    }
+                    else
+                    {
+                        if (record.MType == 5)
+                        {
+                            List<MessageRecord> rec = new List<MessageRecord>();
+                            record.MID = record.MID;
+                            rec.Add(record);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.MsgRecord, rec);
+                            var res = rt.ModifyMessageRecordByText(record);
                             Code = "SCCESS";
                             ResponseMessage = "保存聊天记录成功！";
                         }
@@ -954,7 +1097,7 @@ namespace ISoftSmart.API.Controllers
                                             }
                                         }
                                     }
-                                    userBag.bagCount = userBag.BagNum +(userBag.SerialList == null ? 0 : userBag.SerialList.Count);
+                                    userBag.bagCount = userBag.BagNum + (userBag.SerialList == null ? 0 : userBag.SerialList.Count);
                                     if (userGetBag != null)
                                     {
                                         if (userBag.CurrentUserImgUrl == null)
@@ -986,7 +1129,7 @@ namespace ISoftSmart.API.Controllers
                                         if (userinfo.Count == 0)
                                         {
                                             userinfo = rt.GetUserInfo(new WXUserInfo() { openid = userBag.UserId });
-                                           
+
                                             StackExchangeRedisExtensions.Set(db, CacheKey.WxUserList, userinfo);
                                         }
                                         userBag.CurrentUserImgUrl = userinfo.FirstOrDefault().headimgurl;
@@ -1246,25 +1389,6 @@ namespace ISoftSmart.API.Controllers
                 }
             }
             curAmount = 0;
-            //var curUserNum = StackExchangeRedisExtensions.Get<BagWinner>(db, CacheKey.Winner);
-            //if (curUserNum.openid == userid)
-            //{
-            //    var curuser = SettingBag.Where(x => x.Key != userid).LastOrDefault();
-            //    bag.BagAmount -= curuser.Value;
-            //    bag.BagNum -= 1;
-            //    SettingBag.Remove(curuser.Key);
-            //    curAmount = curuser.Value;
-            //    StackExchangeRedisExtensions.Remove(db, CacheKey.Winner);
-            //}
-            //else
-            //{
-            //    var firstRemove = SettingBag.Where(x => x.Key != userid).LastOrDefault();
-            //    bag.BagAmount -= firstRemove.Value;
-            //    bag.BagNum -= 1;
-            //    SettingBag.Remove(firstRemove.Key);
-            //    curAmount = firstRemove.Value;
-            //}
-
             outbag = bag;
             return outbag;
         }

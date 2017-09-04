@@ -22,19 +22,19 @@ namespace ISoftSmart.Web.signalr
         /// 群发
         /// </summary>
         /// <param name="message"></param>
-        public void SendMessage(string message,string userHeadImg,string customeCode)
+        public void SendMessage(string mid,string nickname,string message,string userHeadImg,string customeCode,int type)
         {
             //调用所有客户注册的本地的JS方法(broadcastMessage)
             //Clients.All.broadcastMessage(message + DateTime.Now.ToString());
-            Clients.All.loadMessage(message, userHeadImg,customeCode, DateTime.Now.ToString());
+            Clients.All.loadMessage(mid,nickname,message, userHeadImg,customeCode, DateTime.Now.ToString(),type);
         }
         /// <summary>
         /// 发图片
         /// </summary>
         /// <param name="message"></param>
-        public void SendImgMessage(string typeid,string openid, string userHeadImg)
+        public void SendImgMessage(string typeid,string openid, string userHeadImg,string nickname)
         {
-            Clients.All.loadImgMessage(typeid,openid, userHeadImg);
+            Clients.All.loadImgMessage(typeid,openid, userHeadImg,nickname);
         }
         /// <summary>
         /// 收款码

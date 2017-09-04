@@ -12,7 +12,9 @@
     <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/swiper-3.4.2.min.css?v=1.1" />
     <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/main.css?v=1.1" />
     <link href="../Jscript/css/bubbles.css?v=1.1" rel="stylesheet" />
+
 </head>
+
 <body>
     <div class="top pr cf">
         <!--<a  class="go-back pa cf" href="javascript:void(0);">
@@ -148,7 +150,7 @@
             url: Apiurl + "api/test/getsharepara", // url  action是方法的名称
             type: "get",
             async: true,
-            data:{oid:oid},
+            data: { oid: oid },
             xhrFields: {
                 withCredentials: true
             },
@@ -232,34 +234,34 @@
     <script>
 
 
-//      点击加号,应用弹出和关闭
+        //      点击加号,应用弹出和关闭
         $(".yingyong").click(function () {
             var bodyheight = $("#initHeight").val();
             if ($("#models").hasClass("none")) {
                 $("#models").removeClass("none").css("bottom", 0);
-				$(".shurukuang").css("bottom", "133px");
-				var height = parseInt(bodyheight) - ($(".shurukuang").height() + $("#models").height()) - $(".shurukuang").height();
-				$("#contentArea").css("height", height);
-				$('#contentArea').scrollTop($('.bd').height());
+                $(".shurukuang").css("bottom", "133px");
+                var height = parseInt(bodyheight) - ($(".shurukuang").height() + $("#models").height()) - $(".shurukuang").height();
+                $("#contentArea").css("height", height);
+                $('#contentArea').scrollTop($('.bd').height());
 
                 //图片
-				if (!$("#emojmodels").hasClass("none")) {
-				    var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
-				    $("#emojmodels").addClass("none");
-				}
-			} else {
+                if (!$("#emojmodels").hasClass("none")) {
+                    var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
+                    $("#emojmodels").addClass("none");
+                }
+            } else {
                 var contHeight = parseInt(bodyheight) - $("#models").height();
                 $("#models").addClass("none");
-				$(".shurukuang").css("bottom", 0);
-				$("#contentArea").css("height", contHeight);
-				$('#contentArea').scrollTop($('.bd').height());
-				if (!$("#emojmodels").hasClass("none")) {
-				    var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
-				    $("#emojmodels").addClass("none");
-				}
+                $(".shurukuang").css("bottom", 0);
+                $("#contentArea").css("height", contHeight);
+                $('#contentArea').scrollTop($('.bd').height());
+                if (!$("#emojmodels").hasClass("none")) {
+                    var contHeight = parseInt(bodyheight) - $("#emojmodels").height();
+                    $("#emojmodels").addClass("none");
+                }
                 //图片
 
-			}
+            }
         });
         $(".biaoqing").click(function () {
             var mySwiper = new Swiper('.swiper-container', {

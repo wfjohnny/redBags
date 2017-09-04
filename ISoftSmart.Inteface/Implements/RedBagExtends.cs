@@ -380,8 +380,9 @@ namespace ISoftSmart.Inteface.Implements
         {
             SqlParameter[] sp = new SqlParameter[]
              {
-                 new SqlParameter("@MID",Guid.NewGuid()),
+                 new SqlParameter("@MID",record.MID),
                  new SqlParameter("@UserID",record.UserID),
+                 new SqlParameter("@NickName",record.nickname),
                  new SqlParameter("@MContent",record.MContent),
                  new SqlParameter("@MType",record.MType),
                  new SqlParameter("@CreateTime",record.CreateTime),
@@ -390,6 +391,7 @@ namespace ISoftSmart.Inteface.Implements
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
            ([MID]
            ,[UserID]
+             ,[NickName]
            ,[MContent]
            ,[HeadImgUrl]
            ,[MType]
@@ -397,10 +399,26 @@ namespace ISoftSmart.Inteface.Implements
      VALUES
            (@MID
            ,@UserID
+            ,@NickName
            ,@MContent
            ,@HeadImgUrl
            ,@MType
            ,@CreateTime)", sp, CommandType.Text);
+            return result;
+        }
+        public int ModifyMessageRecordByText(MessageRecord record)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@MID",record.MID),
+                 new SqlParameter("@MContent",record.MContent),
+                 new SqlParameter("@MType",record.MType)
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"UPDATE [dbo].[MessageRecord]
+               SET 
+                  [MContent] =@MContent,
+                    MType=@MType
+             WHERE MID=@MID", sp, CommandType.Text);
             return result;
         }
         public int InsertMessageRecordByBag(MessageRecord record)
@@ -414,10 +432,12 @@ namespace ISoftSmart.Inteface.Implements
                  new SqlParameter("@BagRemark",record.BagRemark),
                  new SqlParameter("@HeadImgUrl",record.HeadImgUrl),
                  new SqlParameter("@CreateTime",record.CreateTime),
+                 new SqlParameter("@NickName",record.nickname),
              };
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
                    ([MID]
                    ,[HeadImgUrl]
+                   ,[NickName]
                    ,[MType]
                    ,[BagID]
                    ,[BagUserID]
@@ -426,6 +446,7 @@ namespace ISoftSmart.Inteface.Implements
              VALUES
                    (@MID
                    ,@HeadImgUrl
+                   ,@NickName
                    ,@MType
                    ,@BagID
                    ,@BagUserID
@@ -439,6 +460,7 @@ namespace ISoftSmart.Inteface.Implements
              {
                  new SqlParameter("@MID",Guid.NewGuid()),
                  new SqlParameter("@MType",record.MType),
+                 new SqlParameter("@NickName",record.nickname),
                  new SqlParameter("@AmtUserID",record.AmtUserID),
                  new SqlParameter("@AmtUserImg",record.AmtUserImg),
                  new SqlParameter("@CreateTime",record.CreateTime),
@@ -446,12 +468,14 @@ namespace ISoftSmart.Inteface.Implements
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
                    ([MID]
                    ,[MType]
+                   ,[NickName]
                    ,[AmtUserID]
                    ,[AmtUserImg]
                    ,[CreateTime])
              VALUES
                    (@MID
                    ,@MType
+                   ,@NickName
                    ,@AmtUserID
                    ,@AmtUserImg
                    ,@CreateTime)", sp, CommandType.Text);
@@ -463,6 +487,7 @@ namespace ISoftSmart.Inteface.Implements
              {
                  new SqlParameter("@MID",Guid.NewGuid()),
                  new SqlParameter("@MType",record.MType),
+                 new SqlParameter("@NickName",record.nickname),
                  new SqlParameter("@HeadImgUrl",record.HeadImgUrl),
                  new SqlParameter("@ImgUserID",record.ImgUserID),
                  new SqlParameter("@ImgUrl",record.ImgUrl),
@@ -471,6 +496,7 @@ namespace ISoftSmart.Inteface.Implements
             var result = Dapper.Helper.SQLHelper.Execute(@"INSERT INTO [dbo].[MessageRecord]
                    ([MID]
                    ,[MType]
+                    ,NickName
                     ,[HeadImgUrl]
                    ,[ImgUserID]
                    ,[ImgUrl]
@@ -478,6 +504,7 @@ namespace ISoftSmart.Inteface.Implements
              VALUES
                    (@MID
                    ,@MType
+                    ,@NickName
                     ,@HeadImgUrl
                    ,@ImgUserID
                    ,@ImgUrl
@@ -493,6 +520,22 @@ namespace ISoftSmart.Inteface.Implements
             };
             var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT top 50 *
           FROM [dbo].[MessageRecord] where CreateTime between @startTime and @endTime order by CreateTime desc", sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<MessageRecord>>();
+        }
+        public List<MessageRecord> GetMsgRecord(MessageRecord record)
+        {
+            List<SqlParameter> paraList = new List<SqlParameter>();
+            string strWhere = " where 1=1 ";
+            if (record.MID != null)
+            {
+                strWhere += " and Mid=@MID ";
+                paraList.Add(new SqlParameter("@MID", record.MID));
+            }
+            SqlParameter[] sp = paraList.ToArray();
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT *
+          FROM [dbo].[MessageRecord] "+strWhere, sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<MessageRecord>>();
