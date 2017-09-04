@@ -61,6 +61,7 @@
     <Compile Include="RB\My\MyRBCreateBag.cs" />
     <Compile Include="RB\RBBagSerial.cs" />
     <Compile Include="RB\RBCreateBag.cs" />
+    <Compile Include="RB\RBPassWrod.cs" />
     <Compile Include="ServicesException.cs" />
     <Compile Include="UserDetail.cs" />
     <Compile Include="UserInfo\BagWinner.cs" />

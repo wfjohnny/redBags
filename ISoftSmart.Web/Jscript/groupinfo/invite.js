@@ -9,7 +9,7 @@
         },
 };
 $(function () {
-
+   
 });
 function LoadData() {
     //info.pageindex = 1;
@@ -78,6 +78,42 @@ LoadData();
 $("#search").click(function () {
     LoadData();
 });
+
+function SavePwd() {
+    var RBPassWrod =
+        {
+            rBPID: "",
+            groupID: "",
+            rBPwd: ""
+        };
+    debugger
+    RBPassWrod.rBPwd = $("#rbpwd").val();
+    var dataJson = JSON.stringify(RBPassWrod);
+    
+    $.ajax({
+        url: Apiurl + "api/test/SetPassWord", // url  action是方法的名称
+        type: "Post",
+        data: dataJson,
+        //async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            if (data.code == "SCCESS") {
+                if (status == 1) {
+                    layer.msg("设置密码成功！");
+                }
+                else {
+                    layer.msg("设置密码失败！");
+                }
+                $("#rbpwd").val("");
+            }
+        }
+    });
+}
 function JumpPage(index) {
     info.pageindex = index;
     LoadData();

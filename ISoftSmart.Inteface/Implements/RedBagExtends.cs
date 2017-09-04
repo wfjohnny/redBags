@@ -67,7 +67,7 @@ namespace ISoftSmart.Inteface.Implements
         public List<RBCreateBag> GetBagByAndUser(RBCreateBag rb)
         {
             List<SqlParameter> spList = new List<SqlParameter>();
-      
+
             string strWhere = " where 1=1";
             if (rb.RID != null)
             {
@@ -81,7 +81,7 @@ namespace ISoftSmart.Inteface.Implements
             }
             SqlParameter[] sp = spList.ToArray();
             var result = Dapper.Helper.SQLHelper.QueryDataSet(@"  select * from [dbo].[CreateBag]  r
-            left join[dbo].[UserInfo] u on r.UserId = u.openid"+strWhere, sp, CommandType.Text);
+            left join[dbo].[UserInfo] u on r.UserId = u.openid" + strWhere, sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<RBCreateBag>>();
@@ -535,10 +535,55 @@ namespace ISoftSmart.Inteface.Implements
             }
             SqlParameter[] sp = paraList.ToArray();
             var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT *
-          FROM [dbo].[MessageRecord] "+strWhere, sp, CommandType.Text);
+          FROM [dbo].[MessageRecord] " + strWhere, sp, CommandType.Text);
             if (result == "")
                 return null;
             return result.JsonDeserialize<List<MessageRecord>>();
+        }
+        public int SetBagPassWrod(RBPassWrod password)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+               {
+                 new SqlParameter("@RBPID",Guid.NewGuid()),
+                 new SqlParameter("@RBPwd",password.RBPwd),
+               };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            INSERT INTO [dbo].[RBPassWrod]
+                       ([RBPID]
+                       ,[RBPwd])
+                 VALUES
+                       (@RBPID
+                       ,@RBPwd)", sp, CommandType.Text);
+            return result;
+        }
+        public int ModifyBagPassWrod(RBPassWrod password)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+               {
+                 new SqlParameter("@RBPID",Guid.NewGuid()),
+                 new SqlParameter("@RBPwd",password),
+               };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            UPDATE [dbo].[RBPassWrod]
+               SET [RBPwd] = @RBPwd
+             WHERE  [RBPID] = @RBPID", sp, CommandType.Text);
+            return result;
+        }
+        public List<RBPassWrod> GetBagPassWrod()
+        {
+            List<SqlParameter> paraList = new List<SqlParameter>();
+            //string strWhere = " where 1=1 ";
+            //if (record.MID != null)
+            //{
+            //    strWhere += " and Mid=@MID ";
+            //paraList.Add(new SqlParameter("@MID", "1=1"));
+            //}
+            SqlParameter[] sp = paraList.ToArray();
+            var result = Dapper.Helper.SQLHelper.QueryDataSet(@"SELECT *
+          FROM [dbo].[RBPassWrod] where 1=1",sp, CommandType.Text);
+            if (result == "")
+                return null;
+            return result.JsonDeserialize<List<RBPassWrod>>();
         }
     }
 }

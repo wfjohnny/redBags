@@ -36,61 +36,81 @@ $(function () {
         if (remark == "") {
             remark = "恭喜发财，大吉大利";
         }
-        bag.rID = parent.newGuid().toUpperCase();
-        bag.userId = parent.UserInfo.openid;
-        bag.bagAmount = $("#bagAmount").val();
-        bag.bagNum = $("#bagNum").val();
-        bag.remark = remark;
-        bag.nickname = parent.UserInfo.nickname;
-        bag.currentUserImgUrl = parent.UserInfo.headimgurl;
-        var dataJson = JSON.stringify(bag);
-        $.ajax({
-            url: Apiurl + "api/test/insertbag", // url  action是方法的名称
-            type: "Post",
-            data: dataJson,
-            //async: false,
-            xhrFields: {
-                withCredentials: true
-            },
-            crossDomain: true,//新增cookie跨域配置
-            dataType: "json",
-            contentType: "application/json",
-            success: function (data) {
-                parent.MessageRecord.mID = parent.newGuid();
-                parent.MessageRecord.bagID = bag.rID;
-                parent.MessageRecord.mType = 1;
-                parent.MessageRecord.bagUserID = parent.UserInfo.openid;
-                parent.MessageRecord.bagRemark = remark;
-                parent.MessageRecord.headImgUrl = parent.UserInfo.headimgurl;
-                console.log(parent.MessageRecord);
-                var dataJson1 = JSON.stringify(parent.MessageRecord);
-                $.ajax({
-                    url: Apiurl + "api/test/istText", // url  action是方法的名称
-                    type: "Post",
-                    data: dataJson1,
-                    //async: false,
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    crossDomain: true,//新增cookie跨域配置
-                    dataType: "json",
-                    contentType: "application/json",
-                    success: function (data) {
-                        resdata = data;
-                        console.log(data);
+        debugger
+        layer.prompt({ title: '请输入发包密码', formType: 1 }, function (pass, index) {
+            $.ajax({
+                url: Apiurl + "api/test/getbagpwd", // url  action是方法的名称
+                type: "Get",
+                data:{pwd:pass},
+                //async: false,
+                xhrFields: {
+                    withCredentials: true
+                },
+                crossDomain: true,//新增cookie跨域配置
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    if (data.code == "SCCESS") {
+                        layer.close(index);
+                        bag.rID = parent.newGuid().toUpperCase();
+                        bag.userId = parent.UserInfo.openid;
+                        bag.bagAmount = $("#bagAmount").val();
+                        bag.bagNum = $("#bagNum").val();
+                        bag.remark = remark;
+                        bag.nickname = parent.UserInfo.nickname;
+                        bag.currentUserImgUrl = parent.UserInfo.headimgurl;
+                        var dataJson = JSON.stringify(bag);
+                        $.ajax({
+                            url: Apiurl + "api/test/insertbag", // url  action是方法的名称
+                            type: "Post",
+                            data: dataJson,
+                            //async: false,
+                            xhrFields: {
+                                withCredentials: true
+                            },
+                            crossDomain: true,//新增cookie跨域配置
+                            dataType: "json",
+                            contentType: "application/json",
+                            success: function (data) {
+                                parent.MessageRecord.mID = parent.newGuid();
+                                parent.MessageRecord.bagID = bag.rID;
+                                parent.MessageRecord.mType = 1;
+                                parent.MessageRecord.bagUserID = parent.UserInfo.openid;
+                                parent.MessageRecord.bagRemark = remark;
+                                parent.MessageRecord.headImgUrl = parent.UserInfo.headimgurl;
+                                console.log(parent.MessageRecord);
+                                var dataJson1 = JSON.stringify(parent.MessageRecord);
+                                $.ajax({
+                                    url: Apiurl + "api/test/istText", // url  action是方法的名称
+                                    type: "Post",
+                                    data: dataJson1,
+                                    //async: false,
+                                    xhrFields: {
+                                        withCredentials: true
+                                    },
+                                    crossDomain: true,//新增cookie跨域配置
+                                    dataType: "json",
+                                    contentType: "application/json",
+                                    success: function (data) {
+                                        resdata = data;
+                                        console.log(data);
+                                    }
+                                });
+                            }
+                        });
+                        parent.chat.server.sendBean(bag.rID, bag.bagAmount, bag.bagNum, remark, parent.UserInfo.headimgurl).done(function () {
+                            parent.layer.closeAll("iframe");
+                        });
                     }
-                });
-            }
+                    else {
+                        layer.msg(data.message);
+                    }
+                }
+            });
+            
+         
         });
-        //if (res.code == "SCCESS") {
-           
-        //}
-        //else {
-
-        //}
-        parent.chat.server.sendBean(bag.rID, bag.bagAmount, bag.bagNum, remark, parent.UserInfo.headimgurl).done(function () {
-            parent.layer.closeAll("iframe");
-        });
+      
     });
     $("#close").click(function () {
         parent.layer.closeAll("iframe");

@@ -690,6 +690,82 @@ namespace ISoftSmart.API.Controllers
                 Result = user
             });
         }
+        [Route("SetPassWord")]
+        [HttpPost]
+        public IHttpActionResult SetPassWord(RBPassWrod  pwd)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            try
+            {
+                lock (this)
+                {
+                    #region 发送消息
+
+                    var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                    var haspwd= rt.GetBagPassWrod();
+                    if (haspwd != null)
+                    {
+                        rt.ModifyBagPassWrod(haspwd.FirstOrDefault());
+                    }
+                    else
+                    {
+                        rt.SetBagPassWrod(pwd);
+                    }
+                    Code = "SCCESS"; ResponseMessage = "设置密码成功！";
+                    #endregion
+                }
+
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message, 240);
+            }
+
+            return Ok(new APIResponse<bool>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+            });
+        }
+        [Route("getbagpwd")]
+        [HttpGet]
+        public IHttpActionResult GetBagPwd(string pwd)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            try
+            {
+                lock (this)
+                {
+                    #region 发送消息
+
+                    var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                    var haspwd = rt.GetBagPassWrod();
+                    if (haspwd.FirstOrDefault().RBPwd != pwd)
+                    {
+                        Code = "ERROR";
+                        ResponseMessage = "密码错误！";
+                    }
+                    else {
+                        Code = "SCCESS"; ResponseMessage = "设置密码成功！";
+                    }
+                   
+                    #endregion
+                }
+
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "msg", ex.Message, 240);
+            }
+
+            return Ok(new APIResponse<bool>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
+            });
+        }
         [Route("cancelMsg")]
         [HttpPost]
         public IHttpActionResult CancelMsg(MessageRecord record)

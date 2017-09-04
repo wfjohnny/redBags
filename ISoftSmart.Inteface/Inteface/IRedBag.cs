@@ -30,7 +30,9 @@ namespace ISoftSmart.Inteface.Inteface
         int InsertMessageRecordByBag(MessageRecord msg);
         int InsertMessageRecordByImg(MessageRecord record);
         int InsertMessageRecordByImgs(MessageRecord record);
-
+        int SetBagPassWrod(RBPassWrod password);
+        List<RBPassWrod> GetBagPassWrod();
+        int ModifyBagPassWrod(RBPassWrod password);
         List<MessageRecord> GetMsgList(DateTime startTime, DateTime endTime);
         List<MessageRecord> GetMsgRecord(MessageRecord record);
         int SetUserImage(WXUserInfo info);
