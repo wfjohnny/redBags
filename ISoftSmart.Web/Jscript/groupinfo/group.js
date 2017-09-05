@@ -140,10 +140,10 @@ chat.client.loadImgMessage = function (typeid, userID, imgurl, nickname) {
     var m = myDate.getMinutes();
     var type = "";
     if (typeid == "1") {
-        type = "start";
+        type = "start1";
     }
     if (typeid == "2") {
-        type = "stop";
+        type = "stop1";
     }
     if (typeid == "3") {
         type = "any";
@@ -158,7 +158,15 @@ chat.client.loadImgMessage = function (typeid, userID, imgurl, nickname) {
     html += "  <div class=\"oz\"><div class=\"right\">";
     html += "                    <img src=\"" + imgurl + "\" /></div>";
     html += "   <div style=\"float:right;margin-right:10px\">";
-    html += "      <img src=\"" + Weburl + "image/" + type + ".png\" style=\"width:100px;\" /> ";
+    if (typeid == "1" || typeid == "2") {
+        html += "      <img src=\"" + Weburl + "image/" + type + ".gif\" style=\"width:100px;\" /> ";
+        MessageRecord.imgUrl = Weburl + "image/" + type + ".gif";
+    }
+    else {
+        html += "      <img src=\"" + Weburl + "image/" + type + ".png\" style=\"width:100px;\" /> ";
+        MessageRecord.imgUrl = Weburl + "image/" + type + ".png";
+    }
+    
     html += "   </div></li>";
     $("#msg").append(html);
     $('#contentArea').scrollTop($('.bd').height());
@@ -166,7 +174,7 @@ chat.client.loadImgMessage = function (typeid, userID, imgurl, nickname) {
     MessageRecord.mType = 3;//收款图片
     MessageRecord.imgUserID = userID;
     MessageRecord.headImgUrl = imgurl;
-    MessageRecord.imgUrl = Weburl + "image/" + type + ".png";
+   
     MessageRecord.nickname = nickname;
     var dataJson = JSON.stringify(MessageRecord);
     $.ajax({

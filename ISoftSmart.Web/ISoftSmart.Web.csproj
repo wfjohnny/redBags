@@ -325,7 +325,9 @@
     <Content Include="image\next.png" />
     <Content Include="image\speend.png" />
     <Content Include="image\start.png" />
+    <Content Include="image\start1.gif" />
     <Content Include="image\stop.png" />
+    <Content Include="image\stop1.gif" />
     <Content Include="init\initData.js" />
     <Content Include="init\jquery.cookie.js" />
     <Content Include="Jscript\auth\authjs.js" />
@@ -410,6 +412,8 @@
     <Content Include="Main\testtt.html" />
     <Content Include="Main\uploadfile.html" />
     <Content Include="Main\waitList.html" />
+    <Content Include="Script\gif\gif.js" />
+    <Content Include="Script\gif\gif.worker.js" />
     <Content Include="Script\jquery.signalR-2.2.2.js" />
     <Content Include="Script\jquery.signalR-2.2.2.min.js" />
     <Content Include="Jscript\js\red.js" />
