@@ -19,7 +19,6 @@ $(function () {
             layer.msg('请填写发放数量！');
             return;
         }
-        debugger
         var amount = Number($("#bagAmount").val());
         var num = Number($("#bagNum").val());
         if (isNaN(amount)) {

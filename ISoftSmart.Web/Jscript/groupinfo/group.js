@@ -64,10 +64,10 @@ $.ajax({
                 UserInfo.sex = data.result.sex;
                 UserInfo.unionid = data.result.unionid;
 
-                //if (data.result.invite != 1) {
-                //    layer.msg("您没有接受邀请，不能进入群聊");
-                //    wx.closeWindow();
-                //}
+                if (data.result.invite != 1) {
+                    layer.msg("您没有接受邀请，不能进入群聊");
+                    wx.closeWindow();
+                }
             }
         }
     }
