@@ -321,8 +321,10 @@
     <Content Include="Ctrl\style\stylesheets\theme.css" />
     <Content Include="Demo\demos.html" />
     <Content Include="Demo\styles.css" />
+    <Content Include="image\mybean.png" />
     <Content Include="image\any.png" />
     <Content Include="image\next.png" />
+    <Content Include="image\ready.png" />
     <Content Include="image\speend.png" />
     <Content Include="image\start.png" />
     <Content Include="image\start1.gif" />
@@ -340,6 +342,7 @@
     <Content Include="Jscript\groupinfo\group.js" />
     <Content Include="Jscript\groupinfo\invite.js" />
     <Content Include="Jscript\groupinfo\menu.js" />
+    <Content Include="Jscript\groupinfo\mybean.js" />
     <Content Include="Jscript\groupinfo\sendbag.js" />
     <Content Include="Jscript\groupinfo\share.js" />
     <Content Include="Jscript\groupinfo\sharebox.js" />
@@ -406,6 +409,7 @@
     <Content Include="Jscript\upload\mbUploadImg.js" />
     <Content Include="Main\baglist.html" />
     <Content Include="Main\menu.html" />
+    <Content Include="Main\mybean.html" />
     <Content Include="Main\openbag.html" />
     <Content Include="Main\sendbags.html" />
     <Content Include="Main\share.html" />

@@ -154,6 +154,9 @@ chat.client.loadImgMessage = function (typeid, userID, imgurl, nickname) {
     if (typeid == "5") {
         type = "next";
     }
+    if (typeid == "6") {
+        type = "ready";
+    }
     html += "<li><p class=\"am-text-center cf f12\">" + h + ":" + m + "</p>";
     html += "  <div class=\"oz\"><div class=\"right\">";
     html += "                    <img src=\"" + imgurl + "\" /></div>";

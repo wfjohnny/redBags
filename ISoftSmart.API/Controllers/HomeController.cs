@@ -267,7 +267,10 @@ namespace ISoftSmart.API.Controllers
                                             break;
                                         }
                                     }
-
+                                    if (outbag.BagAmount == 0 && string.IsNullOrEmpty(outbag.RID))
+                                    {
+                                        outbag = tr;
+                                    }
                                 }
                             }
                             else
@@ -282,6 +285,9 @@ namespace ISoftSmart.API.Controllers
                             {
                                 Code = "ERROR";
                                 ResponseMessage = "金豆抢完了！";
+                               var  seriList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
+                                Result.SerialList = seriList.OrderByDescending(x => x.CreateTime).ToList();
+                                Result.bagCount = Result.BagNum + seriList.Count;
                                 return Ok(new APIResponse<RBCreateBag>
                                 {
                                     Code = Code,
@@ -425,6 +431,19 @@ namespace ISoftSmart.API.Controllers
                 Result = userList.Count
             });
         }
+        [Route("mybeanlist")]
+        [HttpGet]
+        public IHttpActionResult MyBeanList(string openid)
+        {
+            var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            var userList = rt.GetUserInfo(new WXUserInfo() { }).Where(x => x.openid == openid).FirstOrDefault();
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = "SCCESS",
+                ResponseMessage = "获得用户信息成功！",
+                Result = userList
+            });
+        }
         [Route("getUserInfocount")]
         [HttpGet]
         public IHttpActionResult getInfoUsercount()
@@ -451,6 +470,28 @@ namespace ISoftSmart.API.Controllers
             {
                 lock (_locker)
                 {
+                    var userinfo = rt.GetUserInfo(new WXUserInfo() { openid = bag.UserId }).FirstOrDefault();
+                    if (userinfo.beannum == 0)
+                    {
+                        Code = "ERROR";
+                        ResponseMessage = "发包失败，用户余额不足！";
+                        return Ok(new APIResponse<RBCreateBag>
+                        {
+                            Code = Code,
+                            ResponseMessage = ResponseMessage,
+
+                        });
+                    }
+                    else if (userinfo.beannum - bag.BagNum < 0)
+                    {
+                        Code = "ERROR";
+                        ResponseMessage = "发包失败，用户余额不足！";
+                        return Ok(new APIResponse<RBCreateBag>
+                        {
+                            Code = Code,
+                            ResponseMessage = ResponseMessage,
+                        });
+                    }
                     var bagcache = StackExchangeRedisExtensions.Get<List<RBCreateBag>>(db, CacheKey.BagKey);
                     if (bagcache.Count >= 1)
                     {
@@ -470,9 +511,9 @@ namespace ISoftSmart.API.Controllers
                         bagcache.Add(bag);
                         StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
                     }
-
-
+                 
                     var res = rt.InsertBag(bag);
+                    var modifybean = rt.SendUserBean(new WXUserInfo() { beannum=bag.BagNum,openid=bag.UserId});
                     Code = "SCCESS";
                     ResponseMessage = "金豆发放成功！";
                     Result = bag;
@@ -480,12 +521,36 @@ namespace ISoftSmart.API.Controllers
             }
             else
             {
+               
+                var userinfo = rt.GetUserInfo(new WXUserInfo() { openid = bag.UserId }).FirstOrDefault();
+                if (userinfo.beannum == 0)
+                {
+                    Code = "ERROR";
+                    ResponseMessage = "发包失败，用户余额不足！";
+                    return Ok(new APIResponse<RBCreateBag>
+                    {
+                        Code = Code,
+                        ResponseMessage = ResponseMessage,
+
+                    });
+                }
+                else if (userinfo.beannum - bag.BagNum < 0)
+                {
+                    Code = "ERROR";
+                    ResponseMessage = "发包失败，用户余额不足！";
+                    return Ok(new APIResponse<RBCreateBag>
+                    {
+                        Code = Code,
+                        ResponseMessage = ResponseMessage,
+                    });
+                }
                 List<RBCreateBag> crbag = new List<RBCreateBag>();
                 crbag.Add(bag);
                 StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, crbag);
                 Code = "SCCESS";
                 ResponseMessage = "金豆发放成功！";
                 var res = rt.InsertBag(bag);
+                var modifybean = rt.SendUserBean(new WXUserInfo() { beannum = bag.BagNum, openid = bag.UserId });
                 Result = bag;
             }
             return Ok(new APIResponse<RBCreateBag>
@@ -692,7 +757,7 @@ namespace ISoftSmart.API.Controllers
         }
         [Route("SetPassWord")]
         [HttpPost]
-        public IHttpActionResult SetPassWord(RBPassWrod  pwd)
+        public IHttpActionResult SetPassWord(RBPassWrod pwd)
         {
             var Code = string.Empty;
             var ResponseMessage = string.Empty;
@@ -703,7 +768,7 @@ namespace ISoftSmart.API.Controllers
                     #region 发送消息
 
                     var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
-                    var haspwd= rt.GetBagPassWrod();
+                    var haspwd = rt.GetBagPassWrod();
                     if (haspwd != null)
                     {
                         rt.ModifyBagPassWrod(haspwd.FirstOrDefault());
@@ -747,10 +812,11 @@ namespace ISoftSmart.API.Controllers
                         Code = "ERROR";
                         ResponseMessage = "密码错误！";
                     }
-                    else {
+                    else
+                    {
                         Code = "SCCESS"; ResponseMessage = "设置密码成功！";
                     }
-                   
+
                     #endregion
                 }
 
@@ -1178,7 +1244,7 @@ namespace ISoftSmart.API.Controllers
                                     {
                                         if (userBag.CurrentUserImgUrl == null)
                                         {
-                                            userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { RID = gRID }).FirstOrDefault().CurrentUserImgUrl;
+                                            userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { RID = gRID }).FirstOrDefault().headImgUrl;
                                         }
                                         result = userBag;
                                         Code = "ERROR";
@@ -1243,7 +1309,7 @@ namespace ISoftSmart.API.Controllers
                                         {
                                             userBag = new RBCreateBag();
                                             userBag = rt.GetBag(new RBCreateBag() { RID = gRID, UserId = userId }).FirstOrDefault();
-                                            userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { RID = userId }).FirstOrDefault().headImgUrl;
+                                            userBag.CurrentUserImgUrl = rt.GetBagByAndUser(new RBCreateBag() { UserId = userId }).FirstOrDefault().headImgUrl;
                                         }
                                     }
                                     else
@@ -1350,7 +1416,9 @@ namespace ISoftSmart.API.Controllers
                         if (!StackExchangeRedisExtensions.HasKey(db, CacheKey.BagKey))
                         {
                             bagInfo = rt.GetBagInfo(new RBCreateBag() { RID = gRID }).FirstOrDefault();
-                            StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagInfo);
+                            var bagList = new List<RBCreateBag>();
+                            bagList.Add(bagInfo);
+                            StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagList);
                         }
                         else
                         {
@@ -1362,7 +1430,9 @@ namespace ISoftSmart.API.Controllers
                             if (bagInfo == null)
                             {
                                 bagInfo = rt.GetBagInfo(new RBCreateBag() { RID = gRID }).FirstOrDefault();
-                                StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagInfo);
+                                var bagList = new List<RBCreateBag>();
+                                bagList.Add(bagInfo);
+                                StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagList);
                             }
                         }
                         List<WXUserInfo> userinfo = new List<WXUserInfo>();
@@ -1920,6 +1990,39 @@ namespace ISoftSmart.API.Controllers
                 Code = Code,
                 ResponseMessage = ResponseMessage,
                 Result = UserInfo
+            });
+        }
+        [Route("setbean")]
+        [HttpPost]
+        public IHttpActionResult SetBean(WXUserInfo info)
+        {
+            var Code = string.Empty;
+            var ResponseMessage = string.Empty;
+            Code = "SCCESS";
+            WXUserInfo UserInfo = new WXUserInfo();
+            var rt = IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+            try
+            {
+                if (info.Invite == 0)
+                {
+                    var userMsg = rt.SetUserBean(new WXUserInfo() { openid = info.openid, beannum = info.beannum });
+                }
+                else
+                {
+                    var userMsg = rt.SendUserBean(new WXUserInfo() { openid = info.openid, beannum = info.beannum });
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                StackExchangeRedisExtensions.Set(db, "02", ex.Message);
+            }
+
+            ResponseMessage = "设置用户金豆数量成功！";
+            return Ok(new APIResponse<WXUserInfo>
+            {
+                Code = Code,
+                ResponseMessage = ResponseMessage,
             });
         }
         /** 获取大写的MD5签名结果 */

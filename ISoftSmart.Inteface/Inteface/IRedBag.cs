@@ -17,6 +17,7 @@ namespace ISoftSmart.Inteface.Inteface
         int ChangeBagStatus(RBCreateBag bag);
         int InsertBag(RBCreateBag bag);
         int SetUserBean(WXUserInfo bag);
+        int SendUserBean(WXUserInfo bag);
         List<MyBagSerial> GetUserSerialList(MyBagSerial my);
         List<MyBagSerial> GetUserSerial(MyBagSerial my);
         int InsertSerial(MyBagSerial my);

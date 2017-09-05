@@ -349,7 +349,19 @@ namespace ISoftSmart.Inteface.Implements
         }
 
 
-
+        public int SendUserBean(WXUserInfo bag)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+             {
+                 new SqlParameter("@OpenId",bag.openid),
+                 new SqlParameter("@BeanNum",bag.beannum),
+             };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            UPDATE [dbo].[UserInfo]
+               SET [BeanNum] = [BeanNum]-@BeanNum
+             WHERE OpenId=@OpenId", sp, CommandType.Text);
+            return result;
+        }
         public int SetUserBean(WXUserInfo bag)
         {
             SqlParameter[] sp = new SqlParameter[]
