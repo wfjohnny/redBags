@@ -191,7 +191,6 @@ chat.client.loadMessage = function (mid, nickname, message, userImg, curUser, ti
     var html = "";
     var curTime = time;
     time = time.split(" ")[1].split(":");
-    debugger
     //if (data.code == "SCCESS") {
     if (type == 0) {
         html += "<li id=\"li_" + mid + "\"><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
@@ -212,7 +211,7 @@ chat.client.loadMessage = function (mid, nickname, message, userImg, curUser, ti
         html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
         html += "   <div>   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
         html += "        <span  id=\"" + mid + "\" style=\"max-width:70%\">";
-        html += "          <div id=\"div_" + mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + MessageRecord.mContent + "</div>";
+        html += "          <div id=\"div_" + mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + nickname + "撤回了一条消息。</div>";
         html += "            <span class=\"bottomLevel\"></span>";
         html += "           <span class=\"topLevel\"></span>";
         html += "        </span>";
@@ -636,23 +635,30 @@ function showCancel(mid, nickname, ctl, time) {
     });
 }
 function cancelMsg(mid, nickname) {
-    MessageRecord.mID = mid;
-    MessageRecord.mContent = nickname + "撤回了一条消息。";
-    var dataJson = JSON.stringify(MessageRecord);
-    $.ajax({
-        url: Apiurl + "api/test/cancelMsg", // url  action是方法的名称
-        type: "Post",
-        data: dataJson,
-        async: false,
-        xhrFields: {
-            withCredentials: true
-        },
-        crossDomain: true,//新增cookie跨域配置
-        dataType: "json",
-        contentType: "application/json",
-        success: function (data) {
-            chat.server.sendMessage(MessageRecord.mID, UserInfo.nickname, MessageRecord.mContent, UserInfo.headimgurl, UserInfo.openid, 5);
-
-        }
+  var index=  layer.confirm('是否要撤回？', {
+        btn: ['确定', '取消'] //按钮
+    }, function () {
+        MessageRecord.mID = mid;
+        MessageRecord.mContent = nickname + "撤回了一条消息。";
+        var dataJson = JSON.stringify(MessageRecord);
+        $.ajax({
+            url: Apiurl + "api/test/cancelMsg", // url  action是方法的名称
+            type: "Post",
+            data: dataJson,
+            async: false,
+            xhrFields: {
+                withCredentials: true
+            },
+            crossDomain: true,//新增cookie跨域配置
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                chat.server.sendMessage(MessageRecord.mID, UserInfo.nickname, MessageRecord.mContent, UserInfo.headimgurl, UserInfo.openid, 5);
+                layer.closeAll();
+            }
+        });
+    }, function () {
+       
     });
+    
 }
