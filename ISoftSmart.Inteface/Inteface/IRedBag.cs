@@ -39,5 +39,6 @@ namespace ISoftSmart.Inteface.Inteface
         int SetUserImage(WXUserInfo info);
         int ChangeUserStatus(WXUserInfo bag);
         List<WXUserInfo> GetUserInfoByPage(WXUserInfo user, int pageindex, int pagesize, out int pageCount);
+        int ChangeUserTreaty(string openid, int id);
     }
 }

@@ -46,7 +46,7 @@ namespace ISoftSmart.API.Controllers
         string ShareUrl = System.Configuration.ConfigurationManager.AppSettings["ShareUrl"].ToString();
         string GetUser = "https://api.weixin.qq.com/cgi-bin/user/info?access_token={0}&openid={1}";
         string GetOpenID = "https://api.weixin.qq.com/sns/oauth2/access_token?appid={0}&secret={1}&code={2}&grant_type=authorization_code";
-        int pageSize = 50;
+        int pageSize = 40;
         static Dictionary<string, decimal> SettingBag = new Dictionary<string, decimal>();
         IDatabase db = RedisManager.Instance.GetDatabase();
         [Route("t")]
@@ -168,7 +168,29 @@ namespace ISoftSmart.API.Controllers
                 });
             }
         }
-
+        [Route("agreetreaty")]
+        [HttpGet]
+        public IHttpActionResult AgreeTreaty(string openid, int id)
+        {
+            try
+            {
+                var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
+                var userinfoList = rt.ChangeUserTreaty(openid, id);
+                return Ok(new APIResponse<int>
+                {
+                    Code = "SCCESS",
+                    ResponseMessage = "用户接受免责声明",
+                });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new APIResponse<WXUserInfo>
+                {
+                    Code = "ERROR",
+                    ResponseMessage = "用户拒绝免责声明",
+                });
+            }
+        }
         [Route("getWxUser")]
         [HttpGet]
         public IHttpActionResult GetUserInfoByWX(string bagId)
@@ -176,19 +198,33 @@ namespace ISoftSmart.API.Controllers
             try
             {
                 var rt = ISoftSmart.Core.IoC.IoCFactory.Instance.CurrentContainer.Resolve<IRedBag>();//使用接口
-                var userinfoList = rt.GetUserInfo(new WXUserInfo() { openid = bagId }).FirstOrDefault();
-                return Ok(new APIResponse<WXUserInfo>
+                WXUserInfo wxusers = new WXUserInfo();
+                List<WXUserInfo> userinfoList = rt.GetUserInfo(new WXUserInfo() { openid = bagId });
+                if (userinfoList != null)
                 {
-                    Code = "SCCESS",
-                    ResponseMessage = "获取用户信息成功",
-                    Result = userinfoList
-                });
+                    wxusers = userinfoList.FirstOrDefault();
+                    return Ok(new APIResponse<WXUserInfo>
+                    {
+                        Code = "SCCESS",
+                        ResponseMessage = "获取用户信息成功",
+                        Result = wxusers
+                    });
+                }
+                else
+                {
+                    return Ok(new APIResponse<WXUserInfo>
+                    {
+                        Code = "ERROR",
+                        ResponseMessage = "获取用户信息失败",
+                        Result = null
+                    });
+                }
             }
             catch (Exception ex)
             {
                 return Ok(new APIResponse<WXUserInfo>
                 {
-                    Code = "SCCESS",
+                    Code = "ERROR",
                     ResponseMessage = "获取用户信息失败",
                     Result = null
                 });
@@ -285,7 +321,7 @@ namespace ISoftSmart.API.Controllers
                             {
                                 Code = "ERROR";
                                 ResponseMessage = "金豆抢完了！";
-                               var  seriList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
+                                var seriList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
                                 Result.SerialList = seriList.OrderByDescending(x => x.CreateTime).ToList();
                                 Result.bagCount = Result.BagNum + seriList.Count;
                                 return Ok(new APIResponse<RBCreateBag>
@@ -511,9 +547,9 @@ namespace ISoftSmart.API.Controllers
                         bagcache.Add(bag);
                         StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
                     }
-                 
+
                     var res = rt.InsertBag(bag);
-                    var modifybean = rt.SendUserBean(new WXUserInfo() { beannum=bag.BagNum,openid=bag.UserId});
+                    var modifybean = rt.SendUserBean(new WXUserInfo() { beannum = bag.BagNum, openid = bag.UserId });
                     Code = "SCCESS";
                     ResponseMessage = "金豆发放成功！";
                     Result = bag;
@@ -521,7 +557,7 @@ namespace ISoftSmart.API.Controllers
             }
             else
             {
-               
+
                 var userinfo = rt.GetUserInfo(new WXUserInfo() { openid = bag.UserId }).FirstOrDefault();
                 if (userinfo.beannum == 0)
                 {
@@ -1911,7 +1947,8 @@ namespace ISoftSmart.API.Controllers
                         {
                             UserInfo.hasImg = 0;
                             UserInfo.Invite = 0;
-                            rt.InsertUserInfo(UserInfo);
+                            if (UserInfo.nickname != null)
+                                rt.InsertUserInfo(UserInfo);
                         }
                         else
                         {
@@ -1935,7 +1972,8 @@ namespace ISoftSmart.API.Controllers
                     {
                         UserInfo.hasImg = 0;
                         UserInfo.Invite = 0;
-                        rt.InsertUserInfo(UserInfo);
+                        if (UserInfo.nickname != null)
+                            rt.InsertUserInfo(UserInfo);
                     }
                     else
                     {
@@ -2011,7 +2049,7 @@ namespace ISoftSmart.API.Controllers
                 {
                     var userMsg = rt.SendUserBean(new WXUserInfo() { openid = info.openid, beannum = info.beannum });
                 }
-                
+
             }
             catch (Exception ex)
             {

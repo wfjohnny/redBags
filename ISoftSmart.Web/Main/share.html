@@ -65,12 +65,22 @@
                             wxUserInfo.sex = data.result.sex;
                             wxUserInfo.unionid = data.result.unionid;
                             if (data.result.invite == 0) {
-                                $("#closed").hide();
-                                $("#facepreview").html("您已被邀请进入群聊<br/>是否接受邀请？");
-                                $("#btnshare").show();
-                                $("#divdone").show();
-                                $("#btncancel").hide();
-                                $("#divcancel").hide();
+                                if (wxUserInfo.nickname == null) {
+                                    $("#closed").hide();
+                                    $("#facepreview").html("您还没有关注公众号，请先关注公众号!");
+                                    $("#btnshare").hide();
+                                    $("#divdone").hide();
+                                    $("#btncancel").hide();
+                                    $("#divcancel").hide();
+                                }
+                                else {
+                                    $("#closed").hide();
+                                    $("#facepreview").html("您已被邀请进入群聊<br/>是否接受邀请？");
+                                    $("#btnshare").show();
+                                    $("#divdone").show();
+                                    $("#btncancel").hide();
+                                    $("#divcancel").hide();
+                                }
                             }
                             else if (data.result.invite == 1) {
                                 var RetUrl = "http://www.isoftsmart.com/bagWeb/Authorization/auth.html";

@@ -28,6 +28,10 @@ namespace ISoftSmart.Web.signalr
             //Clients.All.broadcastMessage(message + DateTime.Now.ToString());
             Clients.All.loadMessage(mid,nickname,message, userHeadImg,customeCode, DateTime.Now.ToString(),type);
         }
+        public void UserCount(string count)
+        {
+            Clients.All.loadUserCountMessage(count);
+        }
         /// <summary>
         /// 发图片
         /// </summary>

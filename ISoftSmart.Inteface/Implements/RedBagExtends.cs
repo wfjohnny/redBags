@@ -177,6 +177,19 @@ namespace ISoftSmart.Inteface.Implements
              WHERE  [OpenId] =@OpenId", sp, CommandType.Text);
             return result;
         }
+        public int ChangeUserTreaty(string openid,int id)
+        {
+            SqlParameter[] sp = new SqlParameter[]
+           {
+                new SqlParameter("@OpenId",openid),
+                new SqlParameter("@Treaty",id)
+           };
+            var result = Dapper.Helper.SQLHelper.Execute(@"
+            UPDATE[dbo].[UserInfo]
+               SET[Treaty] =@Treaty
+             WHERE  [OpenId] =@OpenId", sp, CommandType.Text);
+            return result;
+        }
         public int InsertUserInfo(WXUserInfo user)
         {
             SqlParameter[] sp = new SqlParameter[]

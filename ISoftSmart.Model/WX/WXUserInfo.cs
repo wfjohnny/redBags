@@ -20,5 +20,6 @@ namespace ISoftSmart.Model.WX
         public decimal beannum { get; set; }
         public int hasImg { get; set; }
         public int Invite { get; set; }
+        public int? Treaty { get; set; }
     }
 }

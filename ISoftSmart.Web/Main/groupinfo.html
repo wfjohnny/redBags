@@ -80,31 +80,31 @@
                     <div class="swiper-slide">
                         <ul class="admin-content-list ">
                             <li class="am-text-center" style="width:20%;float:left;">
-                                <a id="start" href="javascript:void(0);" onclick="sendImg('1');" class="">
+                                <a id="start" href="javascript:void(0);" onclick="sendImg('1','d1');" class="d1">
                                     <img src="../image/start1.gif">
                                     <p>开始下注</p>
                                 </a>
                             </li>
                             <li class="am-text-center" style="width:20%;float:left;">
-                                <a href="javascript:void(0);" id="stop" onclick="sendImg('2');" class="">
+                                <a href="javascript:void(0);" id="stop" onclick="sendImg('2','d2');" class="d2">
                                     <img src="../image/stop1.gif" />
                                     <p>停止下注</p>
                                 </a>
                             </li>
                             <li class="am-text-center" style="width:20%;float:left;">
-                                <a id="any" href="javascript:void(0);" onclick="sendImg('3');" class="">
+                                <a id="any" href="javascript:void(0);" onclick="sendImg('3','d3');" class="d3">
                                     <img src="../image/any.png" />
                                     <p>投注询问</p>
                                 </a>
                             </li>
                             <li class="am-text-center" style="width:20%;float:left;">
-                                <a id="speend" href="javascript:void(0);" onclick="sendImg('4');" class="">
+                                <a id="speend" href="javascript:void(0);" onclick="sendImg('4','d4');" class="d4">
                                     <img src="../image/speend.png" />
                                     <p>催收款</p>
                                 </a>
                             </li>
                             <li class="am-text-center" style="width:20%;float:left;">
-                                <a id="next" href="javascript:void(0);" onclick="sendImg('5');" class="">
+                                <a id="next" href="javascript:void(0);" onclick="sendImg('5','d5');" class="d5">
                                     <img src="../image/next.png" />
                                     <p>换庄</p>
                                 </a>
@@ -114,7 +114,7 @@
                     <div class="swiper-slide">
                         <ul class="admin-content-list ">
                             <li class="am-text-center" style="width:20%;float:left;">
-                                <a id="next" href="javascript:void(0);" onclick="sendImg('6');" class="">
+                                <a id="next" href="javascript:void(0);" onclick="sendImg('6','d6');" class="d6">
                                     <img src="../image/ready.png" />
                                     <p>准备</p>
                                 </a>
@@ -141,8 +141,10 @@
     <script src="../init/jquery.cookie.js?v=1.1"></script>
     <script src="../Jscript/layer/layer.js?v=1.1"></script>
     <script src="../Jscript/hongbao/js/jquery.SuperSlide.2.1.1.js?v=1.1" type="text/javascript" charset="utf-8"></script>
-    <script src="../Jscript/groupinfo/group.js?v=1.1"></script>
-    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+  <!--  <script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js?v=1.0"></script>-->
+    <script src="../Script/jweixin-1.2.0.js"></script>
+    <script src="../Jscript/groupinfo/group.js?v=2.1"></script>
+    
     <script type="text/javascript">
         function getUrlParam(name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
@@ -162,6 +164,7 @@
             dataType: "json",
             contentType: "application/json",
             success: function (res) {
+              
                 if (res.code == "SCCESS") {
                     wx.config({
                         debug: false,
@@ -175,12 +178,16 @@
                 }
             }
         });
+     
         wx.ready(function () {
+            document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+                WeixinJSBridge.call('hideOptionMenu');
+            });
             wx.onMenuShareAppMessage({
                 title: '轻松一刻',
                 desc: '轻松一刻',
                 link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://img3.douban.com/view/movie_poster_cover/spst/public/p2166127561.jpg',
+                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
                 trigger: function (res) {
                 },
                 success: function (res) {
@@ -189,12 +196,14 @@
                 },
                 fail: function (res) {
                 }
+              
             });
+           
             wx.onMenuShareTimeline({
                 title: '轻松一刻',
                 desc: '轻松一刻',
                 link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://img3.douban.com/view/movie_poster_cover/spst/public/p2166127561.jpg',
+                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
                 trigger: function (res) {
                 },
                 success: function (res) {
@@ -208,7 +217,7 @@
                 title: '轻松一刻',
                 desc: '轻松一刻',
                 link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://img3.douban.com/view/movie_poster_cover/spst/public/p2166127561.jpg',
+                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
                 trigger: function (res) {
                 },
                 success: function (res) {
@@ -222,7 +231,7 @@
                 title: '轻松一刻',
                 desc: '轻松一刻',
                 link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://img3.douban.com/view/movie_poster_cover/spst/public/p2166127561.jpg',
+                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
                 trigger: function (res) {
                 },
                 success: function (res) {
