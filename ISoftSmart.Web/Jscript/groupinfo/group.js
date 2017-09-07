@@ -38,13 +38,150 @@ var MessageRecord = {
 
 };
 var openid;
+wx.ready(function () {
+    wx.hideMenuItems({ menuList: ["menuItem:share:timeline", "menuItem:share:appMessage", "menuItem:share:qq", "menuItem:share:QZone", 'menuItem:share:weiboApp', "menuItem:copyUrl"] });
+    wx.hideAllNonBaseMenuItem();
+    var wxUserres;
+    $.ajax({
+        url: Apiurl + "api/test/getWxUser", // url  action是方法的名称
+        type: "Get",
+        data: { bagId: openid },
+        //async: false,
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,//新增cookie跨域配置
+        dataType: "json",
+        contentType: "application/json",
+        success: function (data) {
+            if (data.code == "SCCESS") {
+                if (data.result != null) {
+                    UserInfo.city = data.result.city;
+                    UserInfo.country = data.result.country;
+                    UserInfo.headimgurl = data.result.headimgurl;
+                    UserInfo.nickname = data.result.nickname;
+                    UserInfo.openid = data.result.openid;
+                    UserInfo.privilege = data.result.privilege;
+                    UserInfo.province = data.result.province;
+                    UserInfo.sex = data.result.sex;
+                    UserInfo.unionid = data.result.unionid;
+                    UserInfo.invite = data.result.invite;
+                    UserInfo.treaty = data.result.treaty;
+                    document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+                        WeixinJSBridge.call('hideOptionMenu');
+                    });
+                    if (data.result.invite != 1) {
+                        layer.msg("您没有接受邀请，不能进入群聊");
+                        wx.closeWindow();
+                    }
+                    else {
+                        layer.closeAll();
+                        //询问框
+                        if (UserInfo.treaty != 1) {
+                            showMZSM(UserInfo.openid);
+                        }
+
+                        $.ajax({
+                            url: Apiurl + "api/test/getmsglist", // url  action是方法的名称
+                            type: "Get",
+                            data: { time: "", pageIndex: 1 },
+                            //async: false,
+                            xhrFields: {
+                                withCredentials: true
+                            },
+                            crossDomain: true,//新增cookie跨域配置
+                            dataType: "json",
+                            contentType: "application/json",
+                            success: function (data) {
+                                var html = "";
+                                $(data.result).each(function (a, item) {
+                                    var time = item.createTime.split(" ")[1].split(":");
+                                    if (item.mType == 0) {
+                                        html += "<li id=\"li_" + item.mid + "\"><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                                        html += " <div class=\"right\" style=\"width:20%\">";
+                                        html += "                     <a href=\"javascript:;\" onclick=\"return false;\"><img src=\"" + item.headImgUrl + "\" style=\"width:3.5em;height:3.5em\"/></a>";
+                                        html += "                  </div>";
+                                        html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+                                        html += "        <span class=\"bubble rightBubble\" id=\"" + item.mid + "\" onclick=\"showCancel('" + item.mid + "','" + item.nickname + "',this,'" + item.createTime + "')\" style=\"max-width:70%\">";
+                                        html += "          <div id=\"div_" + item.mid + "\">" + item.mContent + "</div>";
+                                        html += "            <span class=\"bottomLevel\"></span>";
+                                        html += "           <span class=\"topLevel\"></span>";
+                                        html += "        </span>";
+                                        html += "   </div></li>";
+                                    }
+                                    else if (item.mType == 1) {
+                                        html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                                        html += " <div class=\"oz\">";
+                                        html += " <div class=\"right\" style=\"width:20%\">";
+                                        html += "<a href=\"javascript:void(0);\" onclick=\"return false;\" ><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
+                                        html += "</div>";
+                                        html += "<div class=\"cont_right\">";
+                                        html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + item.bagID + "','" + item.bagUserID + "');\">";
+                                        html += "<div>" + item.bagRemark + " </div>";
+                                        html += "</a>";
+                                        html += "</div>";
+                                        html += "</div> </li>";
+                                    }
+                                    else if (item.mType == 2) {
+                                        html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                                        html += "  <div class=\"oz\"><div class=\"right\" style=\"width:20%\">";
+                                        html += "                    <img src=\"" + item.amtUserImg + "\"  style=\"width:3.5em;height:3.5em\"/></div>";
+                                        html += "   <div style=\"float:right;margin-right:10px\">";
+                                        html += "      <img src=\"" + Apiurl + "QRFile/" + item.amtUserID + ".jpg\" style=\"width:180px;\" /> ";
+                                        html += "   </div></li>";
+
+                                    }
+                                    else if (item.mType == 3) {
+                                        html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                                        html += "  <div class=\"oz\"><div class=\"right\">";
+                                        html += "                    <img src=\"" + item.headImgUrl + "\" /></div>";
+                                        html += "   <div style=\"float:right;margin-right:10px\">";
+                                        html += "      <img src=\"" + item.imgUrl + "\" style=\"width:100px;\" /> ";
+                                        html += "   </div></li>";
+
+                                    }
+                                    else if (item.mType == 5) {
+                                        html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
+                                        html += "   <div>   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
+                                        html += "        <span  id=\"" + item.mid + "\" style=\"max-width:70%\">";
+                                        html += "          <div id=\"div_" + item.mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + item.mContent + "</div>";
+                                        html += "            <span class=\"bottomLevel\"></span>";
+                                        html += "           <span class=\"topLevel\"></span>";
+                                        html += "        </span>";
+                                        html += "   </div></li>";
+                                    }
+                                });
+                                $("#msg").append(html);
+                                if ($("#initHeight").val() == "") {
+                                    $("#initHeight").val($(window).height());
+                                }
+
+                                var initheight = parseInt($("#initHeight").val()) - $(".shurukuang").height() - $("h2").height();
+                                $("#contentArea").css("height", initheight);
+                                $('#contentArea').scrollTop($('.bd').height());
+                            }
+                        });
+                    }
+                }
+            }
+            else {
+                // layer.msg("您没有接受邀请，不能进入群聊");
+                wx.closeWindow();
+            }
+        }
+    });
+});
 //if (getUrlParam("openid") == null) {
 //    openid = "olDlVsy5vYjAhbWIDMYaj5PSVp04";
 //}
 //else {
 openid = getUrlParam("oid");
+//setTimeout(
+//     document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+//         WeixinJSBridge.call('hideOptionMenu');
+//     })
+//    , 5000);
 //}
-var wxUserres;
 
 var bag = {
     rID: "",
@@ -235,131 +372,7 @@ $.connection.hub.start().done(function () {
             }
         }
     });
-    $.ajax({
-        url: Apiurl + "api/test/getWxUser", // url  action是方法的名称
-        type: "Get",
-        data: { bagId: openid },
-        //async: false,
-        xhrFields: {
-            withCredentials: true
-        },
-        crossDomain: true,//新增cookie跨域配置
-        dataType: "json",
-        contentType: "application/json",
-        success: function (data) {
-            if (data.code == "SCCESS") {
-                if (data.result != null) {
-                    UserInfo.city = data.result.city;
-                    UserInfo.country = data.result.country;
-                    UserInfo.headimgurl = data.result.headimgurl;
-                    UserInfo.nickname = data.result.nickname;
-                    UserInfo.openid = data.result.openid;
-                    UserInfo.privilege = data.result.privilege;
-                    UserInfo.province = data.result.province;
-                    UserInfo.sex = data.result.sex;
-                    UserInfo.unionid = data.result.unionid;
-                    UserInfo.invite = data.result.invite;
-                    UserInfo.treaty = data.result.treaty;
-                    if (data.result.invite != 1) {
-                        layer.msg("您没有接受邀请，不能进入群聊");
-                        wx.closeWindow();
-                    }
-                    else {
-                        layer.closeAll();
-                        //询问框
-                        if (UserInfo.treaty != 1) {
-                            showMZSM(UserInfo.openid);
-                        }
-
-                        $.ajax({
-                            url: Apiurl + "api/test/getmsglist", // url  action是方法的名称
-                            type: "Get",
-                            data: { time: "", pageIndex: 1 },
-                            //async: false,
-                            xhrFields: {
-                                withCredentials: true
-                            },
-                            crossDomain: true,//新增cookie跨域配置
-                            dataType: "json",
-                            contentType: "application/json",
-                            success: function (data) {
-                                var html = "";
-                                $(data.result).each(function (a, item) {
-                                    var time = item.createTime.split(" ")[1].split(":");
-                                    if (item.mType == 0) {
-                                        html += "<li id=\"li_" + item.mid + "\"><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                                        html += " <div class=\"right\" style=\"width:20%\">";
-                                        html += "                     <a href=\"javascript:;\" onclick=\"return false;\"><img src=\"" + item.headImgUrl + "\" style=\"width:3.5em;height:3.5em\"/></a>";
-                                        html += "                  </div>";
-                                        html += "   <div class=\"bubbleItem clearfix\">   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-                                        html += "        <span class=\"bubble rightBubble\" id=\"" + item.mid + "\" onclick=\"showCancel('" + item.mid + "','" + item.nickname + "',this,'" + item.createTime + "')\" style=\"max-width:70%\">";
-                                        html += "          <div id=\"div_" + item.mid + "\">" + item.mContent + "</div>";
-                                        html += "            <span class=\"bottomLevel\"></span>";
-                                        html += "           <span class=\"topLevel\"></span>";
-                                        html += "        </span>";
-                                        html += "   </div></li>";
-                                    }
-                                    else if (item.mType == 1) {
-                                        html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                                        html += " <div class=\"oz\">";
-                                        html += " <div class=\"right\" style=\"width:20%\">";
-                                        html += "<a href=\"javascript:void(0);\" onclick=\"return false;\" ><img src=\"" + item.headImgUrl + "\"  style=\"width:3.5em;height:3.5em\"/></a>";
-                                        html += "</div>";
-                                        html += "<div class=\"cont_right\">";
-                                        html += "<a class=\"cf\" href=\"javascript:void(0);\" onclick=\"OpenBag('" + item.bagID + "','" + item.bagUserID + "');\">";
-                                        html += "<div>" + item.bagRemark + " </div>";
-                                        html += "</a>";
-                                        html += "</div>";
-                                        html += "</div> </li>";
-                                    }
-                                    else if (item.mType == 2) {
-                                        html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                                        html += "  <div class=\"oz\"><div class=\"right\" style=\"width:20%\">";
-                                        html += "                    <img src=\"" + item.amtUserImg + "\"  style=\"width:3.5em;height:3.5em\"/></div>";
-                                        html += "   <div style=\"float:right;margin-right:10px\">";
-                                        html += "      <img src=\"" + Apiurl + "QRFile/" + item.amtUserID + ".jpg\" style=\"width:180px;\" /> ";
-                                        html += "   </div></li>";
-
-                                    }
-                                    else if (item.mType == 3) {
-                                        html += "<li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                                        html += "  <div class=\"oz\"><div class=\"right\">";
-                                        html += "                    <img src=\"" + item.headImgUrl + "\" /></div>";
-                                        html += "   <div style=\"float:right;margin-right:10px\">";
-                                        html += "      <img src=\"" + item.imgUrl + "\" style=\"width:100px;\" /> ";
-                                        html += "   </div></li>";
-
-                                    }
-                                    else if (item.mType == 5) {
-                                        html += " <li><p class=\"am-text-center cf f12\">" + time[0] + ":" + time[1] + "</p>";
-                                        html += "   <div>   <span style=\"font-family: Arial, Helvetica, sans-serif;\"><!--右侧的泡泡--></span>";
-                                        html += "        <span  id=\"" + item.mid + "\" style=\"max-width:70%\">";
-                                        html += "          <div id=\"div_" + item.mid + "\" style=\"background:#E6E6E6;border-radius:15px;width:60%;margin-left:60px;font-family:黑体;font-size:12px;color:white\">" + item.mContent + "</div>";
-                                        html += "            <span class=\"bottomLevel\"></span>";
-                                        html += "           <span class=\"topLevel\"></span>";
-                                        html += "        </span>";
-                                        html += "   </div></li>";
-                                    }
-                                });
-                                $("#msg").append(html);
-                                if ($("#initHeight").val() == "") {
-                                    $("#initHeight").val($(window).height());
-                                }
-
-                                var initheight = parseInt($("#initHeight").val()) - $(".shurukuang").height() - $("h2").height();
-                                $("#contentArea").css("height", initheight);
-                                $('#contentArea').scrollTop($('.bd').height());
-                            }
-                        });
-                    }
-                }
-            }
-            else {
-                layer.msg("您没有接受邀请，不能进入群聊");
-                wx.closeWindow();
-            }
-        }
-    });
+   
 
     $('#getAmt').click(function () {
         if (UserInfo.openid == null) {

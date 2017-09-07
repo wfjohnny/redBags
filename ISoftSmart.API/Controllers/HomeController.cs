@@ -323,6 +323,23 @@ namespace ISoftSmart.API.Controllers
                                 ResponseMessage = "金豆抢完了！";
                                 var seriList = StackExchangeRedisExtensions.Get<List<RBBagSerial>>(db, CacheKey.SerialKey).Where(x => x.RID == bag.RID).ToList();
                                 Result.SerialList = seriList.OrderByDescending(x => x.CreateTime).ToList();
+                                if (Result.SerialList == null)
+                                {
+                                    var ser= rt.GetUserSerialList(new MyBagSerial() { RID = bag.RID });
+                                    foreach (var item in ser)
+                                    {
+                                        RBBagSerial s = new RBBagSerial();
+                                        s.RID = item.RID;
+                                        s.SerialId = item.SerialId;
+                                        s.UserId = item.UserId;
+                                        s.nickname = item.nickname;
+                                        s.BagAmount = item.BagAmount;
+                                        s.CreateTime = item.CreateTime;
+                                        s.headImg = item.headimg;
+                                        Result.SerialList.Add(s);
+                                    }
+                                
+                                }
                                 Result.bagCount = Result.BagNum + seriList.Count;
                                 return Ok(new APIResponse<RBCreateBag>
                                 {
@@ -547,7 +564,7 @@ namespace ISoftSmart.API.Controllers
                         bagcache.Add(bag);
                         StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, bagcache);
                     }
-
+                    SettingBag.Clear();
                     var res = rt.InsertBag(bag);
                     var modifybean = rt.SendUserBean(new WXUserInfo() { beannum = bag.BagNum, openid = bag.UserId });
                     Code = "SCCESS";
@@ -585,6 +602,7 @@ namespace ISoftSmart.API.Controllers
                 StackExchangeRedisExtensions.Set(db, CacheKey.BagKey, crbag);
                 Code = "SCCESS";
                 ResponseMessage = "金豆发放成功！";
+                SettingBag.Clear();
                 var res = rt.InsertBag(bag);
                 var modifybean = rt.SendUserBean(new WXUserInfo() { beannum = bag.BagNum, openid = bag.UserId });
                 Result = bag;

@@ -99,6 +99,9 @@
                     }
                 }
             });
+            document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+                WeixinJSBridge.call('hideOptionMenu');
+            });
         }
     </script>
     <script src="../Jscript/groupinfo/share.js"></script>

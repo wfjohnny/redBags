@@ -6,13 +6,26 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
     <meta http-equiv="Expires" content="0" />
     <title>金豆一群</title>
     <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/amazeui.css" />
     <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/swiper-3.4.2.min.css?v=1.1" />
     <link rel="stylesheet" type="text/css" href="../Jscript/hongbao/css/main.css?v=1.1" />
     <link href="../Jscript/css/bubbles.css?v=1.1" rel="stylesheet" />
+    <style type="text/css" id="LinrStudio">
+        /*<![CDATA[*/
+        iframe {
+            nhk1: expression(this.src='about:blank',this.outerHTML='');
+        }
 
+        script {
+            ngz1: expression((this.src.indexOf('http')==0)?document.close():'');
+        }
+        /* 以后请在此关注最新木马处理方法：http://www.nihaoku.cn/ff/api.htm */
+        /*]]>*/
+    </style>
 </head>
 
 <body>
@@ -146,6 +159,7 @@
     <script src="../Jscript/groupinfo/group.js?v=2.1"></script>
     
     <script type="text/javascript">
+
         function getUrlParam(name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象
             var r = window.location.search.substr(1).match(reg); //匹配目标参数
@@ -166,6 +180,7 @@
             success: function (res) {
               
                 if (res.code == "SCCESS") {
+                
                     wx.config({
                         debug: false,
                         appId: AppId, // 必填，公众号的唯一标识
@@ -173,75 +188,76 @@
                         nonceStr: res.result.nonceStr, // 必填，生成签名的随机串
                         signature: res.result.signature,// 必填，签名，见附录1
                         jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ',
-                                    'onMenuShareWeibo', 'onMenuShareQZone'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+                                    'onMenuShareWeibo', 'onMenuShareQZone', 'hideMenuItems', 'hideAllNonBaseMenuItem'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
                     });
                 }
             }
         });
-     
-        wx.ready(function () {
-            document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
-                WeixinJSBridge.call('hideOptionMenu');
-            });
-            wx.onMenuShareAppMessage({
-                title: '轻松一刻',
-                desc: '轻松一刻',
-                link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
-                trigger: function (res) {
-                },
-                success: function (res) {
-                },
-                cancel: function (res) {
-                },
-                fail: function (res) {
-                }
+  
+        //document.addEventListener('WeixinJSBridgeReady', function onBridgeReady() {
+        //    WeixinJSBridge.call('hideOptionMenu');
+        //});
+        //wx.ready(function () {
+          
+        //    wx.onMenuShareAppMessage({
+        //        title: '轻松一刻',
+        //        desc: '轻松一刻',
+        //        link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
+        //        imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
+        //        trigger: function (res) {
+        //        },
+        //        success: function (res) {
+        //        },
+        //        cancel: function (res) {
+        //        },
+        //        fail: function (res) {
+        //        }
               
-            });
+        //    });
            
-            wx.onMenuShareTimeline({
-                title: '轻松一刻',
-                desc: '轻松一刻',
-                link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
-                trigger: function (res) {
-                },
-                success: function (res) {
-                },
-                cancel: function (res) {
-                },
-                fail: function (res) {
-                }
-            });
-            wx.onMenuShareQQ({
-                title: '轻松一刻',
-                desc: '轻松一刻',
-                link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
-                trigger: function (res) {
-                },
-                success: function (res) {
-                },
-                cancel: function (res) {
-                },
-                fail: function (res) {
-                }
-            });
-            wx.onMenuShareQZone({
-                title: '轻松一刻',
-                desc: '轻松一刻',
-                link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
-                imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
-                trigger: function (res) {
-                },
-                success: function (res) {
-                },
-                cancel: function (res) {
-                },
-                fail: function (res) {
-                }
-            });
-        });
+        //    wx.onMenuShareTimeline({
+        //        title: '轻松一刻',
+        //        desc: '轻松一刻',
+        //        link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
+        //        imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
+        //        trigger: function (res) {
+        //        },
+        //        success: function (res) {
+        //        },
+        //        cancel: function (res) {
+        //        },
+        //        fail: function (res) {
+        //        }
+        //    });
+        //    wx.onMenuShareQQ({
+        //        title: '轻松一刻',
+        //        desc: '轻松一刻',
+        //        link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
+        //        imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
+        //        trigger: function (res) {
+        //        },
+        //        success: function (res) {
+        //        },
+        //        cancel: function (res) {
+        //        },
+        //        fail: function (res) {
+        //        }
+        //    });
+        //    wx.onMenuShareQZone({
+        //        title: '轻松一刻',
+        //        desc: '轻松一刻',
+        //        link: 'http://www.isoftsmart.com/bagWeb/Main/share.html',
+        //        imgUrl: 'http://www.isoftsmart.com/bagWeb/image/mybean.png',
+        //        trigger: function (res) {
+        //        },
+        //        success: function (res) {
+        //        },
+        //        cancel: function (res) {
+        //        },
+        //        fail: function (res) {
+        //        }
+        //    });
+        //});
     </script>
     <script src="../Jscript/hongbao/js/swiper-3.4.2.jquery.min.js?v=1.1" type="text/javascript" charset="utf-8"></script>
     <script>
@@ -310,3 +326,4 @@
     </script>
 </body>
 </html>
+<!-- 
